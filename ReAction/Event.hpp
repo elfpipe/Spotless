@@ -5,7 +5,7 @@
 
 using namespace std;
 
-class GuiEvent {
+class Event {
 public:
 	enum EventClass {
 		CLASS_NoClass = 0,
@@ -23,8 +23,8 @@ private:
 	string description;
 
 public:
-	GuiEvent(EventClass eClass) { setEventClass(eClass); }
-	~GuiEvent() { }
+	Event(EventClass eClass) { setEventClass(eClass); }
+	~Event() { }
 
 	EventClass eventClass() { return eClass; }
 	void setEventClass (EventClass eventClass) { eClass = eventClass; }

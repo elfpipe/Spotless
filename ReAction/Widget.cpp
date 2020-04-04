@@ -176,7 +176,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 	int MouseX = window->MouseX;
 	int MouseY = window->MouseY;
 
-	GuiEvent *event = 0;
+	Event *event = 0;
 	Widget *parent = 0;
 	switch (Class & WMHI_CLASSMASK) {
 		case WMHI_GADGETUP: {
@@ -195,17 +195,17 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 					LISTBROWSER_Selected,	&selected,
 				TAG_DONE);
 			
-				event = new GuiEvent(GuiEvent::CLASS_SelectNode);
+				event = new Event(Event::CLASS_SelectNode);
 
 				if (relEvent == LBRE_CHECKED)
-					event->setEventClass (GuiEvent::CLASS_CheckboxCheck);
+					event->setEventClass (Event::CLASS_CheckboxCheck);
 				else if (relEvent == LBRE_UNCHECKED)
-					event->setEventClass (GuiEvent::CLASS_CheckboxUncheck);
+					event->setEventClass (Event::CLASS_CheckboxUncheck);
 
 				event->setElementId(gadgetId);
 				event->setItemId (selected);
 			} else if(Speedbar::isSpeedbar(gadget)) {
-				event = new GuiEvent (GuiEvent::CLASS_ButtonPress);
+				event = new Event (Event::CLASS_ButtonPress);
 				event->setElementId (Code);
 			} else if(GoButton::isButton(gadget)) {
 				char *text;
@@ -214,26 +214,26 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 					GA_Text, &text,
 				TAG_DONE);
 
-				event = new GuiEvent (GuiEvent::CLASS_ButtonPress);
+				event = new Event (Event::CLASS_ButtonPress);
 				event->setElementId (gadgetId);
 				event->setElementDescription (text);
 			}
 			break;
 		}
 		case WMHI_MOUSEBUTTONS: {
-			event = new GuiEvent(GuiEvent::CLASS_MouseButtonDown);
+			event = new Event(Event::CLASS_MouseButtonDown);
 			event->setMousePosition (MouseX, MouseY);
 			break;
 		}
 		case WMHI_MOUSEMOVE: {
-			event = new GuiEvent(GuiEvent::CLASS_MouseMove);
+			event = new Event(Event::CLASS_MouseMove);
 			event->setMousePosition (MouseX, MouseY);
 			break;
 		}
 	}
 	bool result = false;
 	if (event) {
-		result = parent ? parent->handleGuiEvent(event) : handleGuiEvent(event);
+		result = parent ? parent->handleEvent(event) : handleEvent(event);
 		delete event;
 	}
 	return result;

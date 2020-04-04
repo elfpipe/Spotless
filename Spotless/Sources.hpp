@@ -14,5 +14,8 @@ public:
     void createGuiObject(Layout *layout) {
         listbrowser = layout->createListbrowser();
     }
+    void update() {
+        
+    }
 };
 #endif

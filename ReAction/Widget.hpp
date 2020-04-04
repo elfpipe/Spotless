@@ -87,7 +87,7 @@ public:
 
 	virtual void createGuiObject (Layout *layout) = 0;
 
-	virtual bool handleGuiEvent (GuiEvent *event) { return false; };
+	virtual bool handleEvent (Event *event) { return false; };
 
 public:
 	friend MainWindow;

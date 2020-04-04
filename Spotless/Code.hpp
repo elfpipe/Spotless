@@ -14,5 +14,14 @@ public:
     void createGuiObject(Layout *layout) {
         listbrowser = layout->createListbrowser();
     }
+    void showSourceFile(string file) {
+
+    }
+    void highlightLine(int line) {
+        
+    }
+    void update() {
+
+    }
 };
 #endif

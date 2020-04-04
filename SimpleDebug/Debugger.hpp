@@ -230,7 +230,13 @@ public:
 		return result;
 	}
 	uint32_t getTrapSignal() {
-		return process.
+		return process.getTrapSignal();
+	}
+	uint32_t getPortSignal() {
+		return process.getPortSignal();
+	}
+	vector<string> getMessages() {
+		return process.getMessages();
 	}
 };
 

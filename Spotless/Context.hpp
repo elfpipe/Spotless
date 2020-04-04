@@ -15,5 +15,8 @@ public:
         listbrowser = layout->createListbrowser();
         listbrowser->setHierachical(true);
     }
+    void update() {
+        
+    }
 };
 #endif

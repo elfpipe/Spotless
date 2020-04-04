@@ -15,5 +15,8 @@ public:
         listbrowser = layout->createListbrowser();
         listbrowser->setStriping(true);
     }
+    void update() {
+        
+    }
 };
 #endif

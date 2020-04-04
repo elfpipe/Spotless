@@ -10,12 +10,16 @@ private:
 public:
     MainMenu(Spotless *parent) : Menubar(dynamic_cast<Widget *>(parent)) { spotless = parent; }
     void createMenu() {
-        MenuReference panel1 = addCreateMenu ("Panel 1");
-        MenuReference panel2 = addCreateMenu ("Panel 2");
+        MenuReference panel1 = addCreateMenu("Spotless");
 
-        addCreateMenuItem (panel1, "Item 1", "CTRL+1", 1);
-        addCreateMenuItem (panel2, "Item 2", "CTRL+2", 2);
-        addCreateMenuItem (panel2, "Item 2", "CTRL+3", 3);
+        addCreateMenuItem (panel1, "About", "", 1);
+        addCreateMenuItem (panel1, "Switch public screen", "", 2);
+    }
+    bool handleMenuPick(int id) {
+        switch(id) {
+            case 1: //show about
+            case 2: //switch public screen
+        }
     }
 };
 #endif
