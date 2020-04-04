@@ -63,8 +63,7 @@ public:
 	Debugger() {
 	}
 	~Debugger() {
-		if(handle) delete handle;
-		if(binary) delete binary;
+		clear();
 	}
 	void open(APTR _handle, string name) {
 		handle = new ElfHandle(_handle, name);
@@ -247,6 +246,11 @@ public:
 	vector<string> getMessages() {
 		return process.getMessages();
 	}
+    void clear() {
+		breaks.clear();
+		if(handle) delete handle;
+		if(binary) delete binary;
+    }
 };
 
 #if 0

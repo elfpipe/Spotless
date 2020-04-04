@@ -36,6 +36,7 @@ public:
     static void trapHandler();
     static void portHandler();
     static void pipeHandler();
+    static void deathHandler();
     bool handleEvent(Event *event);
 
     void updateAll();

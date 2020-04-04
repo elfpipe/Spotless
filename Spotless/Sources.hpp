@@ -27,5 +27,8 @@ public:
         for(int i = 0; i < sources.size(); i++)
             listbrowser->addNode(sources[i]);
     }
+    void clear() {
+        listbrowser->clear();
+    }
 };
 #endif

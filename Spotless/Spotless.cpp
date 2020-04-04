@@ -15,13 +15,13 @@ Spotless *Spotless::spotless = 0;
 void Spotless::create() {
     spotless = this;
 
-    menu = new MainMenu(this);
-    actions = new Actions(this);
-    sources = new Sources(this);
-    context = new Context(this);
-    stacktrace = new Stacktrace(this);
-    code = new Code(this);
-    console = new Console(this);
+    menu = new MainMenu(spotless);
+    actions = new Actions(spotless);
+    sources = new Sources(spotless);
+    context = new Context(spotless);
+    stacktrace = new Stacktrace(spotless);
+    code = new Code(spotless);
+    console = new Console(spotless);
 
     setMenubar(menu);
     setTopBar(actions);
@@ -34,6 +34,7 @@ void Spotless::create() {
     addSignalHandler(trapHandler, debugger.getTrapSignal());
     addSignalHandler(portHandler, debugger.getPortSignal());
     addSignalHandler(pipeHandler, debugger.getPipeSignal());
+    addSignalHandler(deathHandler, SIGF_CHILD);
 }
 
 int Spotless::unfold() {
@@ -64,6 +65,16 @@ void Spotless::pipeHandler() {
     }
 }
 
+void Spotless::deathHandler() {
+    if(spotless) {
+        spotless->actions->clear();
+        spotless->code->clear();
+        spotless->context->clear();
+        spotless->sources->clear();
+        spotless->stacktrace->clear();
+        spotless->debugger.clear();
+    }
+}
 bool Spotless::handleEvent(Event *event) {
     if(event->eventClass() == Event::CLASS_ButtonPress) {
         switch(event->elementId()) {

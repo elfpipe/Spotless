@@ -25,11 +25,16 @@ public:
             int nextGeneration = generation;
             if(str.endsWith('{')) nextGeneration++;
             if(str.endsWith('}')) nextGeneration--;
-            vector<string> data;
-            data.push_back(context[i]);
-            listbrowser->addNode(data, 0, nextGeneration > generation, generation);
-            generation = nextGeneration;
+            else {
+                vector<string> data;
+                data.push_back(context[i]);
+                listbrowser->addNode(data, 0, nextGeneration > generation, generation);
+                generation = nextGeneration;
+            }
         }
+    }
+    void clear() {
+        listbrowser->clear();
     }
 };
 #endif

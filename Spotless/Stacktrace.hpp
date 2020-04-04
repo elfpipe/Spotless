@@ -18,5 +18,8 @@ public:
     void update() {
         
     }
+    void clear() {
+        listbrowser->clear();
+    }
 };
 #endif

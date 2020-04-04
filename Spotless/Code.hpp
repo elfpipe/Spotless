@@ -47,5 +47,9 @@ public:
         int line = listbrowser->getSelectedLineNumber();
         spotless->debugger.breakpoint(file, line, checked);
     }
+
+    void clear() {
+        listbrowser->clear();
+    }
 };
 #endif
