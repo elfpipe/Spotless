@@ -187,6 +187,12 @@ public:
 	int getSourceLine() {
 		return binary ? binary->getSourceLine(process.ip()) : 0;
 	}
+	bool isSourceLine(string file, int line) {
+		return binary ? binary->getLineAddress(file, line) : false;
+	}
+	bool isBreakpoint(string file, int line) {
+		return binary ? breaks.isBreak(binary->getLineAddress(file, line)) : false;
+	}
 	string printLocation() {
 		return binary ? binary->getSourceFile(process.ip()) + " at line " + patch::toString(binary->getSourceLine(process.ip())) : string();
 	}
@@ -234,6 +240,9 @@ public:
 	}
 	uint32_t getPortSignal() {
 		return process.getPortSignal();
+	}
+	uint32_t getPipeSignal() {
+		return process.getPipeSignal();
 	}
 	vector<string> getMessages() {
 		return process.getMessages();

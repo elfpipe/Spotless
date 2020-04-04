@@ -1,3 +1,6 @@
+#ifndef TEXTFILE_HPP
+#define TEXTFILE_HPP
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -5,6 +8,7 @@ using namespace std;
 class TextFile {
 private:
     ifstream is;
+    bool isValid = false;
 public:
     TextFile(string file) {
         is.open(file);
@@ -22,4 +26,11 @@ public:
         getline(is, result);
         return result;
     }
+    bool eof() {
+        return is.eof();
+    }
+    bool good() {
+        return is.good();
+    }
 };
+#endif

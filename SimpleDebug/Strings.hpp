@@ -12,6 +12,7 @@ using namespace std;
 
 #define MAX_CHAR_BUFFER_SIZE 4096
 
+string formatRawString(string text);
 string printStringFormat (const char *format, ...);
 string printStringFormat_helper (const char *format, va_list arg);
 namespace patch {
@@ -99,7 +100,16 @@ public:
         return result;
     }
 };
-
+namespace patch {
+inline string fullPath(string path, string file) {
+    astream str(path);
+    if (str.endsWith(':'))
+        return path + file;
+    if (path.size() == 0)
+        return file;
+    return path + "/" + file;
+}
+}
 #if 0
 int main() {
     astream a("4321/1234:Hello#Hi#Howareyou");

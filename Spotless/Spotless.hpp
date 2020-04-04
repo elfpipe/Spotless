@@ -23,6 +23,9 @@ private:
 
     Debugger debugger;
 
+private:
+    static Spotless *spotless;
+    
 public:
     Spotless () : MainWindow() { create(); }
     ~Spotless() {}
@@ -30,9 +33,12 @@ public:
     void create();
     int unfold();
 
-    void trapHandler();
-    void portHandler();
+    static void trapHandler();
+    static void portHandler();
+    static void pipeHandler();
     bool handleEvent(Event *event);
+
+    void updateAll();
 
     friend class MainMenu;
     friend class Actions;

@@ -7,6 +7,8 @@
 class MainMenu : public Menubar {
 private:
     Spotless *spotless;
+    PublicScreen *screen;
+    bool usingPublicScreen = false;
 public:
     MainMenu(Spotless *parent) : Menubar(dynamic_cast<Widget *>(parent)) { spotless = parent; }
     void createMenu() {
@@ -18,7 +20,18 @@ public:
     bool handleMenuPick(int id) {
         switch(id) {
             case 1: //show about
+                Requesters::showAboutWindow();
+                break;
             case 2: //switch public screen
+                spotless->closeWindow();
+                if(usingPublicScreen) {
+                    screen->closePublicScreen();
+                    usingPublicScreen = false;
+                } else {
+                    screen->openPublicScreen("Spotless", "Spotless"); //name, title
+                }
+                spotless->openWindow();
+                spotless->updateAll();
                 break;
         }
         return false;

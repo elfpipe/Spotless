@@ -102,6 +102,9 @@ public:
 	uint32_t getPortSignal() {
 		return 1 << port->mp_SigBit;
 	}
+	uint32_t getPipeSignal() {
+		return 0x0; //fix
+	}
 	vector<string> getMessages();
 };
 #endif

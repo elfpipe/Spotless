@@ -1,9 +1,9 @@
-#ifndef DB101_REQUESTERTOOLS_h
-#define DB101_REQUESTERTOOLS_h
+#ifndef REQUESTERS_HPP
+#define REQUESTERS_HPP
 
-#include <string>
+using namespace std;
 
-class RequesterTools {
+class Requesters {
 public:
 	enum RequesterCategory {
 		REQUESTER_EXECUTABLE,
@@ -15,16 +15,16 @@ public:
 	};
 	
 private:
-	std::string pathBuffer[REQPATH_N];
+	static string pathBuffer[REQPATH_N];
 	
 public:
-	RequesterTools() {}
-	~RequesterTools() {}
+	Requesters() {}
+	~Requesters() {}
 
-	std::string requesterFile (enum RequesterCategory category, std::string inputFile, std::string &pathResult, const char *format, ...);
-	std::string requesterPath (enum RequesterCategory category, const char *format, ...);
-	int requesterChoice (const char *title, const char *gadgetsText, const char *format, ...);
-	std::string requesterString (const char *title, const char *format, ...);
-	void showAboutWindow();
+	static string file (enum RequesterCategory category, string inputFile, string &pathResult, const char *format, ...);
+	static string path (enum RequesterCategory category, const char *format, ...);
+	static int choice (const char *title, const char *gadgetsText, const char *format, ...);
+	static string requestString (const char *title, const char *format, ...);
+	static void showAboutWindow();
 };
 #endif

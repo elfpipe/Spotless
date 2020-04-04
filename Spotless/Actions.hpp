@@ -30,5 +30,9 @@ public:
         actions->addButton(5, "Step out");
         actions->addButton(6, "Quit");
     }
+
+    void update() {
+        
+    }
 };
 #endif

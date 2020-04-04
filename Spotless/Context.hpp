@@ -4,6 +4,8 @@
 #include "../ReAction/classes.h"
 #include "Spotless.hpp"
 
+#include "../SimpleDebug/Strings.hpp"
+
 class Context : public Widget {
 private:
     Spotless *spotless;
@@ -16,7 +18,18 @@ public:
         listbrowser->setHierachical(true);
     }
     void update() {
-        
+        vector<string> context = spotless->debugger.context();
+        int generation = 1;
+        for(int i = 0; i < context.size(); i++) {
+            astream str(context[i]);
+            int nextGeneration = generation;
+            if(str.endsWith('{')) nextGeneration++;
+            if(str.endsWith('}')) nextGeneration--;
+            vector<string> data;
+            data.push_back(context[i]);
+            listbrowser->addNode(data, 0, nextGeneration > generation, generation);
+            generation = nextGeneration;
+        }
     }
 };
 #endif

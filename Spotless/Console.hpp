@@ -7,15 +7,21 @@
 class Console : public Widget {
 private:
     Spotless *spotless;
-    Listbrowser *listbrowser;
+    static Listbrowser *listbrowser;
 
 public:
     Console(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { setName("Console"); spotless = parent; }
     void createGuiObject(Layout *layout) {
         listbrowser = layout->createListbrowser();
     }
-    void writeToConsole(PublicScreen::PenType pen, string text) {
-        
+    static void write(PublicScreen::PenType pen, string text) {
+        if(listbrowser) {
+            listbrowser->setPen(pen);
+            listbrowser->addNode(text);
+        }
+    }
+    void clear() {
+        listbrowser->clear();
     }
 };
 #endif

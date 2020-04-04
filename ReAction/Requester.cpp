@@ -14,11 +14,13 @@
 
 using namespace std;
 
-std::string RequesterTools::requesterFile (RequesterCategory category, std::string initialFile, std::string &pathResult, const char *format, ...)
+string Requesters::pathBuffer[REQPATH_N];
+
+string Requesters::file (RequesterCategory category, string initialFile, string &pathResult, const char *format, ...)
 {
 	va_list argptr;
 	va_start (argptr, format);
-	std::string titleText = printStringFormat_helper (format, argptr);
+	string titleText = printStringFormat_helper (format, argptr);
 	va_end (argptr);
 
 	struct Screen *publicScreen = PublicScreen::instance()->screenPointer();
@@ -32,16 +34,16 @@ std::string RequesterTools::requesterFile (RequesterCategory category, std::stri
 	
 	if (!requester) {
 		cout << "Failed to allocate ASL requester\n";
-		return std::string();
+		return string();
 	}
 	
 	if (!IAsl->AslRequest (requester, 0)) { //if user aborts
-		return std::string();
+		return string();
 	}
 
-	std::string fileName (requester->fr_File);
+	string fileName (requester->fr_File);
 	
-	pathBuffer[category] = std::string (requester->fr_Drawer);
+	pathBuffer[category] = string (requester->fr_Drawer);
 	pathResult = pathBuffer[category];
 	
 	IAsl->FreeAslRequest (requester);
@@ -49,11 +51,11 @@ std::string RequesterTools::requesterFile (RequesterCategory category, std::stri
 	return fileName;
 }
 
-std::string RequesterTools::requesterPath (enum RequesterCategory category, const char *format, ...)
+string Requesters::path (enum RequesterCategory category, const char *format, ...)
 {
 	va_list argptr;
 	va_start (argptr, format);
-	std::string titleText = printStringFormat_helper (format, argptr);
+	string titleText = printStringFormat_helper (format, argptr);
 	va_end (argptr);
 	
 	struct Screen *publicScreen = PublicScreen::instance()->screenPointer();
@@ -67,25 +69,25 @@ std::string RequesterTools::requesterPath (enum RequesterCategory category, cons
 	
 	if (!requester) {
 		cout << "Failed to allocate ASL requester\n";
-		return std::string();
+		return string();
 	}
 	
 	if (!IAsl->AslRequest (requester, 0)) {
-		return std::string();
+		return string();
 	}
 
-	std::string result (requester->fr_Drawer);
-	pathBuffer[category] = std::string (requester->fr_Drawer);
+	string result (requester->fr_Drawer);
+	pathBuffer[category] = string (requester->fr_Drawer);
 
 	IAsl->FreeAslRequest (requester);	
 	return result;
 }
 
-int RequesterTools::requesterChoice(const char *title, const char *gadgetsText, const char *format, ...)
+int Requesters::choice(const char *title, const char *gadgetsText, const char *format, ...)
 {
 	va_list argptr;
 	va_start (argptr, format);
-	std::string content = printStringFormat_helper (format, argptr);
+	string content = printStringFormat_helper (format, argptr);
 	va_end (argptr);
 
 	struct Screen *publicScreen = PublicScreen::instance()->screenPointer();
@@ -106,11 +108,11 @@ int RequesterTools::requesterChoice(const char *title, const char *gadgetsText, 
 	return code;
 }
 
-std::string RequesterTools::requesterString (const char *title, const char *format, ...)
+string Requesters::requestString (const char *title, const char *format, ...)
 {
 	va_list argptr;
 	va_start (argptr, format);
-	std::string content = printStringFormat_helper (format, argptr);
+	string content = printStringFormat_helper (format, argptr);
 	va_end (argptr);
 
 	char buffer[MAX_CHAR_BUFFER_SIZE];	
@@ -135,10 +137,10 @@ std::string RequesterTools::requesterString (const char *title, const char *form
 		IIntuition->DisposeObject (requesterObject);
 	}
 	
-	return std::string (buffer);
+	return string (buffer);
 }
 
-void RequesterTools::showAboutWindow ()
+void Requesters::showAboutWindow ()
 {
 	struct Screen *publicScreen = PublicScreen::instance()->screenPointer();
 	

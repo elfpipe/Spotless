@@ -4,6 +4,10 @@
 #include "../ReAction/classes.h"
 #include "Spotless.hpp"
 
+#include <string>
+
+using namespace std;
+
 class Sources : public Widget {
 private:
     Spotless *spotless;
@@ -14,8 +18,14 @@ public:
     void createGuiObject(Layout *layout) {
         listbrowser = layout->createListbrowser();
     }
+    string getSelectedElement() {
+        return listbrowser->getNode(listbrowser->getSelectedLineNumber());
+    }
     void update() {
-        
+        vector<string> sources = spotless->debugger.sourceFiles();
+        listbrowser->clear();
+        for(int i = 0; i < sources.size(); i++)
+            listbrowser->addNode(sources[i]);
     }
 };
 #endif

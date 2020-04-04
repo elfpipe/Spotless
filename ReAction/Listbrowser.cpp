@@ -173,6 +173,18 @@ void Listbrowser::addNode (vector<string> columnTexts, void *userData, bool hasC
 	addCheckboxNode (columnTexts, false, false, userData, hasChildren, generation);
 }
 
+string Listbrowser::getNode(int line) {
+	int i = 1;
+	struct Node *node = IExec->GetHead(&labels);
+	while(i < line) {
+		node = IExec->GetSucc(node);
+		i++;
+	}
+	const char *str;
+	IListBrowser->GetListBrowserNodeAttrs(node, LBNCA_Text, &str, TAG_DONE);
+	return str;
+}
+
 void Listbrowser::addCheckboxNode (vector<string> columnTexts, bool checkbox, bool checked, void *userData, bool hasChildren, int generation)
 {	
 	uint32 flags = 0x0;
