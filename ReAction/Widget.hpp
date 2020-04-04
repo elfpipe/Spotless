@@ -13,7 +13,7 @@ class Layout;
 class GoButton;
 class Speedbar;
 class Listbrowser;
-class GuiEvent;
+class Event;
 
 using namespace std;
 
@@ -61,6 +61,7 @@ public:
 		uint32_t result = 0x0;
 		for(int i = 0; i < handlers.size(); i++)
 			result |= handlers[i]->signal;
+		return result;
 	}
 
 public:
@@ -81,7 +82,7 @@ public:
 	void uniconify();
 	void windowToFront();
 
-	void addSignalHandler(Handler *handler, uint32_t signal) {
+	void addSignalHandler(Handler handler, uint32_t signal) {
 		handlers.push_back(new HandlerReference(handler, signal));
 	}
 

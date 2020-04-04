@@ -10,7 +10,7 @@ private:
     Listbrowser *listbrowser;
 
 public:
-    Context(Spotless *parent) : Widget((Widget *)parent) { spotless = parent; }
+    Context(Spotless *parent) : Widget((Widget *)parent) { setName("Variables"); spotless = parent; }
     void createGuiObject(Layout *layout) {
         listbrowser = layout->createListbrowser();
         listbrowser->setHierachical(true);

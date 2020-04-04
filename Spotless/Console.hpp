@@ -10,7 +10,7 @@ private:
     Listbrowser *listbrowser;
 
 public:
-    Console(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { spotless = parent; }
+    Console(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { setName("Console"); spotless = parent; }
     void createGuiObject(Layout *layout) {
         listbrowser = layout->createListbrowser();
     }

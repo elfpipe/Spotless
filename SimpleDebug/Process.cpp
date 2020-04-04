@@ -360,15 +360,15 @@ vector<string> AmigaProcess::getMessages() {
 	while(message) {
 		switch(message->type) {
 			case AmigaProcess::MSGTYPE_EXCEPTION:
-				result.push_back("==EXCEPTION (ip = 0x" << (void *)ip() << ")");
+				result.push_back("==EXCEPTION (ip = 0x" + patch::toString((void *)ip()) + ")");
 				break;
 
 			case AmigaProcess::MSGTYPE_TRAP:
-				result.push_back("==TRAP (ip = 0x" << (void *)ip() << ")");
+				result.push_back("==TRAP (ip = 0x" + patch::toString((void *)ip()) + ")");
 				break;
 
 			case AmigaProcess::MSGTYPE_CRASH:
-				result.push_back("==CRASH (ip = 0x" << (void *)ip() << ")");
+				result.push_back("==CRASH (ip = 0x" + patch::toString((void *)ip()) + ")");
 				break;
 
 			case AmigaProcess::MSGTYPE_OPENLIB:

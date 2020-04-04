@@ -19,7 +19,9 @@ public:
         switch(id) {
             case 1: //show about
             case 2: //switch public screen
+                break;
         }
+        return false;
     }
 };
 #endif

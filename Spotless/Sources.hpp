@@ -10,7 +10,7 @@ private:
     Listbrowser *listbrowser;
 
 public:
-    Sources(Spotless *parent) : Widget((Widget *)parent) { spotless = parent; }
+    Sources(Spotless *parent) : Widget((Widget *)parent) { setName("Source files"); spotless = parent; }
     void createGuiObject(Layout *layout) {
         listbrowser = layout->createListbrowser();
     }

@@ -20,7 +20,7 @@ private:
     Speedbar *actions;
 
 public:
-    Actions(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { spotless = parent; }
+    Actions(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { spotless = parent; setName("Actions"); }
     void createGuiObject(Layout *layout) {
         actions = layout->createSpeedbar();
         actions->addButton(1, "Load");

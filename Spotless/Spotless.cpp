@@ -29,3 +29,32 @@ int Spotless::unfold() {
     openWindow();
     return waitForClose();
 }
+
+void Spotless::trapHandler() {
+
+}
+
+void Spotless::portHandler() {
+
+}
+
+bool Spotless::handleEvent(Event *event) {
+    if(event->eventClass() == Event::CLASS_ButtonPress) {
+        switch(event->elementId()) {
+            case Actions::Load:
+            case Actions::Start:
+            case Actions::StepOver:
+            case Actions::StepInto:
+            case Actions::StepOut:
+            case Actions::Quit:
+                break;
+        }
+    }
+    if(event->eventClass() == Event::CLASS_CheckboxCheck) {
+
+    }
+    if(event->eventClass() == Event::CLASS_CheckboxUncheck) {
+        
+    }
+    return false;
+}
