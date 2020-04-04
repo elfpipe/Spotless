@@ -2,6 +2,7 @@
 #define SPOTLESS_GUI_H
 
 #include "../ReAction/classes.h"
+#include "../SimpleDebug/Debugger.hpp"
 
 class MainMenu;
 class Actions;
@@ -19,6 +20,8 @@ private:
     Context *context;
     Stacktrace *stacktrace;
     Console *console;
+
+    Debugger debugger;
 
 public:
     Spotless () : MainWindow() { create(); }

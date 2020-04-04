@@ -5,7 +5,7 @@
 
 #include "Pipe.hpp"
 #include "Strings.hpp"
-#include "async.h"
+//#include "async.h"
 
 Pipe::Pipe() {
 	init();

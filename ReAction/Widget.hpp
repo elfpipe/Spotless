@@ -58,7 +58,7 @@ public:
 	void setName(string name) { widgetName = name; }
 	string name() { return widgetName; }
 		
-	virtual void waitForClose();
+	virtual int waitForClose();
 	virtual void openWindow();
 	void closeWindow();
 	

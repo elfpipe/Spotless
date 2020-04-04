@@ -71,7 +71,7 @@ void Widget::closeWindow ()
 	children.clear();
 }
 
-void Widget::waitForClose()
+int Widget::waitForClose()
 {
 	bool close = false;
 	
@@ -112,6 +112,7 @@ void Widget::waitForClose()
 		}
 	}
 	closeWindow ();
+	return 0;
 }
 
 Widget *Widget::topLevelParent()

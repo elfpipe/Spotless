@@ -26,5 +26,6 @@ void Spotless::create() {
 }
 
 int Spotless::unfold() {
-    return 0;
+    openWindow();
+    return waitForClose();
 }
