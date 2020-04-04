@@ -1,12 +1,12 @@
-#include "menu.h"
-#include "../Gui/event.h"
-#include "layout.h"
-#include "widget.h"
-#include "speedbar.h"
+#include "Menubar.hpp"
+#include "Event.hpp"
+#include "Layout.hpp"
+#include "Widget.hpp"
+#include "Speedbar.hpp"
 #include "reaction.h"
-#include "screen.h"
+#include "Screen.hpp"
 
-ReactionWidget::ReactionWidget(ReactionWidget *parentWidget)
+Widget::Widget(Widget *parentWidget)
 	:	object(0),
 		window(0),
 		parentLayout(0),
@@ -16,12 +16,12 @@ ReactionWidget::ReactionWidget(ReactionWidget *parentWidget)
 	this->parentWidget = parentWidget;
 }
 
-ReactionWidget::~ReactionWidget()
+Widget::~Widget()
 {
     closeWindow();
 }
 
-void ReactionWidget::openWindow()
+void Widget::openWindow()
 {
 	if (window) return;
 
@@ -45,21 +45,21 @@ void ReactionWidget::openWindow()
 	if (object) window = (struct Window *) RA_OpenWindow (object);
 }
 
-Object *ReactionWidget::createContent()
+Object *Widget::createContent()
 {
-    parentLayout = new ReactionLayout(this, ReactionLayout::LAYOUT_Vertical);
+    parentLayout = new Layout(this, Layout::LAYOUT_Vertical);
 	createGuiObject(parentLayout);
 	return parentLayout->systemObject();
 }
 
-void ReactionWidget::setMenu(ReactionMenu *menu)
+void Widget::setMenubar(Menubar *menu)
 {
 	mainMenu = menu;
 	if(mainMenu) mainMenu->createMenu();
-	if(window) IIntuition->SetMenuStrip(window, (Menu *)mainMenu->systemObject());
+	if(window) IIntuition->SetMenuStrip(window, (struct Menu *)mainMenu->systemObject());
 }
 
-void ReactionWidget::closeWindow ()
+void Widget::closeWindow ()
 {
 	if (object) IIntuition->DisposeObject (object);
 	object = 0;
@@ -71,7 +71,7 @@ void ReactionWidget::closeWindow ()
 	children.clear();
 }
 
-void ReactionWidget::waitForClose()
+void Widget::waitForClose()
 {
 	bool close = false;
 	
@@ -114,21 +114,21 @@ void ReactionWidget::waitForClose()
 	closeWindow ();
 }
 
-ReactionWidget *ReactionWidget::topLevelParent()
+Widget *Widget::topLevelParent()
 {
-	ReactionWidget *top = parentWidget;
+	Widget *top = parentWidget;
 	while(top && top->parentWidget)
 		top = top->parentWidget;
 	return top ? top : this;
 }
 
-void ReactionWidget::addChild(Object *object)
+void Widget::addChild(Object *object)
 {
 	children.push_back(object);
 	IIntuition->SetAttrs(object, GA_ID, gadgetId++, TAG_DONE);
 }
 
-Object *ReactionWidget::findChild(unsigned int id)
+Object *Widget::findChild(unsigned int id)
 {
 	for (int i = 0; i < children.size(); i++) {
 		Object *child = children[i];
@@ -139,38 +139,38 @@ Object *ReactionWidget::findChild(unsigned int id)
 	}
 	return 0;
 }
-void ReactionWidget::iconify()
+void Widget::iconify()
 {
 	if(object)
 		RA_Iconify(object);
 	window = 0;
 }
 
-void ReactionWidget::uniconify()
+void Widget::uniconify()
 {
 	if(object)
 		window = RA_Uniconify(object);
 }
 
-void ReactionWidget::windowToFront ()
+void Widget::windowToFront ()
 {
 	if (window) IIntuition->WindowToFront (window);
 }
 
-uint32 ReactionWidget::windowSignalMask ()
+uint32 Widget::windowSignalMask ()
 {
 	uint32 mask = 0x0;
 	if (object) IIntuition->GetAttr (WINDOW_SigMask, object, &mask);
 	return mask;
 }
 
-bool ReactionWidget::processEvent (uint32 Class, uint16 Code)
+bool Widget::processEvent (uint32 Class, uint16 Code)
 {
 	int MouseX = window->MouseX;
 	int MouseY = window->MouseY;
 
 	GuiEvent *event = 0;
-	ReactionWidget *parent = 0;
+	Widget *parent = 0;
 	switch (Class & WMHI_CLASSMASK) {
 		case WMHI_GADGETUP: {
 			unsigned int gadgetId = Class & WMHI_GADGETMASK;
@@ -180,7 +180,7 @@ bool ReactionWidget::processEvent (uint32 Class, uint16 Code)
 				GA_UserData, &parent,
 				TAG_DONE);
 
-			if(ReactionListbrowser::isListbrowser(gadget)) {
+			if(Listbrowser::isListbrowser(gadget)) {
 				uint32 relEvent, selected;
 
 				IIntuition->GetAttrs(gadget,
@@ -197,10 +197,10 @@ bool ReactionWidget::processEvent (uint32 Class, uint16 Code)
 
 				event->setElementId(gadgetId);
 				event->setItemId (selected);
-			} else if(ReactionSpeedbar::isSpeedbar(gadget)) {
+			} else if(Speedbar::isSpeedbar(gadget)) {
 				event = new GuiEvent (GuiEvent::CLASS_ButtonPress);
 				event->setElementId (Code);
-			} else if(ReactionButton::isButton(gadget)) {
+			} else if(GoButton::isButton(gadget)) {
 				char *text;
 
 				IIntuition->GetAttrs(gadget,

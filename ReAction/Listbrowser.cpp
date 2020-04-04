@@ -7,14 +7,14 @@
 
 #include <string.h>
 
-#include "screen.h"
-#include "widget.h"
-#include "listbrowser.h"
-#include "../Service/stringtools.h"
+#include "Screen.hpp"
+#include "Widget.hpp"
+#include "Listbrowser.hpp"
+#include "../SimpleDebug/Strings.hpp"
 
 using namespace std;
 
-ReactionListbrowser::ReactionListbrowser(ReactionWidget *parent)
+Listbrowser::Listbrowser(Widget *parent)
 	:   columnInfo(0),
 		noColumns(1),
 		penType(PublicScreen::PENTYPE_DEFAULT)
@@ -23,11 +23,11 @@ ReactionListbrowser::ReactionListbrowser(ReactionWidget *parent)
     init();
 }
 
-ReactionListbrowser::~ReactionListbrowser()
+Listbrowser::~Listbrowser()
 {
 }
 
-void ReactionListbrowser::init()
+void Listbrowser::init()
 {
 	IExec->NewList(&labels);
 	
@@ -43,9 +43,10 @@ void ReactionListbrowser::init()
 	parent->topLevelParent()->addChild(object); //To direct selection events, object needs to be stored in the top level widget
 }
 
-void ReactionListbrowser::setColumnTitles(const char *titlesString) //separated by '|'
+void Listbrowser::setColumnTitles(const char *titlesString) //separated by '|'
 {
-	vector<string> titles = splitString (titlesString, "|");
+	astream str(titlesString);
+	vector<string> titles = str.split('|'); //splitString (titlesString, "|");
 	noColumns = titles.size();
 
 	freeColumnTitles();
@@ -69,55 +70,55 @@ void ReactionListbrowser::setColumnTitles(const char *titlesString) //separated 
     attach();
 }
 
-void ReactionListbrowser::freeColumnTitles()
+void Listbrowser::freeColumnTitles()
 {
 	if (columnInfo)
 		IListBrowser->FreeLBColumnInfo (columnInfo);
 }
 
-void ReactionListbrowser::setHierachical(bool enable)
+void Listbrowser::setHierachical(bool enable)
 {
 	IIntuition->SetAttrs((Object *)object,
 		LISTBROWSER_Hierarchical,	enable,
 	TAG_DONE);
 }
 
-void ReactionListbrowser::setStriping (bool enable)
+void Listbrowser::setStriping (bool enable)
 {
 	IIntuition->SetAttrs(object,
 		LISTBROWSER_Striping, enable ? LBS_ROWS : LBS_NONE,
 	TAG_DONE);
 }
 
-void ReactionListbrowser::attach ()
+void Listbrowser::attach ()
 {
 	IIntuition->RefreshSetGadgetAttrs((struct Gadget *)object, parent->topLevelParent()->windowPointer(), 0,
 		LISTBROWSER_Labels,		&labels,
 	TAG_DONE);
 }
 
-void ReactionListbrowser::detach ()
+void Listbrowser::detach ()
 {
 	IIntuition->SetAttrs(object,
 		LISTBROWSER_Labels,		~0,
 	TAG_DONE);
 }
 
-void ReactionListbrowser::clear()
+void Listbrowser::clear()
 {
 	detach();	
 	IListBrowser->FreeListBrowserList(&labels);
 	attach();
 }
 
-void ReactionListbrowser::scrollToBottom ()
+void Listbrowser::scrollToBottom ()
 {
 	IIntuition->SetAttrs(object,
 		LISTBROWSER_Position, LBP_BOTTOM,
 	TAG_DONE);	
 }
 
-void ReactionListbrowser::focus (int line)
+void Listbrowser::focus (int line)
 {
 	IIntuition->RefreshSetGadgetAttrs ((struct Gadget *)object, parent->topLevelParent()->windowPointer(), 0,
 		LISTBROWSER_Selected,		line,
@@ -125,7 +126,7 @@ void ReactionListbrowser::focus (int line)
 	TAG_DONE);
 }
 
-void *ReactionListbrowser::getUserData (int lineNumber)
+void *Listbrowser::getUserData (int lineNumber)
 {
 	struct List *labels;
 	IIntuition->GetAttrs (object, LISTBROWSER_Labels, &labels, TAG_DONE);
@@ -144,7 +145,7 @@ void *ReactionListbrowser::getUserData (int lineNumber)
 	return data;
 }
 
-void *ReactionListbrowser::getSelectedNodeData ()
+void *Listbrowser::getSelectedNodeData ()
 {
 	struct Node *node = 0;
 	IIntuition->GetAttrs (object, LISTBROWSER_SelectedNode, &node, TAG_DONE);
@@ -155,24 +156,24 @@ void *ReactionListbrowser::getSelectedNodeData ()
 	return data;
 }
 
-void ReactionListbrowser::setPen (PublicScreen::PenType pen)
+void Listbrowser::setPen (PublicScreen::PenType pen)
 {
 	penType = pen;
 }
 
-void ReactionListbrowser::addNode (string text, void *userData, bool hasChildren, int generation)
+void Listbrowser::addNode (string text, void *userData, bool hasChildren, int generation)
 {
 	vector<string> columnText;
 	columnText.push_back(text);
 	addNode (columnText, userData, hasChildren, generation);
 }
 
-void ReactionListbrowser::addNode (vector<string> columnTexts, void *userData, bool hasChildren, int generation)
+void Listbrowser::addNode (vector<string> columnTexts, void *userData, bool hasChildren, int generation)
 {
 	addCheckboxNode (columnTexts, false, false, userData, hasChildren, generation);
 }
 
-void ReactionListbrowser::addCheckboxNode (vector<string> columnTexts, bool checkbox, bool checked, void *userData, bool hasChildren, int generation)
+void Listbrowser::addCheckboxNode (vector<string> columnTexts, bool checkbox, bool checked, void *userData, bool hasChildren, int generation)
 {	
 	uint32 flags = 0x0;
 	flags |= hasChildren ? LBFLG_HASCHILDREN | LBFLG_SHOWCHILDREN : 0;
@@ -200,14 +201,14 @@ void ReactionListbrowser::addCheckboxNode (vector<string> columnTexts, bool chec
 	attach();
 }
 
-int ReactionListbrowser::getSelectedLineNumber()
+int Listbrowser::getSelectedLineNumber()
 {
 	int lineNumber = 0;
 	IIntuition->GetAttrs (object, LISTBROWSER_Selected, &lineNumber, TAG_DONE);
 	return ++lineNumber;
 }
 
-bool ReactionListbrowser::checkboxChecked()
+bool Listbrowser::checkboxChecked()
 {
 	uint32 event;
 	IIntuition->GetAttrs (object, LISTBROWSER_RelEvent, &event, TAG_DONE);
@@ -220,14 +221,14 @@ bool ReactionListbrowser::checkboxChecked()
 	return false;
 }
 
-unsigned int ReactionListbrowser::getId()
+unsigned int Listbrowser::getId()
 {
 	unsigned int id;
 	IIntuition->GetAttrs(object, GA_ID, &id, TAG_DONE);
 	return id;
 }
 
-bool ReactionListbrowser::isListbrowser(Object *o)
+bool Listbrowser::isListbrowser(Object *o)
 {
 	uint32 dummy;
 	return IIntuition->GetAttr(LISTBROWSER_Labels, o, &dummy) ? true : false;

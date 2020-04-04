@@ -1,19 +1,19 @@
 #include "reaction.h"
-#include "panel.h"
-#include "layout.h"
-#include "widget.h"
+#include "Panel.hpp"
+#include "Layout.hpp"
+#include "Widget.hpp"
 
 #include <string.h>
 
-ReactionPanel::ReactionPanel(ReactionWidget *parent) {
+Panel::Panel(Widget *parent) {
     parentWidget = parent;
     state = PANEL_TABBED;
 }
 
-ReactionPanel::~ReactionPanel() {
+Panel::~Panel() {
 }
 
-void ReactionPanel::setTabbed(bool tabbed) {
+void Panel::setTabbed(bool tabbed) {
     if (tabbed) {
         state = PANEL_TABBED;
     } else {
@@ -21,19 +21,19 @@ void ReactionPanel::setTabbed(bool tabbed) {
     }
 }
 
-void ReactionPanel::addWidget(ReactionWidget *widget) {
+void Panel::addWidget(Widget *widget) {
     widgets.push_back(widget);
     widget->setParent(parentWidget);
 }
 
-Object *ReactionPanel::createGuiObject() {
+Object *Panel::createGuiObject() {
     Object *pages = PageObject, EndMember;
 
     char *pageLabels[widgets.size() + 1];
     for(int i = 0; i < widgets.size(); i++) {
         pageLabels[i] = strdup(widgets[i]->name().c_str());
 
-        ReactionLayout *layout = new ReactionLayout(parentWidget);
+        Layout *layout = new Layout(parentWidget);
         widgets[i]->createGuiObject(layout);
         widgets[i]->setParentLayout(layout);
         IIntuition->SetAttrs(pages, PAGE_Add, layout->systemObject(), TAG_DONE);

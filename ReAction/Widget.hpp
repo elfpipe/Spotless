@@ -6,18 +6,18 @@
 #include <string>
 #include <vector>
 
-class ReactionMenu;
-class ReactionPanel;
-class ReactionMainWindow;
-class ReactionLayout;
-class ReactionButton;
-class ReactionSpeedbar;
-class ReactionListbrowser;
+class Menubar;
+class Panel;
+class MainWindow;
+class Layout;
+class GoButton;
+class Speedbar;
+class Listbrowser;
 class GuiEvent;
 
 using namespace std;
 
-class ReactionWidget {
+class Widget {
 private:
 	Object *object;
 	struct Window *window;
@@ -40,20 +40,20 @@ private:
 private:
 	string widgetName;
 
-	ReactionLayout *parentLayout;
-	ReactionMenu *mainMenu;
-	ReactionWidget *parentWidget;
+	Layout *parentLayout;
+	Widget *parentWidget;
+	Menubar *mainMenu;
 
-	ReactionWidget *parent() { return parentWidget; }
-	void setParent(ReactionWidget *parent) { parentWidget = parent; }
-	ReactionWidget *topLevelParent();
+	Widget *parent() { return parentWidget; }
+	Widget *topLevelParent();
+	void setParent(Widget *parent) { parentWidget = parent; }
 
 public:
-	ReactionWidget(ReactionWidget *parentWidget = 0);
-	~ReactionWidget();
+	Widget(Widget *parentWidget = 0);
+	~Widget();
 
-	void setParentLayout(ReactionLayout *layout) { parentLayout = layout; }	
-	void setMenu(ReactionMenu *menu);
+	void setParentLayout(Layout *layout) { parentLayout = layout; }	
+	void setMenubar(Menubar *menu);
 
 	void setName(string name) { widgetName = name; }
 	string name() { return widgetName; }
@@ -61,23 +61,22 @@ public:
 	virtual void waitForClose();
 	virtual void openWindow();
 	void closeWindow();
-	//void embedWidget();
 	
 	void iconify();
 	void uniconify();
 	void windowToFront();
 
-	virtual void createGuiObject (ReactionLayout *layout) = 0;
+	virtual void createGuiObject (Layout *layout) = 0;
 
 	virtual bool handleGuiEvent (GuiEvent *event) { return false; };
 
 public:
-	friend ReactionMainWindow;
-	friend ReactionListbrowser;
-	friend ReactionSpeedbar;
-	friend ReactionLayout;
-	friend ReactionButton;
-	friend ReactionPanel;
-	friend ReactionMenu;
+	friend MainWindow;
+	friend Listbrowser;
+	friend Speedbar;
+	friend Layout;
+	friend GoButton;
+	friend Panel;
+	friend Menubar;
 };
 #endif

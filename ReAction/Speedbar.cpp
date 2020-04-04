@@ -1,6 +1,3 @@
-#include "speedbar.h"
-#include "screen.h"
-
 #include <proto/exec.h>
 #include <proto/intuition.h>
 #include <proto/speedbar.h>
@@ -15,19 +12,21 @@
 #include <string.h>
 #include <iostream>
 
-#include "widget.h"
+#include "Widget.hpp"
+#include "Speedbar.hpp"
+#include "Screen.hpp"
 
 using namespace std;
 
-ReactionSpeedbar::ReactionSpeedbar(ReactionWidget *parent) {
+Speedbar::Speedbar(Widget *parent) {
 	this->parent = parent;
 	init();
 }
 
-ReactionSpeedbar::~ReactionSpeedbar() {
+Speedbar::~Speedbar() {
 }
 
-void ReactionSpeedbar::init()
+void Speedbar::init()
 {
 	IExec->NewList (&buttonList);
 	speedbar = SpeedBarObject,
@@ -41,7 +40,7 @@ void ReactionSpeedbar::init()
 	parent->topLevelParent()->addChild(speedbar);
 }
 
-void ReactionSpeedbar::clear()
+void Speedbar::clear()
 {
 	struct Node *node, *nextnode;
 
@@ -54,12 +53,12 @@ void ReactionSpeedbar::clear()
 	IExec->NewList (&buttonList);
 }
 
-void ReactionSpeedbar::addNode (struct Node *node)
+void Speedbar::addNode (struct Node *node)
 {
 	IExec->AddTail (&buttonList, node);
 }
 
-void ReactionSpeedbar::addButton (int buttonId, string buttonText, string iconName)
+void Speedbar::addButton (int buttonId, string buttonText, string iconName)
 {
 	struct Screen *screen = PublicScreen::instance()->screenPointer();
 
@@ -90,7 +89,7 @@ void ReactionSpeedbar::addButton (int buttonId, string buttonText, string iconNa
 
 #define SBID_SPACER 0x9999
 
-void ReactionSpeedbar::addSpacer ()
+void Speedbar::addSpacer ()
 {
 	struct Node *node = ISpeedBar->AllocSpeedButtonNode (
 		SBID_SPACER,
@@ -101,7 +100,7 @@ void ReactionSpeedbar::addSpacer ()
 		addNode (node);
 }
 
-Gadget *ReactionSpeedbar::findButtonGadget (uint16 id)
+Gadget *Speedbar::findButtonGadget (uint16 id)
 {
 	struct Node *node;
 	node = IExec->GetHead (&buttonList);
@@ -114,21 +113,21 @@ Gadget *ReactionSpeedbar::findButtonGadget (uint16 id)
 	return 0;
 }
 
-void ReactionSpeedbar::attach()
+void Speedbar::attach()
 {
 	IIntuition->RefreshSetGadgetAttrs((struct Gadget *)speedbar, parent->topLevelParent()->windowPointer(), 0,
 		SPEEDBAR_Buttons,		&buttonList,
 	TAG_DONE);
 }
 
-void ReactionSpeedbar::detach()
+void Speedbar::detach()
 {
 	IIntuition->SetAttrs(speedbar,
 		SPEEDBAR_Buttons,		~0,
 	TAG_DONE);
 }
 
-void ReactionSpeedbar::enableButton (int id, bool enable)
+void Speedbar::enableButton (int id, bool enable)
 {
 	detach();
 	Gadget *gadget = findButtonGadget (id);
@@ -138,7 +137,7 @@ void ReactionSpeedbar::enableButton (int id, bool enable)
 	attach();
 }
 
-void ReactionSpeedbar::setButtonText (int id, string text)
+void Speedbar::setButtonText (int id, string text)
 {
 	detach();
 	Gadget *gadget = findButtonGadget (id);
@@ -148,7 +147,7 @@ void ReactionSpeedbar::setButtonText (int id, string text)
 	attach();
 }
 
-bool ReactionSpeedbar::isSpeedbar(Object *o)
+bool Speedbar::isSpeedbar(Object *o)
 {
 	uint32 dummy;
 	return IIntuition->GetAttr(SPEEDBAR_Buttons, o, &dummy) ? true : false;

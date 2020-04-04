@@ -2,39 +2,39 @@
 
 #include <string.h>
 
-#include "menu.h"
-#include "gui.h"
+#include "Menubar.hpp"
+#include "Widget.hpp"
 
-ReactionMenu::ReactionMenu(ReactionWidget *parent)
+Menubar::Menubar(Widget *parent)
     : menu(0)
 {
     this->parent = parent;
     createMenuStrip();
 }
 
-ReactionMenu::~ReactionMenu()
+Menubar::~Menubar()
 {
     destroyMenuStrip();
 }
 
-void ReactionMenu::createMenuStrip () {
+void Menubar::createMenuStrip () {
     menu = IIntuition->NewObject(NULL, "menuclass", MA_Type, T_ROOT, TAG_END);
 }
 
-void ReactionMenu::destroyMenuStrip () {
+void Menubar::destroyMenuStrip () {
     if (menu) IIntuition->DisposeObject(menu);
     menu = 0;
 }
 
-void ReactionMenu::attach() {
-    if(parent && parent->windowPointer()) IIntuition->SetMenuStrip(parent->topLevelParent()->windowPointer(), (Menu *)menu);
+void Menubar::attach() {
+    if(parent && parent->windowPointer()) IIntuition->SetMenuStrip(parent->topLevelParent()->windowPointer(), (struct Menu *)menu);
 }
 
-void ReactionMenu::detach() {
+void Menubar::detach() {
     if(parent && parent->windowPointer()) IIntuition->ClearMenuStrip(parent->topLevelParent()->windowPointer());
 }
 
-Object *ReactionMenu::addCreateMenu (string label) {
+Object *Menubar::addCreateMenu (string label) {
     detach();
     Object *panel = IIntuition->NewObject(NULL, "menuclass",
         MA_Type, 		T_MENU,
@@ -47,7 +47,7 @@ Object *ReactionMenu::addCreateMenu (string label) {
     return panel;
 }
 
-void ReactionMenu::addCreateMenuItem (Object *panel, string label, string shortCut, int itemId) {
+void Menubar::addCreateMenuItem (Object *panel, string label, string shortCut, int itemId) {
     detach();
     Object *item = IIntuition->NewObject(NULL, "menuclass",
         MA_ID,			itemId,

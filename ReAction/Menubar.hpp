@@ -6,14 +6,14 @@
 
 using namespace std;
 
-class ReactionWidget;
-class ReactionMenu {
+class Widget;
+class Menubar {
 public:
     typedef Object *MenuReference;
 
 private:
     Object *menu;
-    ReactionWidget *parent;
+    Widget *parent;
 
     void attach();
     void detach();
@@ -24,10 +24,10 @@ private:
     Object *systemObject () { return menu; }
 
 public:
-    ReactionMenu(ReactionWidget *parent);
-    ~ReactionMenu();        
+    Menubar(Widget *parent);
+    ~Menubar();        
 
-    ReactionWidget *parentWidget() { return parent; }
+    Widget *parentWidget() { return parent; }
     
     MenuReference addCreateMenu (string label);
     void addCreateMenuItem (MenuReference, string label, string shortCut, int itemId);
@@ -36,7 +36,7 @@ public:
 
     virtual bool handleMenuPick(int id) { return false; }
 
-    friend class ReactionWidget;
-    friend class ReactionMainWindow;
+    friend class Widget;
+    friend class MainWindow;
 };
 #endif

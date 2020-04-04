@@ -2,32 +2,27 @@
 
 #include <string.h>
 
-#include "mainwindow.h"
-#include "screen.h"
-#include "layout.h"
-#include "menu.h"
+#include "MainWindow.hpp"
+#include "Screen.hpp"
+#include "Layout.hpp"
+#include "Menubar.hpp"
 
 /* ----------------------------------------------------- */
 
-ReactionMainWindow::ReactionMainWindow()
+MainWindow::MainWindow()
     :   topBar(0),
         mainView(0),
         leftPanel(0),
         bottomPanel(0),
         rightPanel(0)
 {
-    unityState = MAINWINDOW_UNIFIED;
 }
 
-ReactionMainWindow::~ReactionMainWindow()
+MainWindow::~MainWindow()
 {
 }
 
-void ReactionMainWindow::openWindow() {
-
-    if(unityState == MAINWINDOW_SEPARATED)
-        closeSeparated();
-
+void MainWindow::openWindow() {
 	if(window) {
 		IIntuition->CloseWindow(window);
 		window = 0;
@@ -58,21 +53,21 @@ void ReactionMainWindow::openWindow() {
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
 }
 
-Object *ReactionMainWindow::createContent() {
-    ReactionLayout *mainLayout = new ReactionLayout(this, ReactionLayout::LAYOUT_Vertical);
+Object *MainWindow::createContent() {
+    Layout *mainLayout = new Layout(this, Layout::LAYOUT_Vertical);
 
     if(topBar) {
         mainLayout->addEmbeddedWidget(topBar);
     }
 
-    ReactionLayout *layoutA = mainLayout->createHorizontalLayout();
+    Layout *layoutA = mainLayout->createHorizontalLayout();
 
     if (leftPanel && leftPanel->count()) {
         layoutA->addTabbedPanel(leftPanel, 30);
         layoutA->addWeightBar();
     }
 
-    ReactionLayout *layoutB = layoutA->createVerticalLayout();
+    Layout *layoutB = layoutA->createVerticalLayout();
 
     if(mainView) {
         layoutB->addEmbeddedWidget(mainView);
@@ -92,125 +87,30 @@ Object *ReactionMainWindow::createContent() {
     return mainLayout->systemObject();
  }
 
-void ReactionMainWindow::setMainView(ReactionWidget *view)
+void MainWindow::setMainView(Widget *view)
 {
     mainView = view;
 }
 
-void ReactionMainWindow::setTopBar(ReactionWidget *top)
+void MainWindow::setTopBar(Widget *top)
 {
     topBar = top;
 }
 
-void ReactionMainWindow::addLeftPanelWidget(ReactionWidget *widget)
+void MainWindow::addLeftPanelWidget(Widget *widget)
 {
-    if(!leftPanel) leftPanel = new ReactionPanel(this);
+    if(!leftPanel) leftPanel = new Panel(this);
     leftPanel->addWidget(widget);
 }
 
-void ReactionMainWindow::addBottomPanelWidget(ReactionWidget *widget)
+void MainWindow::addBottomPanelWidget(Widget *widget)
 {
-    if(!bottomPanel) bottomPanel = new ReactionPanel(this);
+    if(!bottomPanel) bottomPanel = new Panel(this);
     bottomPanel->addWidget(widget);
 }
 
-void ReactionMainWindow::addRightPanelWidget(ReactionWidget *widget)
+void MainWindow::addRightPanelWidget(Widget *widget)
 {
-    if(!rightPanel) rightPanel = new ReactionPanel(this);
+    if(!rightPanel) rightPanel = new Panel(this);
     rightPanel->addWidget(widget);
-}
-
-void ReactionMainWindow::openSeparated()
-{
-    separateWidgets.clear();
-    separateWidgets.push_back(topBar);
-    separateWidgets.push_back(mainView);
-    if(leftPanel)
-    for(int i = 0; i < leftPanel->count(); i++) {
-        ReactionWidget *w = leftPanel->getWidget(i);
-        separateWidgets.push_back(w);
-    }
-    if(bottomPanel)
-    for(int i = 0; i < bottomPanel->count(); i++) {
-        ReactionWidget *w = bottomPanel->getWidget(i);
-        separateWidgets.push_back(w);
-    }
-    if(rightPanel)
-    for(int i = 0; i < rightPanel->count(); i++) {
-        ReactionWidget *w = rightPanel->getWidget(i);
-        separateWidgets.push_back(w);
-    }
-    for(ReactionWidget *w : separateWidgets) {
-        w->openWindow();
-        if(mainMenu) w->setMenu(mainMenu);
-    }
-}
-
-void ReactionMainWindow::closeSeparated()
-{
-    for(ReactionWidget *w : separateWidgets) {
-        w->closeWindow();
-    }
-    separateWidgets.clear();
-}
-
-void ReactionMainWindow::waitForClose()
-{
-    if(unityState == MAINWINDOW_UNIFIED) {
-        ReactionWidget::waitForClose();
-        return;
-    }
-
-    bool close = false;
-	
-	while (!close) {
-        uint32 mask = 0x0;
-        for(ReactionWidget *w : separateWidgets)
-            mask |= w->windowSignalMask();
-		uint32 result = IExec->Wait (mask | SIGBREAKF_CTRL_C);
-
-		if (result & SIGBREAKF_CTRL_C) {
-			close = true;
-            break;
-		}
-
-		while(mask) {
-            for(ReactionWidget *w : separateWidgets) {
-                if(w->windowSignalMask() & mask) {
-                    Object *object = w->windowObject();
-
-            		bool done = false;
-                    while(!done) {
-    			        uint32 Class;
-	            		uint16 Code;
-		    	        Class = IIntuition->IDoMethod (object, WM_HANDLEINPUT, &Code);
-			            if(Class == WMHI_LASTMSG) {
-			            	done = true;
-            			} else {
-			            	switch (Class & WMHI_CLASSMASK) {
-					            case WMHI_CLOSEWINDOW:
-						            close = true;
-						            break;
-
-                                case IDCMP_MENUPICK: {
-                                    uint32 id = NO_MENU_ID;
-                                    while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID)
-                                    close = mainMenu->handleMenuPick(id);
-                                    done = close;
-                                }
-                                break;
-
-        					    default:
-		            				close = w->processEvent(Class, Code);
-					            	done = close;
-						        break;
-				            }
-			            }
-		            }
-                    mask = mask & ~(w->windowSignalMask());
-                }
-            }
-        }
-	}
-	closeWindow ();
 }

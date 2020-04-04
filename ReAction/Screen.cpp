@@ -1,7 +1,7 @@
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 
-#include "screen.h"
+#include "Screen.hpp"
 
 #include <string>
 

@@ -8,13 +8,13 @@
 #include <string>
 #include <vector>
 
-#include "screen.h"
+#include "Screen.hpp"
 
 using namespace std;
 
-class ReactionWidget;
-class ReactionLayout;
-class ReactionListbrowser {
+class Widget;
+class Layout;
+class Listbrowser {
 private:
 	static bool isListbrowser(Object *o);
 
@@ -23,7 +23,7 @@ private:
 	Object *object;
 	struct ColumnInfo *columnInfo;
 	int noColumns;
-	ReactionWidget *parent;
+	Widget *parent;
 
 	PublicScreen::PenType penType;
 	int gid; //only values btw 0 and 255
@@ -37,8 +37,8 @@ private:
 	unsigned int getId();
 
 public:
-	ReactionListbrowser(ReactionWidget *parent = 0);
-	~ReactionListbrowser();
+	Listbrowser(Widget *parent = 0);
+	~Listbrowser();
 
 	void clear();
 
@@ -63,7 +63,7 @@ public:
     void addCheckboxNode (vector<string> columnTexts, bool checkbox, bool checked, void *userData, bool hasChildren, int generation);
 
 public:
-	friend ReactionWidget;
-	friend ReactionLayout;
+	friend Widget;
+	friend Layout;
 };
 #endif

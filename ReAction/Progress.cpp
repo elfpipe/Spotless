@@ -1,5 +1,5 @@
-#include "progress.h"
-#include "screen.h"
+#include "Progress.hpp"
+#include "Screen.hpp"
 
 #include <proto/exec.h>
 #include <proto/intuition.h>
@@ -14,16 +14,16 @@
 
 //----------------------------------
 
-ReactionProgressWindow::ReactionProgressWindow()
+ProgressWindow::ProgressWindow()
 : _windowObject(0)
 {
 }
 
-ReactionProgressWindow::~ReactionProgressWindow()
+ProgressWindow::~ProgressWindow()
 {
 }
 
-void ReactionProgressWindow::open (const char *windowTitle, int total, int initial)
+void ProgressWindow::open (const char *windowTitle, int total, int initial)
 {
 	if (_windowObject) {
 		updateParameters (windowTitle, total, initial);
@@ -70,7 +70,7 @@ void ReactionProgressWindow::open (const char *windowTitle, int total, int initi
 	}
 }
 
-void ReactionProgressWindow::updateParameters (const char * windowTitle, int total, int level)
+void ProgressWindow::updateParameters (const char * windowTitle, int total, int level)
 {
 	if (!_windowObject)
 		return;
@@ -87,7 +87,7 @@ void ReactionProgressWindow::updateParameters (const char * windowTitle, int tot
 	_oldLevel = level;
 }
 
-void ReactionProgressWindow::updateLevel (int level)
+void ProgressWindow::updateLevel (int level)
 {
 	if(!_windowObject)
 		return;
@@ -101,7 +101,7 @@ void ReactionProgressWindow::updateLevel (int level)
 	}
 }
 
-void ReactionProgressWindow::close ()
+void ProgressWindow::close ()
 {	
 	if (_windowObject) IIntuition->DisposeObject (_windowObject);
 	_windowObject = 0;

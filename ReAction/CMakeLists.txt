@@ -1,4 +1,4 @@
-include(Modules/CMakeRemoteTest.cmake)
+#include(Modules/CMakeRemoteTest.cmake)
 
 set(REACTION_SOURCES
     listbrowser.cpp
@@ -12,10 +12,9 @@ set(REACTION_SOURCES
     button.cpp
     panel.cpp
     menu.cpp
-    ../Service/stringtools.cpp
 )
 
-if(CMAKE_CROSSCOMPILING)
+if(0) #CMAKE_CROSSCOMPILING)
 
     add_remote_test(TEST ReactionClassesTest
         ARGUMENTS ""

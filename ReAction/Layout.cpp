@@ -1,6 +1,6 @@
-#include "layout.h"
-#include "widget.h"
-#include "panel.h"
+#include "Layout.hpp"
+#include "Widget.hpp"
+#include "Panel.hpp"
 
 #include <proto/layout.h>
 #include <proto/space.h>
@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-ReactionLayout::ReactionLayout(ReactionWidget *parent, LayoutDirection direction)
+Layout::Layout(Widget *parent, LayoutDirection direction)
 {
 	this->parent = parent;
     this->direction = direction;
@@ -21,7 +21,7 @@ ReactionLayout::ReactionLayout(ReactionWidget *parent, LayoutDirection direction
 	}
 }
 
-ReactionLayout::ReactionLayout (ReactionWidget *parent, string label)
+Layout::Layout (Widget *parent, string label)
 {
 	this->parent = parent;
 	layout = HLayoutObject,
@@ -31,61 +31,61 @@ ReactionLayout::ReactionLayout (ReactionWidget *parent, string label)
 	EndMember;
 }
 
-ReactionLayout::~ReactionLayout()
+Layout::~Layout()
 {
 }
 
-ReactionLayout *ReactionLayout::createVerticalLayout()
+Layout *Layout::createVerticalLayout()
 {
-	ReactionLayout *childLayout = new ReactionLayout(parent, LAYOUT_Vertical);
+	Layout *childLayout = new Layout(parent, LAYOUT_Vertical);
 	IIntuition->SetAttrs (layout,
 		LAYOUT_AddChild, childLayout->systemObject(),
 	TAG_DONE);
 	return childLayout;
 }
 
-ReactionLayout *ReactionLayout::createHorizontalLayout ()
+Layout *Layout::createHorizontalLayout ()
 {
-	ReactionLayout *childLayout = new ReactionLayout(parent, LAYOUT_Horizontal);
+	Layout *childLayout = new Layout(parent, LAYOUT_Horizontal);
 	IIntuition->SetAttrs (layout,
 		LAYOUT_AddChild, childLayout->systemObject(),
 	TAG_DONE);
 	return childLayout;
 }
 
-ReactionLayout *ReactionLayout::createLabeledLayout (string label)
+Layout *Layout::createLabeledLayout (string label)
 {
-	ReactionLayout *childLayout = new ReactionLayout(parent, label);
+	Layout *childLayout = new Layout(parent, label);
 	IIntuition->SetAttrs (layout,
 		LAYOUT_AddChild, childLayout->systemObject(),
 	TAG_DONE);
 	return childLayout;
 }	
 
-void ReactionLayout::createSpace()
+void Layout::createSpace()
 {
 	IIntuition->SetAttrs (layout,
 		LAYOUT_AddChild, SpaceObject, End,
 	TAG_DONE);
 }
 
-ReactionSpeedbar *ReactionLayout::createSpeedbar()
+Speedbar *Layout::createSpeedbar()
 {
-	ReactionSpeedbar *buttonBar = new ReactionSpeedbar(parent);
+	Speedbar *buttonBar = new Speedbar(parent);
 	IIntuition->SetAttrs (layout, LAYOUT_AddChild, buttonBar->systemObject(), TAG_DONE);
 	return buttonBar;
 }
 
-ReactionListbrowser *ReactionLayout::createListbrowser ()
+Listbrowser *Layout::createListbrowser ()
 {
-	ReactionListbrowser *listbrowser = new ReactionListbrowser(parent);
+	Listbrowser *listbrowser = new Listbrowser(parent);
 	IIntuition->SetAttrs (layout, LAYOUT_AddChild, listbrowser->systemObject(), TAG_DONE);
 	return listbrowser;
 }
 
-ReactionButton *ReactionLayout::createButton (const char *text)
+GoButton *Layout::createButton (const char *text)
 {
-	ReactionButton *button = new ReactionButton(parent, text);
+	GoButton *button = new GoButton(parent, text);
 	IIntuition->SetAttrs (layout,
 		LAYOUT_AddChild, button->systemObject(),
 		CHILD_WeightedHeight,	0,
@@ -94,19 +94,19 @@ ReactionButton *ReactionLayout::createButton (const char *text)
 	return button;
 }
 
-void ReactionLayout::addWeightBar()
+void Layout::addWeightBar()
 {
 	IIntuition->SetAttrs (layout, LAYOUT_WeightBar, TRUE, TAG_DONE);
 }
 
-void ReactionLayout::addEmbeddedWidget(ReactionWidget *widget)
+void Layout::addEmbeddedWidget(Widget *widget)
 {
 	widget->setParent(parent);
 	widget->setParentLayout(this);
 	widget->createGuiObject(this);
 }
 
-void ReactionLayout::addTabbedPanel(ReactionPanel *panel, int weight)
+void Layout::addTabbedPanel(Panel *panel, int weight)
 {
 	IIntuition->SetAttrs (layout,
 		LAYOUT_AddChild, panel->createGuiObject(),
@@ -115,7 +115,7 @@ void ReactionLayout::addTabbedPanel(ReactionPanel *panel, int weight)
 	TAG_DONE);
 }
 
-void ReactionLayout::getDimensions(int *left, int *top, int *width, int *height)
+void Layout::getDimensions(int *left, int *top, int *width, int *height)
 {
 	IIntuition->GetAttrs (layout, GA_Left, left, GA_Top, top, GA_Width, width, GA_Height, height, TAG_DONE);
 }

@@ -7,8 +7,8 @@
 
 using namespace std;
 
-class ReactionWidget;
-class ReactionPanel {
+class Widget;
+class Panel {
 public:
     typedef enum {
         PANEL_TABBED,
@@ -16,21 +16,21 @@ public:
     } PanelState;
 
 private:
-    vector<ReactionWidget *> widgets;
+    vector<Widget *> widgets;
     PanelState state;
     Object *object;
 
-    ReactionWidget *parentWidget;
+    Widget *parentWidget;
 
 public:
-    ReactionPanel(ReactionWidget *parent);
-    ~ReactionPanel();
+    Panel(Widget *parent);
+    ~Panel();
 
     int count() { return widgets.size(); }
     
     void setTabbed(bool tabbed);
-    void addWidget(ReactionWidget *widget);
-    ReactionWidget *getWidget(int index) { return widgets.at(index); }
+    void addWidget(Widget *widget);
+    Widget *getWidget(int index) { return widgets.at(index); }
 
     Object *createGuiObject();
 };

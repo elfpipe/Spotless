@@ -8,9 +8,9 @@
 #include <string.h>
 #include <iostream>
 
-#include "screen.h"
-#include "requester.h"
-#include "../Service/stringtools.h"
+#include "Screen.hpp"
+#include "Requester.hpp"
+#include "../SimpleDebug/Strings.hpp"
 
 using namespace std;
 

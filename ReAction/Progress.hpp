@@ -4,7 +4,7 @@
 #include <exec/types.h>
 #include <proto/intuition.h>
 
-class ReactionProgressWindow {
+class ProgressWindow {
 private:
 	Object *_windowObject;
 	Object *_fuelGaugeObject;
@@ -16,8 +16,8 @@ private:
 	
 public:
 	
-	ReactionProgressWindow();
-	~ReactionProgressWindow();
+	ProgressWindow();
+	~ProgressWindow();
 	
 	void open (const char *, int, int);
 	void updateParameters (const char *, int, int);

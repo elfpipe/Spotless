@@ -8,9 +8,9 @@
 
 using namespace std;
 
-class ReactionWidget;
-class ReactionLayout;
-class ReactionSpeedbar {
+class Widget;
+class Layout;
+class Speedbar {
 private:
 	static bool isSpeedbar(Object *o);
 
@@ -19,7 +19,7 @@ private:
 	Object *speedbar;
 	int gid;
 
-	ReactionWidget *parent;
+	Widget *parent;
 
 	void addNode (struct Node *node);
 	
@@ -34,8 +34,8 @@ private:
 	Object *systemObject () { return speedbar; }
 
 public:
-	ReactionSpeedbar(ReactionWidget *parent);
-	~ReactionSpeedbar();
+	Speedbar(Widget *parent);
+	~Speedbar();
 
 	void addButton (int id, string buttonText, string iconName = string());	
 	void addSpacer ();
@@ -44,7 +44,7 @@ public:
 	void setButtonText (int id, string text);
 
 public:
-	friend ReactionWidget;
-	friend ReactionLayout;
+	friend Widget;
+	friend Layout;
 };
 #endif

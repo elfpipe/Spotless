@@ -3,10 +3,10 @@
 
 #include <string>
 
-#include "button.h"
-#include "widget.h"
+#include "GoButton.hpp"
+#include "Widget.hpp"
 
-ReactionButton::ReactionButton (ReactionWidget *parent, const char *text)
+GoButton::GoButton (Widget *parent, const char *text)
 {
 	button = IIntuition->NewObject(NULL, "button.gadget",
 		GA_UserData,	parent,
@@ -17,18 +17,18 @@ ReactionButton::ReactionButton (ReactionWidget *parent, const char *text)
 	parent->topLevelParent()->addChild(button);
 }
 
-ReactionButton::~ReactionButton ()
+GoButton::~GoButton ()
 {
 }
 
-void ReactionButton::setText (const char *text)
+void GoButton::setText (const char *text)
 {
 	IIntuition->SetAttrs (button,
 		GA_Text,	text,
 	TAG_DONE);
 }
 
-bool ReactionButton::isButton(Object *o)
+bool GoButton::isButton(Object *o)
 {
 	char *dummy;
 	IIntuition->GetAttr(GA_Text, o, (uint32*)&dummy);
