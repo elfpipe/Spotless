@@ -19,6 +19,7 @@ Widget::Widget(Widget *parentWidget)
 Widget::~Widget()
 {
     closeWindow();
+	handlers.clear();
 }
 
 void Widget::openWindow()
@@ -76,10 +77,15 @@ int Widget::waitForClose()
 	bool close = false;
 	
 	while (!close) {
-		uint32 result = IExec->Wait (windowSignalMask() | SIGBREAKF_CTRL_C);
+		uint32 result = IExec->Wait (handlerSignals() | windowSignalMask() | SIGBREAKF_CTRL_C);
 
 		if (result & SIGBREAKF_CTRL_C) {
 			close = true;
+		}
+
+		for(int i = 0; i < handlers.size(); i++) {
+			if(result & handlers[i]->signal)
+				handlers[i]->handler();
 		}
 
 		bool done = false;

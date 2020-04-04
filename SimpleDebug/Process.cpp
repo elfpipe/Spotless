@@ -353,3 +353,37 @@ bool AmigaProcess::isDead() {
 	if(result) IExec->Wait(SIGF_CHILD);
 	return result;
 }
+
+vector<string> AmigaProcess::getMessages() {
+	vector<string> result;
+	DebugMessage *message = (DebugMessage *)IExec->GetMsg(port);
+	while(message) {
+		switch(message->type) {
+			case AmigaProcess::MSGTYPE_EXCEPTION:
+				result.push_back("==EXCEPTION (ip = 0x" << (void *)ip() << ")");
+				break;
+
+			case AmigaProcess::MSGTYPE_TRAP:
+				result.push_back("==TRAP (ip = 0x" << (void *)ip() << ")");
+				break;
+
+			case AmigaProcess::MSGTYPE_CRASH:
+				result.push_back("==CRASH (ip = 0x" << (void *)ip() << ")");
+				break;
+
+			case AmigaProcess::MSGTYPE_OPENLIB:
+				result.push_back("==OPENLIB");
+				break;
+
+			case AmigaProcess::MSGTYPE_CLOSELIB:
+				result.push_back("==CLOSELIB");
+				break;
+
+			case AmigaProcess::MSGTYPE_CHILDDIED:
+				result.push_back("Child has DIED (exit)");
+				break;
+		}
+		message = (struct AmigaProcess::DebugMessage *)IExec->GetMsg(port);
+	}
+	return result;
+}

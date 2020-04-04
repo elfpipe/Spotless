@@ -229,6 +229,9 @@ public:
 			}
 		return result;
 	}
+	uint32_t getTrapSignal() {
+		return process.
+	}
 };
 
 #if 0

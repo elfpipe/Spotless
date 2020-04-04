@@ -95,5 +95,13 @@ public:
 	bool isDead();
 	Process *getProcess() { return process; }
 	vector<string> emptyPipe() { return vector<string>(); } //pipe.emptyPipe(); }
+
+	uint32_t getTrapSignal() {
+		return 1 << signal;
+	}
+	uint32_t getPortSignal() {
+		return 1 << port->mp_SigBit;
+	}
+	vector<string> getMessages();
 };
 #endif
