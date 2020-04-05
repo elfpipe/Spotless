@@ -6,10 +6,9 @@
 #include "GoButton.hpp"
 #include "Widget.hpp"
 
-GoButton::GoButton (Widget *parent, int id, const char *text)
-{
+GoButton::GoButton (Widget *parent, const char *text)
+{	
 	button = IIntuition->NewObject(NULL, "button.gadget",
-		GA_ID,			id,
 		GA_UserData,	parent,
 		GA_RelVerify,	true,
 		GA_Text,		text,

@@ -6,6 +6,8 @@
 #include "reaction.h"
 #include "Screen.hpp"
 
+#include <iostream>
+
 Widget::Widget(Widget *parentWidget)
 	:	object(0),
 		window(0),
@@ -180,7 +182,8 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 	Widget *parent = 0;
 	switch (Class & WMHI_CLASSMASK) {
 		case WMHI_GADGETUP: {
-			unsigned int gadgetId = Class & WMHI_GADGETMASK;
+			uint32 gadgetId = Class & WMHI_GADGETMASK;
+			
 			Object *gadget = findChild(gadgetId);
 
 			if(!gadget) break;

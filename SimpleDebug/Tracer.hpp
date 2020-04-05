@@ -10,9 +10,10 @@ private:
     Breaks breaks;
     Process *process;
     ExceptionContext *context;
-private:
-    uint32_t branch();
 
+    bool isBranching;
+
+private:
     void setTraceBit();
     void unsetTraceBit();
     static bool hasTraceBit();
@@ -21,5 +22,7 @@ public:
 
     void activate(bool branching = true);
     void suspend();
+
+    uint32_t branch();
 };
 #endif

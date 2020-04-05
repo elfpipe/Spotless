@@ -1,4 +1,4 @@
-#include "Symbols.hpp"
+//#include "Symbols.hpp"
 #include "Process.hpp"
 #include "Breaks.hpp"
 
@@ -122,12 +122,18 @@ public:
 		if(!binary) return;
 
 		process.step();
-		while(!binary->getSourceLine(process.ip()))
-			process.step();
+		while(!binary->getSourceLine(process.ip())) {
+			if(binary->getSourceFile(process.branchAddress()).size() > 0)
+				process.step();
+			else
+				process.stepNoBranch();
+		}
+		//process.wakeUp();
 	}
 	void stepOut() {
 		Breaks outBreak;
-		outBreak.insert(process.lr());
+		if(binary->getSourceFile(process.lr()).size() > 0)
+			outBreak.insert(process.lr());
 
 		process.step();
 

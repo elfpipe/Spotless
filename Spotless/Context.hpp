@@ -13,17 +13,12 @@ private:
     GoButton *button;
 
 public:
-    typedef enum {
-        Globals = 333
-    } Buttons;
-
-public:
     Context(Spotless *parent) : Widget((Widget *)parent) { setName("Variables"); spotless = parent; }
     void createGuiObject(Layout *layout) {
         Layout *vertical = layout->createVerticalLayout();
         listbrowser = vertical->createListbrowser();
         listbrowser->setHierachical(true);
-        button = vertical->createButton(333, "Globals");
+        button = vertical->createButton("Globals");
     }
     void add(vector<string> context, int generation) {
         for(int i = 0; i < context.size(); i++) {

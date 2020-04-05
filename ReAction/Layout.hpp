@@ -48,7 +48,7 @@ public:
 
 	Listbrowser *createListbrowser ();
 	Speedbar *createSpeedbar ();
-	GoButton *createButton (int id, const char *text);
+	GoButton *createButton (const char *text);
 
 	void addEmbeddedWidget(Widget *widget);
 	void addTabbedPanel(Panel *panel, int weight);

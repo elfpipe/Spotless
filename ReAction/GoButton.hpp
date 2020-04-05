@@ -11,7 +11,6 @@ public:
 
 private:
 	Object *button;
-
 	Object *systemObject () { return button; }
 
 private:
@@ -19,7 +18,7 @@ private:
 	struct Icon *icon;
 	
 public:
-	GoButton(Widget *parent, int id, const char *text);
+	GoButton(Widget *parent, const char *text);
 	~GoButton();
 	
 	void setText(const char *text);

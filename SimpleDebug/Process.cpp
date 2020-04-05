@@ -322,13 +322,25 @@ void AmigaProcess::skip() {
 	IDebug->WriteTaskContext((struct Task *)process, &context, RTCF_STATE);
 }
 
-void AmigaProcess::step()
-{
+void AmigaProcess::step() {
 	Tracer tracer(process, &context);
 	tracer.activate();
 	go();
 	wait();
 	tracer.suspend();
+}
+
+void AmigaProcess::stepNoBranch() {
+	Tracer tracer(process, &context);
+	tracer.activate(false);
+	go();
+	wait();
+	tracer.suspend();
+}
+
+uint32_t AmigaProcess::branchAddress() {
+	Tracer tracer(process, &context);
+	return tracer.branch();
 }
 
 // --------------------------------------------------------------------------- //
@@ -345,7 +357,7 @@ void AmigaProcess::wait()
 
 void AmigaProcess::wakeUp()
 {
-	IExec->Signal((struct Task *)IExec->FindTask(0), signal);
+	IExec->Signal((struct Task *)IExec->FindTask(0), 1 << signal);
 }
 
 bool AmigaProcess::isDead() {

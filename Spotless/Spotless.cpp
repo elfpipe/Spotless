@@ -90,6 +90,7 @@ bool Spotless::handleEvent(Event *event) {
                 break;
             case Actions::StepInto:
                 debugger.stepInto();
+                updateAll();
                 break;
             case Actions::StepOut:
                 debugger.stepOut();
@@ -111,11 +112,9 @@ bool Spotless::handleEvent(Event *event) {
         code->checkboxSelected(sources->getSelectedElement(), false);
     }
     if(event->eventClass() == Event::CLASS_GoButtonPress) {
-        //switch(event->elementId()) {
-        //    case Context::Globals:
-                context->globals();
-        //        break;
-        //}
+        if(!event->elementDescription().compare("Globals")) {
+            context->globals();
+        }
     }
     return false;
 }

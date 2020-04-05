@@ -83,9 +83,9 @@ Listbrowser *Layout::createListbrowser ()
 	return listbrowser;
 }
 
-GoButton *Layout::createButton (int id, const char *text)
+GoButton *Layout::createButton (const char *text)
 {
-	GoButton *button = new GoButton(parent, id, text);
+	GoButton *button = new GoButton(parent, text);
 	IIntuition->SetAttrs (layout,
 		LAYOUT_AddChild, button->systemObject(),
 		CHILD_WeightedHeight,	0,

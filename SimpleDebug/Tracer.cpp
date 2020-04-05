@@ -11,7 +11,8 @@ Tracer::Tracer(Process *process, ExceptionContext *context) {
 }
 
 void Tracer::activate(bool branching) {
-    if(hasTraceBit()) {
+	isBranching = branching;
+    if(hasTraceBit() && branching) {
         setTraceBit();
     } else {
         breaks.insert(context->ip + 4);
@@ -23,7 +24,7 @@ void Tracer::activate(bool branching) {
 }
 
 void Tracer::suspend() {
-    if(hasTraceBit()) {
+    if(hasTraceBit() && isBranching) {
         unsetTraceBit();
     } else {
         breaks.deactivate();
