@@ -183,6 +183,8 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 			unsigned int gadgetId = Class & WMHI_GADGETMASK;
 			Object *gadget = findChild(gadgetId);
 
+			if(!gadget) break;
+			
 			IIntuition->GetAttrs(gadget,
 				GA_UserData, &parent,
 				TAG_DONE);

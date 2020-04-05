@@ -121,8 +121,8 @@ void Listbrowser::scrollToBottom ()
 void Listbrowser::focus (int line)
 {
 	IIntuition->RefreshSetGadgetAttrs ((struct Gadget *)object, parent->topLevelParent()->windowPointer(), 0,
-		LISTBROWSER_Selected,		line,
-		LISTBROWSER_MakeVisible,	line,
+		LISTBROWSER_Selected,		line-1,
+		LISTBROWSER_MakeVisible,	line-1,
 	TAG_DONE);
 }
 
@@ -203,7 +203,7 @@ void Listbrowser::addCheckboxNode (vector<string> columnTexts, bool checkbox, bo
 		IListBrowser->SetListBrowserNodeAttrs(node,
 			LBNA_Column,		i,
 				LBNCA_CopyText,		true,
-				LBNCA_Text,			i < columnTexts.size() ? columnTexts[i].c_str() : "", //because of the before mentioned bug
+				LBNCA_Text,			i < columnTexts.size() ? strdup(columnTexts[i].c_str()) : "", //because of the before mentioned bug
 				LBNCA_FGPen,		PublicScreen::instance()->getPen (penType),
 		TAG_END);
 	}

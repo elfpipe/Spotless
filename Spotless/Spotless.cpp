@@ -44,6 +44,7 @@ int Spotless::unfold() {
 
 void Spotless::trapHandler() {
     if(spotless) {
+        spotless->debugger.suspendBreaks();
         spotless->updateAll();
         Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
     }

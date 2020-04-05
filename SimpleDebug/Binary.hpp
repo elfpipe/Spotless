@@ -246,7 +246,7 @@ public:
         }
         switch(rangeType) {
             case R_UInt64: {
-                //result.push_back(patch::toString(*(unsigned long long *)base)); //crashes
+                //result.push_back(patch::toString(*(unsigned long long *)base)); //Fails on adtools libstdc++
                 unsigned int value = *(unsigned long long *)base;
                 result.push_back(patch::toString(value));
                 break;
@@ -285,7 +285,7 @@ public:
                             result.push_back(patch::toString(*(unsigned int *)base));
                             break;
                         case 8: {
-                            // result.push_back(patch::toString(*(unsigned long long *)base));
+                            // result.push_back(patch::toString(*(unsigned long long *)base)); //Fails on adtools libstdc++
                             unsigned int value = *(unsigned long long *)base;
                             result.push_back(patch::toString(value));
                             break;
@@ -303,11 +303,10 @@ public:
                             result.push_back(patch::toString(*(short *)base));
                             break;
                         case 4:
-                            cout << "==INT==\n";
                             result.push_back(patch::toString(*(int *)base));
                             break;
                         case 8: {
-                            // result.push_back(patch::toString(*(long long *)base));
+                            // result.push_back(patch::toString(*(long long *)base)); //Fails on adtools libstdc++
                             int value = *(long long *)base;
                             result.push_back(patch::toString(value));
                             break;

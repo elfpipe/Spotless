@@ -32,7 +32,6 @@ PublicScreen::PublicScreen()
 PublicScreen::~PublicScreen()
 {
 	closePublicScreen();
-	usingPubScreen = false;
 }
 
 void PublicScreen::openPublicScreen (string _name, string title)

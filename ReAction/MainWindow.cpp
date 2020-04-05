@@ -41,7 +41,7 @@ void MainWindow::openWindow() {
 		WA_Width,               windowWidth,
 		WA_Height,              windowHeight,
 		WA_CloseGadget,			true,
-		WA_Backdrop,            backdropWindow,
+		//WA_Backdrop,            backdropWindow,
 		//WA_Borderless,          backdropWindow,
 		WA_Activate,			TRUE,
 		WA_ReportMouse,			TRUE,

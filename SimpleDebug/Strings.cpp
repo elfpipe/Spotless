@@ -28,8 +28,9 @@ string printStringFormat (const char *format, ...)
 string formatRawString(string text) {
 	string result;
 	stringstream str(text);
-	while(!str.eof()) {
+	while(str.good()) {
 		char c = str.get();
+		if(str.eof()) break;
 		switch(c) {
 			case '\t':
 				result += "    ";
@@ -39,7 +40,8 @@ string formatRawString(string text) {
 			case '\0':
 				break;
 			default:
-				result += c;
+				if(c > 31 && c < 127)
+					result += c;
 				break;
 		}
 	}

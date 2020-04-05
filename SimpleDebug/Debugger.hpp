@@ -16,45 +16,13 @@
 
 using namespace std;
 
-#if 0
-string concat(vector<string> strs, int index)
-{
-	string result;
-	for (int i = index; i < strs.size(); i++)
-		result.append(strs[i]);
-	return result;
-}
-
-string vectorToString(vector<string> v) {
-	string result;
-	for(int i = 0; i < v.size(); i++)
-		result += v[i] + "\n";
-	return result;
-}
-// ---------------------------------------------------------------------------- //
-
-vector<string> getInput()
-{
-	cout << "> ";
-
-	char buffer[1024];
-	string command;
-	getline(cin, command);
-
-	astream str(command);
-	vector<string> cmdArgs = str.split(' ');
-
-	return cmdArgs;
-}
-#endif
-
 // ---------------------------------------------------------------------------- //
 
 class Debugger {
 private:
 	AmigaProcess process;
     ElfSymbols symbols;
-    Breaks breaks;
+    Breaks breaks, linebreaks;
 
 	ElfHandle *handle = 0;
 	Binary *binary = 0;
@@ -110,13 +78,18 @@ public:
 		if(address)	set ? breaks.insert(address) : breaks.remove(address);
 		return address != 0;
 	}
+	void suspendBreaks() {
+		breaks.deactivate();
+		linebreaks.deactivate();
+		linebreaks.clear();
+	}
 	void start() {
 		process.step();
 
 		breaks.activate();
 		process.go();
-		process.wait();
-		breaks.deactivate();
+		// process.wait();
+		// breaks.deactivate(); //do the last bit in trap handler
 	}
 	void wait() {
 		process.wait();
@@ -130,7 +103,6 @@ public:
 	void stepOver() {
 		if(!binary) return;
 
-		Breaks linebreaks;
 		Function *function = binary->getFunction(process.ip());
 		for(int i = 0; i < function->lines.size(); i++) {
 			linebreaks.insert(function->address + function->lines[i]->address);
@@ -141,10 +113,10 @@ public:
 		linebreaks.activate();
 
 		process.go();
-		process.wait();
+		// process.wait();
 
-		linebreaks.deactivate();
-		breaks.deactivate();
+		// linebreaks.deactivate(); //do the last bit in trap handler
+		// breaks.deactivate();
 	}
 	void stepInto() {
 		if(!binary) return;
@@ -250,6 +222,8 @@ public:
 		breaks.clear();
 		if(handle) delete handle;
 		if(binary) delete binary;
+		handle = 0;
+		binary = 0;
     }
 };
 
