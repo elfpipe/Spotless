@@ -1,2 +1,2 @@
-# Flawless
+# Spotless
 Frontend for SimpleDebug
