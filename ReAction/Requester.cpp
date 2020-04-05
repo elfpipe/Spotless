@@ -147,7 +147,7 @@ void Requesters::showAboutWindow ()
 	Object *requesterObject = (Object *)IIntuition->NewObject( IRequester->REQUESTER_GetClass(), NULL,
 		REQ_Type,       REQTYPE_INFO,
 		REQ_TitleText,  "About",
-		REQ_BodyText,   "Spotless - Copyright Â© 2020 Alpha Kilimanjaro",
+		REQ_BodyText,   "Spotless - Copyright © 2020 Alpha Kilimanjaro",
 		REQ_GadgetText, "Ok",
 		TAG_DONE);
 

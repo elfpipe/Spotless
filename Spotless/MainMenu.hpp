@@ -24,12 +24,10 @@ public:
                 break;
             case 2: //switch public screen
                 spotless->closeWindow();
-                if(usingPublicScreen) {
-                    screen->closePublicScreen();
-                    usingPublicScreen = false;
-                } else {
-                    screen->openPublicScreen("Spotless", "Spotless"); //name, title
-                }
+                if (!PublicScreen::usingPublicScreen())
+                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020 by Alpha Kilimanjaro");
+                else
+                    PublicScreen::instance()->closePublicScreen();
                 spotless->openWindow();
                 spotless->updateAll();
                 break;

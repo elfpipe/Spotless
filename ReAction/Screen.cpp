@@ -4,6 +4,7 @@
 #include "Screen.hpp"
 
 #include <string>
+#include <string.h>
 
 using namespace std;
 
@@ -43,7 +44,7 @@ void PublicScreen::openPublicScreen (string _name, string title)
 	screen = IIntuition->OpenScreenTags (0,
 		SA_LikeWorkbench,		TRUE,
     	SA_PubName,				_name.c_str(),
-		SA_Title,				title.c_str(),
+		SA_Title,				strdup(title.c_str()),
 		SA_ShowTitle,			TRUE,
 		SA_WindowDropShadows,	FALSE,
 		//SA_Quiet,				TRUE,
