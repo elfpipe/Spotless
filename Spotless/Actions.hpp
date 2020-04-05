@@ -32,7 +32,9 @@ public:
     }
 
     void update() {
-        
+        actions->enableButton(Load, false);
+        for(int i = 2; i < 6+1; i++)
+            actions->enableButton(i, true);        
     }
 
     void clear() {

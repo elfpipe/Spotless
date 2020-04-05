@@ -245,6 +245,7 @@ bool AmigaProcess::handleMessages() {
 
 			case AmigaProcess::MSGTYPE_CHILDDIED:
 				cout << "Child has DIED (exit)\n";
+				process = 0;
 				exit = true;
 				break;
 		}
@@ -349,9 +350,12 @@ void AmigaProcess::wakeUp()
 
 bool AmigaProcess::isDead() {
 	uint32_t signals = IExec->SetSignal(0, 0);
-	bool result = signals & SIGF_CHILD;
-	if(result) IExec->Wait(SIGF_CHILD);
-	return result;
+	return signals & SIGF_CHILD;
+}
+
+void AmigaProcess::resetSignals() {
+	uint32_t signals = IExec->SetSignal(0, 0);
+	if(signals) IExec->Wait(signals);
 }
 
 vector<string> AmigaProcess::getMessages() {

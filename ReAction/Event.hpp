@@ -14,7 +14,8 @@ public:
 		CLASS_ButtonPress,
 		CLASS_CheckboxCheck,
 		CLASS_CheckboxUncheck,
-		CLASS_SelectNode
+		CLASS_SelectNode,
+		CLASS_GoButtonPress
 	};
 private:
 	EventClass eClass;

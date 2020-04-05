@@ -175,7 +175,7 @@ public:
 	}
 	vector<string> stacktrace() {
 		Stacktracer stacktracer;
-		return stacktracer.stacktrace((Task *)process.getProcess(), getSp());
+		return process.isDead() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), getSp());
 	}
 	vector<string> functionSource() {
 		vector<string> result;
@@ -224,6 +224,7 @@ public:
 		if(binary) delete binary;
 		handle = 0;
 		binary = 0;
+		process.resetSignals();
     }
 };
 

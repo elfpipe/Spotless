@@ -43,6 +43,9 @@ int32 Stacktracer::stacktrace_callback(struct Hook *hook, struct Task *task, str
 }
 
 vector<string> Stacktracer::stacktrace(Task *task, uint32_t sp) {
+	trace.clear();
+	if(!task) return trace;
+	
 	Hook *hook = (Hook *)IExec->AllocSysObjectTags(
 		ASOT_HOOK,
 		ASOHOOK_Entry, stacktrace_callback,

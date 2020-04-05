@@ -26,6 +26,8 @@ private:
 private:
     static Spotless *spotless;
     
+    bool childLives = false;
+    
 public:
     Spotless () : MainWindow() { create(); }
     ~Spotless() {}
@@ -40,7 +42,8 @@ public:
     bool handleEvent(Event *event);
 
     void updateAll();
-
+    void clearAll();
+    
     friend class MainMenu;
     friend class Actions;
     friend class Code;

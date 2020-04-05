@@ -93,6 +93,7 @@ public:
 	void wakeUp();
 
 	bool isDead();
+	void resetSignals();
 	Process *getProcess() { return process; }
 	vector<string> emptyPipe() { return vector<string>(); } //pipe.emptyPipe(); }
 

@@ -31,10 +31,10 @@ void Spotless::create() {
     addLeftPanelWidget(stacktrace);
     addBottomPanelWidget(console);
 
+    addSignalHandler(deathHandler, SIGF_CHILD);
     addSignalHandler(trapHandler, debugger.getTrapSignal());
     addSignalHandler(portHandler, debugger.getPortSignal());
     addSignalHandler(pipeHandler, debugger.getPipeSignal());
-    addSignalHandler(deathHandler, SIGF_CHILD);
 }
 
 int Spotless::unfold() {
@@ -45,7 +45,7 @@ int Spotless::unfold() {
 void Spotless::trapHandler() {
     if(spotless) {
         spotless->debugger.suspendBreaks();
-        spotless->updateAll();
+        if(spotless->childLives) spotless->updateAll();
         Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
     }
 }
@@ -68,12 +68,8 @@ void Spotless::pipeHandler() {
 
 void Spotless::deathHandler() {
     if(spotless) {
-        spotless->actions->clear();
-        spotless->code->clear();
-        spotless->context->clear();
-        spotless->sources->clear();
-        spotless->stacktrace->clear();
-        spotless->debugger.clear();
+        spotless->clearAll();
+        spotless->childLives = false;
     }
 }
 bool Spotless::handleEvent(Event *event) {
@@ -82,7 +78,7 @@ bool Spotless::handleEvent(Event *event) {
             case Actions::Load: {
                 string path;
                 string file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
-                debugger.load(patch::fullPath(path, file), "");
+                childLives = debugger.load(patch::fullPath(path, file), "");
                 updateAll();
                 break;
             }
@@ -114,6 +110,13 @@ bool Spotless::handleEvent(Event *event) {
     if(event->eventClass() == Event::CLASS_CheckboxUncheck) {
         code->checkboxSelected(sources->getSelectedElement(), false);
     }
+    if(event->eventClass() == Event::CLASS_GoButtonPress) {
+        //switch(event->elementId()) {
+        //    case Context::Globals:
+                context->globals();
+        //        break;
+        //}
+    }
     return false;
 }
 
@@ -124,4 +127,13 @@ void Spotless::updateAll() {
     context->update();
     stacktrace->update();
     console->clear();
+}
+
+void Spotless::clearAll() {
+    actions->clear();
+    code->clear();
+    context->clear();
+    sources->clear();
+    stacktrace->clear();
+    debugger.clear();
 }

@@ -40,7 +40,12 @@ void MainWindow::openWindow() {
 		WA_Top,					PublicScreen::instance()->screenBarHeight(),
 		WA_Width,               windowWidth,
 		WA_Height,              windowHeight,
+
+        WA_DepthGadget,		    true,
+		WA_SizeGadget,		    true,
+		WA_DragBar,			    true,
 		WA_CloseGadget,			true,
+        
 		//WA_Backdrop,            backdropWindow,
 		//WA_Borderless,          backdropWindow,
 		WA_Activate,			TRUE,

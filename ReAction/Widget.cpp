@@ -216,7 +216,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 					GA_Text, &text,
 				TAG_DONE);
 
-				event = new Event (Event::CLASS_ButtonPress);
+				event = new Event (Event::CLASS_GoButtonPress);
 				event->setElementId (gadgetId);
 				event->setElementDescription (text);
 			}

@@ -10,25 +10,22 @@ class Context : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
+    GoButton *button;
+
+public:
+    typedef enum {
+        Globals = 333
+    } Buttons;
 
 public:
     Context(Spotless *parent) : Widget((Widget *)parent) { setName("Variables"); spotless = parent; }
     void createGuiObject(Layout *layout) {
-        listbrowser = layout->createListbrowser();
+        Layout *vertical = layout->createVerticalLayout();
+        listbrowser = vertical->createListbrowser();
         listbrowser->setHierachical(true);
+        button = vertical->createButton(333, "Globals");
     }
-    void update() {
-        // listbrowser->addNode("Hello", 0, true, 1);
-        // listbrowser->addNode("and", 0, false, 2);
-        // listbrowser->addNode("welcome", 0, false, 2);
-        // listbrowser->addNode("I", 0, true, 1);
-        // listbrowser->addNode("am", 0, true, 2);
-        // listbrowser->addNode("your grandson", 0, false, 3);
-        // listbrowser->addNode("Hierymies", 0, false, 3);
-        // listbrowser->addNode("Isn't it awesome?", 0, false, 0);
-        clear();
-        vector<string> context = spotless->debugger.context();
-        int generation = 1;
+    void add(vector<string> context, int generation) {
         for(int i = 0; i < context.size(); i++) {
             astream str(context[i]);
             int nextGeneration = generation;
@@ -37,6 +34,14 @@ public:
             else listbrowser->addNode(context[i], 0, nextGeneration > generation, generation);
             generation = nextGeneration;
         }
+    }
+    void update() {
+        clear();
+        add(spotless->debugger.context(), 1);
+    }
+    void globals() {
+        listbrowser->addNode("Globals", 0, true, 1);
+        add(spotless->debugger.globals(), 2);
     }
     void clear() {
         listbrowser->clear();

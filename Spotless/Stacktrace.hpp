@@ -16,7 +16,11 @@ public:
         listbrowser->setStriping(true);
     }
     void update() {
-        
+        clear();
+        if(!spotless->childLives) return;
+        vector<string> trace = spotless->debugger.stacktrace();
+        for(int i = 0; i < trace.size(); i++)
+            listbrowser->addNode(trace[i]);
     }
     void clear() {
         listbrowser->clear();
