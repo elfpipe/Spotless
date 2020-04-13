@@ -104,6 +104,7 @@ public:
 		if(!binary) return;
 
 		Function *function = binary->getFunction(process.ip());
+		if(function)
 		for(int i = 0; i < function->lines.size(); i++) {
 			linebreaks.insert(function->address + function->lines[i]->address);
 		}
@@ -121,13 +122,12 @@ public:
 	void stepInto() {
 		if(!binary) return;
 
-		process.step();
-		while(!binary->getSourceLine(process.ip())) {
+		do {
 			if(binary->getSourceFile(process.branchAddress()).size() > 0)
 				process.step();
 			else
 				process.stepNoBranch();
-		}
+		} while(!binary->getSourceLine(process.ip()));
 		//process.wakeUp();
 	}
 	void stepOut() {

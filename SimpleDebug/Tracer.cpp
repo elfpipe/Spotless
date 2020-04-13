@@ -34,6 +34,8 @@ void Tracer::suspend() {
 
 uint32_t Tracer::branch()
 {
+	if(!is_readable_address(context->ip))
+		return 0x0;
 	int32 offset;
 	switch(PPC_DisassembleBranchInstr(*(uint32 *)context->ip, &offset))
 	{

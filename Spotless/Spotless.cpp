@@ -94,6 +94,7 @@ bool Spotless::handleEvent(Event *event) {
                 break;
             case Actions::StepOut:
                 debugger.stepOut();
+                updateAll();
                 break;
             case Actions::Quit:
                 return true;

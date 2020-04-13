@@ -29,6 +29,7 @@ public:
         actions->addButton(4, "Step into");
         actions->addButton(5, "Step out");
         actions->addButton(6, "Quit");
+        clear();
     }
 
     void update() {
