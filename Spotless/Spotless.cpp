@@ -79,7 +79,10 @@ bool Spotless::handleEvent(Event *event) {
                 string path;
                 string file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
                 childLives = debugger.load(patch::fullPath(path, file), "");
-                updateAll();
+                if(childLives)
+                    updateAll();
+                else
+                    console->write(PublicScreen::PENTYPE_CRITICAL, "Failed to load selected file.");
                 break;
             }
             case Actions::Start:

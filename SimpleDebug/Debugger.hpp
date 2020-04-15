@@ -79,9 +79,11 @@ public:
 		return address != 0;
 	}
 	void suspendBreaks() {
-		breaks.deactivate();
-		linebreaks.deactivate();
-		linebreaks.clear();
+		if(!process.isDead()) { //necessary on 440ep
+			breaks.deactivate();
+			linebreaks.deactivate();
+			//linebreaks.clear();
+		}
 	}
 	void start() {
 		process.step();
@@ -143,8 +145,10 @@ public:
 		process.go();
 		process.wait();
 
-		outBreak.deactivate();
-		breaks.deactivate();
+		if(!process.isDead()) {
+			outBreak.deactivate();
+			breaks.deactivate();
+		}
 	}
 	vector<string> context() {
 		return binary ? binary->getContext(process.ip(), process.sp()) : vector<string>();
