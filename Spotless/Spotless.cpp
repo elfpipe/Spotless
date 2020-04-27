@@ -5,6 +5,7 @@
 #include "MainMenu.hpp"
 #include "Sources.hpp"
 #include "Stacktrace.hpp"
+#include "Disassembler.hpp"
 #include "Spotless.hpp"
 
 #include "../SimpleDebug/Strings.hpp"
@@ -22,6 +23,7 @@ void Spotless::create() {
     stacktrace = new Stacktrace(spotless);
     code = new Code(spotless);
     console = new Console(spotless);
+    disassembler = new Disassembler(spotless);
 
     setMenubar(menu);
     setTopBar(actions);
@@ -30,6 +32,7 @@ void Spotless::create() {
     addLeftPanelWidget(context);
     addLeftPanelWidget(stacktrace);
     addBottomPanelWidget(console);
+    addBottomPanelWidget(disassembler);
 
     addSignalHandler(deathHandler, SIGF_CHILD);
     addSignalHandler(trapHandler, debugger.getTrapSignal());
@@ -130,6 +133,7 @@ void Spotless::updateAll() {
     context->update();
     stacktrace->update();
     console->clear();
+    disassembler->update();
 }
 
 void Spotless::clearAll() {
@@ -138,5 +142,6 @@ void Spotless::clearAll() {
     context->clear();
     sources->clear();
     stacktrace->clear();
+    disassembler->clear();
     debugger.clear();
 }

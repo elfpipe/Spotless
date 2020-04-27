@@ -11,6 +11,7 @@ class Sources;
 class Stacktrace;
 class Context;
 class Console;
+class Disassembler;
 class Spotless : public MainWindow {
 private:
     MainMenu *menu;
@@ -20,7 +21,8 @@ private:
     Context *context;
     Stacktrace *stacktrace;
     Console *console;
-
+    Disassembler *disassembler;
+    
     Debugger debugger;
 
 private:
@@ -51,5 +53,6 @@ public:
     friend class Context;
     friend class Stacktrace;
     friend class Console;
+    friend class Disassembler;
 };
 #endif

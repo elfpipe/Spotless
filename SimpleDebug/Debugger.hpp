@@ -27,6 +27,8 @@ private:
 	ElfHandle *handle = 0;
 	Binary *binary = 0;
 
+	int line = 0;
+
 public:
 	Debugger() {
 	}
@@ -168,6 +170,9 @@ public:
 	int getSourceLine() {
 		return binary ? binary->getSourceLine(process.ip()) : 0;
 	}
+	int getSourceLine(uint32_t address) {
+		return binary ? binary->getSourceLine(address) : 0;
+	}
 	bool isSourceLine(string file, int line) {
 		return binary ? binary->getLineAddress(file, line) : false;
 	}
@@ -216,6 +221,38 @@ public:
 			}
 		return result;
 	}
+	vector<string> disassemble() {
+		vector<string> result;
+		Function *function = binary->getFunction(getIp());
+		if(!function) return result;
+		int entry = 1;
+		result.push_back(function->name + " :");
+        for(int i = 0; i < function->lines.size(); i++) {
+			int maxOffset = function->lines[i]->address + 4;
+			if(i < function->lines.size() - 1)
+				maxOffset = function->lines[i+1]->address;
+
+			for(uint32_t offset = function->lines[i]->address; offset < maxOffset; offset += 4) {
+				uint32_t address = function->address + offset;
+				char opcode[256], operands[256];
+				IDebug->DisassembleNative((APTR)address, opcode, operands);
+
+				entry++;
+				if(isLocation(address)) {
+					result.push_back(printStringFormat("[line %d] 0x%x : %s %s", getSourceLine(address), address, opcode, operands));
+				} else {
+					result.push_back(printStringFormat("          0x%x : %s %s", address, opcode, operands));
+				}
+
+				//for hightlighting
+				if(address == getIp()) line = entry;
+			}
+        }
+		return result;
+	}
+	int getDisassebmlyLine() {
+		return line;
+	}
 	uint32_t getTrapSignal() {
 		return process.getTrapSignal();
 	}
@@ -236,6 +273,18 @@ public:
 		binary = 0;
 		process.resetSignals();
     }
+	bool hasFunction() {
+		return binary->getFunction(getIp());
+	}
+	bool isFunction(uint32_t address) {
+		return binary->isFunction(address);
+	}
+	string getFunctionName(uint32_t address) {
+		return binary->getFunctionName(address);
+	}
+	bool isLocation(uint32_t address) {
+		return binary->isLocation(address);
+	}
 };
 
 #if 0

@@ -672,8 +672,11 @@ public:
     uint32_t getLineAddress(string file, int line);
     Function *getFunction(uint32_t address);
     Function::SLine *getLocation(uint32_t address);
+    bool isLocation(uint32_t address);
     string getSourceFile(uint32_t address);
     int getSourceLine(uint32_t address);
+    bool isFunction(uint32_t address);
+    string getFunctionName(uint32_t address);
     uint32_t getFunctionAddress(string name);
     vector<string> getContext(uint32_t ip, uint32_t sp);
     vector<string> getGlobals(ElfSymbols &symbols);

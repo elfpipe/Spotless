@@ -34,14 +34,21 @@ public:
 
     void update() {
         actions->enableButton(Load, false);
-        for(int i = 2; i < 6+1; i++)
-            actions->enableButton(i, true);        
+        actions->enableButton(Start, true);
+        for(int i = 3; i <= 5; i++) {
+            if(spotless->debugger.hasFunction())
+                actions->enableButton(i, true);        
+            else
+                actions->enableButton(i, false);
+        }
+        actions->enableButton(Quit, false);
     }
 
     void clear() {
         actions->enableButton(Load, true);
-        for(int i = 2; i < 6+1; i++)
+        for(int i = 2; i < 6; i++)
             actions->enableButton(i, false);
+        actions->enableButton(Quit, true);
     }
 };
 #endif
