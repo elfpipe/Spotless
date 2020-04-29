@@ -76,11 +76,25 @@ public:
             }
         }
     }
-    int getInt() {
-        int result = 0;
+    int getInt() { //this is a little tricky because of problems with c++ and adtools
+        bool negative = false;
+        unsigned int result = 0;
         char c = ss.peek();
-        if(c == '-' || c >= '0' && c <= '9')
+        if(c == '-') {
+            negative = true;
+            int pos = ss.tellg();
+            skip();
+            char c2 = ss.peek();
+            if(c2 >= '0' && c2 <= '9')
+               ;
+            else
+                ss.seekg(pos);
+            c = ss.peek();
+        }
+        if(c >= '0' && c <= '9')
             ss >> result;
+        if(negative)
+            result = -result;
         return result;
     }
     char peek() {
@@ -112,12 +126,12 @@ inline string fullPath(string path, string file) {
 }
 #if 0
 int main() {
-    astream a("4321/1234:Hello#Hi#Howareyou");
+    astream a("4321/4294967295:Hello#Hi#Howareyou");
     cout << a.endsWith('u') << "\n";
     a.skipNums();
     cout << a.peek() << "\n";
-//    a.skip('/');
-    cout << a.getInt() << "\n";
+    a.skip('/');
+    cout << (unsigned int)a.getInt() << "\n";
     a.skip(':');
     vector<string> r = a.split('#');
     cout << r.size() << "\n";

@@ -36,4 +36,5 @@ set(SOURCES ${SPOTLESS_SOURCES} ${REACTION_SOURCES} ${SIMPLEDEBUG_SOURCES})
 add_executable(Spotless ${SOURCES})
 target_link_libraries(Spotless -lauto)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -athread=native")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -athread=native -gstabs")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gstabs")
