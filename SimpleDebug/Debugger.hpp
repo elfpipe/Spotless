@@ -223,7 +223,7 @@ public:
 	}
 	vector<string> disassemble() {
 		vector<string> result;
-		Function *function = binary->getFunction(getIp());
+		Function *function = binary ? binary->getFunction(getIp()) : 0;
 		if(!function) return result;
 		int entry = 1;
 		result.push_back(function->name + " :");
@@ -274,16 +274,19 @@ public:
 		process.resetSignals();
     }
 	bool hasFunction() {
-		return binary->getFunction(getIp());
+		return binary ? binary->getFunction(getIp()) != 0 : false;
 	}
 	bool isFunction(uint32_t address) {
-		return binary->isFunction(address);
+		return binary ? binary->isFunction(address) : false;
 	}
 	string getFunctionName(uint32_t address) {
-		return binary->getFunctionName(address);
+		return binary ? binary->getFunctionName(address) : string();
 	}
 	bool isLocation(uint32_t address) {
-		return binary->isLocation(address);
+		return binary ? binary->isLocation(address) : false;
+	}
+	bool hasSymbols() {
+		return binary != 0;
 	}
 };
 
