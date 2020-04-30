@@ -253,13 +253,17 @@ string SourceObject::toString() {
         result += (*it)->toString() + "\n";
     return result + "}\n";
 }
+#include "../ReAction/Progress.hpp"
 Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
     this->name = name;
     this->stab = stab;
     this->stabstr = stabstr;
     this->stabsize = stabsize;
 	SymtabEntry *sym = stab;
+    ProgressWindow progress;
+    progress.open("Loading symtabs...", (int)stabsize, 0);
 	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
+        progress.updateLevel((int)sym - (int)stab);
 		switch (sym->n_type) {
             case N_SO:
                 objects.push_back(new SourceObject(&sym, stab, stabstr, stabsize));
@@ -269,6 +273,7 @@ Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t sta
         }
         sym++;
     }
+    progress.close();
 }
 vector<string> Binary::getSourceNames() {
     vector<string> result;

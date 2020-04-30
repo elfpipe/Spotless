@@ -11,6 +11,7 @@ class Code : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
+    string fileName;
 
 public:
     Code(Spotless *parent) : Widget((Widget *)parent) { spotless = parent; }
@@ -40,8 +41,11 @@ public:
         listbrowser->focus(line);
     }
     void update() {
-        show(spotless->debugger.getSourceFile());
+        string file = spotless->debugger.getSourceFile();
+        if(fileName.compare(file))
+            show(file);
         highlight(spotless->debugger.getSourceLine());
+        fileName = file;
     }
     void checkboxSelected(string file, bool checked) {
         int line = listbrowser->getSelectedLineNumber();
