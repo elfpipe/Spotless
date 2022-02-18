@@ -50,7 +50,7 @@ private:
     struct Process *process = 0;
 	struct Hook hook;
 	static ExceptionContext context;
-	bool exists;
+	static bool exists;
 	bool running;
 	bool attached;
 

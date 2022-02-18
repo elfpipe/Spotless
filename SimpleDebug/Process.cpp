@@ -20,6 +20,8 @@ uint8_t AmigaProcess::signal = 0x0;
 struct DebugIFace *IDebug = 0;
 struct MMUIFace *IMMU = 0;
 
+bool AmigaProcess::exists = false;
+
 void AmigaProcess::init()
 {
 	IDebug = (struct DebugIFace *)IExec->GetInterface ((struct Library *)SysBase, "debug", 1, 0);
@@ -135,6 +137,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			
 			IExec->PutMsg (port, (struct Message *)message);
 			sendSignal = true;  //if process has ended, we must signal caller
+			exists = false;
 
 			break;
 		}
@@ -365,8 +368,9 @@ void AmigaProcess::wakeUp()
 }
 
 bool AmigaProcess::isDead() {
-	uint32_t signals = IExec->SetSignal(0, 0);
-	return signals & SIGF_CHILD;
+	return !exists;
+	// uint32_t signals = IExec->SetSignal(0, 0);
+	// return signals & SIGF_CHILD;
 }
 
 void AmigaProcess::resetSignals() {
