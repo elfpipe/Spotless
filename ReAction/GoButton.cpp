@@ -34,6 +34,5 @@ bool GoButton::isButton(Object *o)
 {
 	char *dummy;
 	IIntuition->GetAttr(GA_Text, o, (uint32*)&dummy);
-	cout << "isButton() returns " << (dummy ? true : false) << "\n";
 	return dummy ? true : false;
 }

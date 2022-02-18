@@ -52,7 +52,6 @@ void AmigaProcess::cleanup ()
 
 APTR AmigaProcess::load(string path, string file, string arguments)
 {
-	cout << "AmigaProcess:load : " << path << file << arguments << "\n";
 	BPTR lock = IDOS->Lock(path.c_str(), SHARED_LOCK);
 	if (!lock) {
 		return 0;

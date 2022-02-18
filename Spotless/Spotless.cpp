@@ -88,7 +88,6 @@ bool Spotless::handleEvent(Event *event) {
             case Actions::Load: {
                 string path;
                 string file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
-                cout << "Loading path : " << path << " and file : " << file << "\n";
                 childLives = debugger.load(path, file, "");
                 if(childLives) {
                     updateAll();
@@ -128,11 +127,6 @@ bool Spotless::handleEvent(Event *event) {
         console->write(PublicScreen::PENTYPE_EVENT, "Source file selected : " + file);
         string fullPath = spotless->debugger.searchSourcePath(file);
         code->show(fullPath);
-        cout << "Looking up function context. ip = " << (void *)spotless->debugger.getIp();
-        cout << "Function source : \n";
-        				cout << vectorToString(spotless->debugger.functionSource());
-        // cout << "Binary structure : \n";
-        // 				cout << spotless->debugger.binaryStructure();
     }
     if(event->eventClass() == Event::CLASS_CheckboxCheck) {
         code->checkboxSelected(sources->getSelectedElement(), true);

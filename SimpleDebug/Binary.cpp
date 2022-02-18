@@ -283,16 +283,12 @@ vector<string> Binary::getSourceNames() {
     return result;
 }
 uint32_t Binary::getLineAddress(string file, int line) {
-    cout << "Find line " << line << " in file " << file << "\n";
     for(int i = 0; i < objects.size(); i++) {
         SourceObject *object = objects[i];
-        cout << "Source object[" << i << "] : " << object->name << "\n";
         for(int j = 0; j < object->functions.size(); j++) {
             Function *function = object->functions[j];
-            cout << "Function[" << j << "] : " << function->name << "\n";
             for(int k = 0; k < function->lines.size(); k++) {
                 Function::SLine *sline = function->lines[k];
-                cout << "SLine[" << k << "] : file " << sline->source << " line " << sline->line << "\n";
                 if(!sline->source.compare(file) && sline->line == line)
                     return function->address + sline->address;
             }
@@ -301,15 +297,11 @@ uint32_t Binary::getLineAddress(string file, int line) {
     return 0x0;
 }
 Function *Binary::getFunction(uint32_t address) {
-    cout << "Finding function at " << (void *)address << "\n";
     for(int i = 0; i < objects.size(); i++) {
         SourceObject *object = objects[i];
-        cout << "Source object[" << i << "] : " << object->name << "\n";
         for(int j = 0; j < object->functions.size(); j++) {
             Function *function = object->functions[j];
-            cout << "Function[" << j << "] : " << function->name << "\n";
             Scope *scope = function->locals[0];
-            if (scope) cout << "Scope : " << (void *)scope->begin << " - " << (void *)scope->end << "\n";
             if(scope && scope->begin <= address && scope->end >= address)
                 return function;
         }

@@ -182,7 +182,7 @@ string Listbrowser::getNode(int line) {
 	}
 	const char *str;
 	IListBrowser->GetListBrowserNodeAttrs(node, LBNCA_Text, &str, TAG_DONE);
-	return str;
+	return string(str ? str : "");
 }
 
 void Listbrowser::addCheckboxNode (vector<string> columnTexts, bool checkbox, bool checked, void *userData, bool hasChildren, int generation)

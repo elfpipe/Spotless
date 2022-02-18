@@ -14,7 +14,7 @@ private :
 public:
     void add(string root) { roots.push_back(root); }
     void remove(string root) { for(list<string>::iterator it = roots.begin(); it != roots.end(); it++) {
-        if(!root.compare(*it)) roots.erase(it);
+         if(!(*it).compare(root)) { roots.erase(it); break; }
     }}
     list<string> &get() { return roots; }
     static string append(string path, string file) {
