@@ -1,23 +1,27 @@
-#include "../listbrowser.h"
-#include "../mainwindow.h"
-#include "../requester.h"
-#include "../progress.h"
-#include "../widget.h"
-#include "../layout.h"
-#include "../screen.h"
-#include "../panel.h"
-#include "../event.h"
-#include "../menu.h"
+#include "../Listbrowser.hpp"
+#include "../MainWindow.hpp"
+#include "../Requester.hpp"
+#include "../Progress.hpp"
+#include "../Widget.hpp"
+#include "../Layout.hpp"
+#include "../Screen.hpp"
+#include "../Panel.hpp"
+#include "../Event.hpp"
+#include "../Menubar.hpp"
+#include "../GoButton.hpp"
+#include "../Speedbar.hpp"
+#include "../../SimpleDebug/Strings.hpp"
+#include "../../SimpleDebug/Strings.cpp"
 #include <iostream>
 #include <unistd.h>
 using namespace std;
 
 #include "classes.h"
 
-class Window1 : public ReactionWidget {
+class Window1 : public Widget {
 public:
-    Window1() : ReactionWidget() {}
-    void createGuiObject(ReactionLayout *layout) {
+    Window1() : Widget() {}
+    void createGuiObject(Layout *layout) {
         layout->createButton("PublicScreen1");
         layout->createButton("Requesters1-5");
         layout->createButton("Listbrowser1");
@@ -32,7 +36,7 @@ public:
     }
 
     void progress() {
-        ReactionProgressWindow progress;
+        ProgressWindow progress;
         progress.open("Time is ticking like a clock", 100, 0);
         for (int i = 0; i < 100; i += 10) {
             progress.updateLevel(i);
@@ -53,26 +57,26 @@ public:
     void runRequesters() {
         string pathResult;
 
-        RequesterTools reqTools;
-        string result = reqTools.requesterFile (RequesterTools::REQUESTER_EXECUTABLE, "hello.exe", pathResult, "Select an executable (%s, %d)..", "from the list", 12345);
+        Requesters reqTools;
+        string result = reqTools.file (Requesters::REQUESTER_EXECUTABLE, "hello.exe", pathResult, "Select an executable (%s, %d)..", "from the list", 12345);
         cout << "(requesterFile) Selected file: " << result << " Path result: " << pathResult << "\n";
 
-        result = reqTools.requesterPath (RequesterTools::REQUESTER_EXECUTABLE, "Select a path... (%s, %d)", "from the path list", 12345);
+        result = reqTools.path (Requesters::REQUESTER_EXECUTABLE, "Select a path... (%s, %d)", "from the path list", 12345);
         cout << "(requesterPath) Selected path: " << result << "\n";
 
-        int choice =  reqTools.requesterChoice ("Make a choice", "Yes|No|Don't know", "Are you a fan of %s?", "fishslapping");
+        int choice =  reqTools.choice ("Make a choice", "Yes|No|Don't know", "Are you a fan of %s?", "fishslapping");
         cout << "(requesterChoice) Result: " << choice << "\n";
 
-        result = reqTools.requesterString ("Please enter a string", "What is your favorite %s?", "food");
+        result = reqTools.requestString ("Please enter a string", "What is your favorite %s?", "food");
         cout << "(requesterString) Result: " << result << "\n";
 
         reqTools.showAboutWindow();
     }
 
-    bool handleGuiEvent(GuiEvent *event) {
-        if(event->eventClass() == GuiEvent::CLASS_ButtonPress) {
+    bool handleEvent(Event *event) {
+        if(event->eventClass() == Event::CLASS_GoButtonPress) {
             closeWindow();
-            ReactionWidget *widget = 0;
+            Widget *widget = 0;
             if(!event->elementDescription().compare("Listbrowser1"))
                 widget = new Listbrowser1;
             if(!event->elementDescription().compare("Listbrowser2"))
@@ -106,6 +110,7 @@ public:
 };
 
 int main() {
+    cout << "ReActionTests.\n";
     Window1 window1;
     window1.openWindow();
     window1.waitForClose();

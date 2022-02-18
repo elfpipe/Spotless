@@ -246,7 +246,7 @@ public:
         }
         switch(rangeType) {
             case R_UInt64: {
-                //result.push_back(patch::toString(*(unsigned long long *)base)); //Fails on adtools libstdc++
+                //result.push_back(patch::toString(*(unsigned long long *)base)); //crashes
                 unsigned int value = *(unsigned long long *)base;
                 result.push_back(patch::toString(value));
                 break;
@@ -285,7 +285,7 @@ public:
                             result.push_back(patch::toString(*(unsigned int *)base));
                             break;
                         case 8: {
-                            // result.push_back(patch::toString(*(unsigned long long *)base)); //Fails on adtools libstdc++
+                            // result.push_back(patch::toString(*(unsigned long long *)base));
                             unsigned int value = *(unsigned long long *)base;
                             result.push_back(patch::toString(value));
                             break;
@@ -303,10 +303,11 @@ public:
                             result.push_back(patch::toString(*(short *)base));
                             break;
                         case 4:
+                            cout << "==INT==\n";
                             result.push_back(patch::toString(*(int *)base));
                             break;
                         case 8: {
-                            // result.push_back(patch::toString(*(long long *)base)); //Fails on adtools libstdc++
+                            // result.push_back(patch::toString(*(long long *)base));
                             int value = *(long long *)base;
                             result.push_back(patch::toString(value));
                             break;
@@ -679,10 +680,10 @@ public:
     Function *getFunction(uint32_t address);
     Function::SLine *getLocation(uint32_t address);
     bool isLocation(uint32_t address);
-    string getSourceFile(uint32_t address);
-    int getSourceLine(uint32_t address);
     bool isFunction(uint32_t address);
     string getFunctionName(uint32_t address);
+    string getSourceFile(uint32_t address);
+    int getSourceLine(uint32_t address);
     uint32_t getFunctionAddress(string name);
     vector<string> getContext(uint32_t ip, uint32_t sp);
     vector<string> getGlobals(ElfSymbols &symbols);

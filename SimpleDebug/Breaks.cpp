@@ -8,6 +8,8 @@
 
 #include "Breaks.hpp"
 
+extern struct MMUIFace *IMMU;
+
 bool Breaks::isBreak(uint32_t address)
 {
 	for (list <Break *>::iterator it = breaks.begin (); it != breaks.end (); it++)

@@ -19,8 +19,8 @@ public:
         listbrowser = layout->createListbrowser();
         listbrowser->setColumnTitles("Break|Line|Text");
     }
-    void show(string file) {
-        TextFile text(file);
+    void show(string filePath) {
+        TextFile text(filePath);
         listbrowser->clear();
         int line = 1;
         while(text.good()) {
@@ -29,6 +29,7 @@ public:
             data.push_back("");
             data.push_back(patch::toString(line));
             data.push_back(formatRawString(textLine));
+            string file = Roots::getFilePart(filePath);
             listbrowser->addCheckboxNode(
                 data,
                 spotless->debugger.isSourceLine(file, line),
@@ -42,8 +43,10 @@ public:
     }
     void update() {
         string file = spotless->debugger.getSourceFile();
-        if(fileName.compare(file))
-            show(file);
+        if(fileName.compare(file)) {
+            string filePath = spotless->debugger.searchSourcePath(file);
+            show(filePath);
+        }
         highlight(spotless->debugger.getSourceLine());
         fileName = file;
     }

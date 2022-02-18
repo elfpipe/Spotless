@@ -4,6 +4,7 @@
 
 #include "Process.hpp"
 #include "Tracer.hpp"
+#include "Roots.hpp"
 
 #include <string>
 #include <vector>
@@ -49,14 +50,16 @@ void AmigaProcess::cleanup ()
 	IExec->FreeSignal(signal);
 }
 
-APTR AmigaProcess::load(string path, string command, string arguments)
+APTR AmigaProcess::load(string path, string file, string arguments)
 {
+	cout << "AmigaProcess:load : " << path << file << arguments << "\n";
 	BPTR lock = IDOS->Lock(path.c_str(), SHARED_LOCK);
 	if (!lock) {
 		return 0;
 	}
 	BPTR homelock = IDOS->DupLock (lock);
 
+	string command = Roots::append(path, file);
 	BPTR seglist = IDOS->LoadSeg (command.c_str());
 	
 	if (!seglist) {
@@ -64,7 +67,7 @@ APTR AmigaProcess::load(string path, string command, string arguments)
 		return 0;
 	}
 
-	IExec->Forbid(); //can we avoid this?
+	IExec->Forbid(); //can we avoid this
 
     process = IDOS->CreateNewProcTags(
 		NP_Seglist,					seglist,

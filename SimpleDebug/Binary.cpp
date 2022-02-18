@@ -253,17 +253,13 @@ string SourceObject::toString() {
         result += (*it)->toString() + "\n";
     return result + "}\n";
 }
-#include "../ReAction/Progress.hpp"
 Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
     this->name = name;
     this->stab = stab;
     this->stabstr = stabstr;
     this->stabsize = stabsize;
 	SymtabEntry *sym = stab;
-    ProgressWindow progress;
-    progress.open("Loading symtabs...", (int)stabsize, 0);
 	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
-        progress.updateLevel((int)sym - (int)stab);
 		switch (sym->n_type) {
             case N_SO:
                 objects.push_back(new SourceObject(&sym, stab, stabstr, stabsize));
@@ -273,7 +269,6 @@ Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t sta
         }
         sym++;
     }
-    progress.close();
 }
 vector<string> Binary::getSourceNames() {
     vector<string> result;
@@ -288,12 +283,16 @@ vector<string> Binary::getSourceNames() {
     return result;
 }
 uint32_t Binary::getLineAddress(string file, int line) {
+    cout << "Find line " << line << " in file " << file << "\n";
     for(int i = 0; i < objects.size(); i++) {
         SourceObject *object = objects[i];
+        cout << "Source object[" << i << "] : " << object->name << "\n";
         for(int j = 0; j < object->functions.size(); j++) {
             Function *function = object->functions[j];
+            cout << "Function[" << j << "] : " << function->name << "\n";
             for(int k = 0; k < function->lines.size(); k++) {
                 Function::SLine *sline = function->lines[k];
+                cout << "SLine[" << k << "] : file " << sline->source << " line " << sline->line << "\n";
                 if(!sline->source.compare(file) && sline->line == line)
                     return function->address + sline->address;
             }
@@ -302,11 +301,15 @@ uint32_t Binary::getLineAddress(string file, int line) {
     return 0x0;
 }
 Function *Binary::getFunction(uint32_t address) {
+    cout << "Finding function at " << (void *)address << "\n";
     for(int i = 0; i < objects.size(); i++) {
         SourceObject *object = objects[i];
+        cout << "Source object[" << i << "] : " << object->name << "\n";
         for(int j = 0; j < object->functions.size(); j++) {
             Function *function = object->functions[j];
+            cout << "Function[" << j << "] : " << function->name << "\n";
             Scope *scope = function->locals[0];
+            if (scope) cout << "Scope : " << (void *)scope->begin << " - " << (void *)scope->end << "\n";
             if(scope && scope->begin <= address && scope->end >= address)
                 return function;
         }
@@ -319,7 +322,7 @@ Function::SLine *Binary::getLocation(uint32_t address) {
         Function::SLine *sline = function->lines[k];
         if(function->address + sline->address == address)
             return sline;
-        if(function->address + sline->address > address)
+        if(function->address + sline->address > address) //relevant for return statements
             return function->lines[k-1];
     }
     return 0;

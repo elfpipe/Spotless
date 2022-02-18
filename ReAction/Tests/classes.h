@@ -1,8 +1,8 @@
-class Listbrowser1 : public ReactionWidget {
+class Listbrowser1 : public Widget {
 public:
-    Listbrowser1() : ReactionWidget() { setName("Listbrowser1"); }
-    void createGuiObject(ReactionLayout *layout) {
-        ReactionListbrowser *listbrowser = layout->createListbrowser();
+    Listbrowser1() : Widget() { setName("Listbrowser1"); }
+    void createGuiObject(Layout *layout) {
+        Listbrowser *listbrowser = layout->createListbrowser();
         listbrowser->setColumnTitles("Row|Your|Boat");
         vector<string> text1;
         text1.push_back("Yes");
@@ -18,11 +18,11 @@ public:
     }
 };
 
-class Listbrowser2 : public ReactionWidget {
+class Listbrowser2 : public Widget {
 public:
-    Listbrowser2() : ReactionWidget() { setName("Listbrowser2"); }
-    void createGuiObject(ReactionLayout *layout) {
-        ReactionListbrowser *listbrowser = layout->createListbrowser();
+    Listbrowser2() : Widget() { setName("Listbrowser2"); }
+    void createGuiObject(Layout *layout) {
+        Listbrowser *listbrowser = layout->createListbrowser();
         listbrowser->setHierachical(true);
         listbrowser->addNode("Hello", 0, true, 1);
         listbrowser->addNode("and", 0, false, 2);
@@ -35,11 +35,11 @@ public:
     }
 };
 
-class Listbrowser3 : public ReactionWidget {
+class Listbrowser3 : public Widget {
 public:
-    Listbrowser3() : ReactionWidget() { setName("Listbrowser3"); }
-    void createGuiObject(ReactionLayout *layout) {
-        ReactionListbrowser *listbrowser = layout->createListbrowser();
+    Listbrowser3() : Widget() { setName("Listbrowser3"); }
+    void createGuiObject(Layout *layout) {
+        Listbrowser *listbrowser = layout->createListbrowser();
         listbrowser->setStriping(true);
         listbrowser->addNode("Hello");
         listbrowser->addNode("and");
@@ -52,11 +52,11 @@ public:
     }
 };
 
-class Speedbar1 : public ReactionWidget {
+class Speedbar1 : public Widget {
 public:
-    Speedbar1() : ReactionWidget() { setName("Speedbar1"); }
-    void createGuiObject(ReactionLayout *layout) {
-        ReactionSpeedBar *speedBar = layout->createSpeedBar();
+    Speedbar1() : Widget() { setName("Speedbar1"); }
+    void createGuiObject(Layout *layout) {
+        Speedbar *speedBar = layout->createSpeedbar();
         speedBar->addButton(1, "Hello", "rescue");
         speedBar->addButton(2, "how", "arrowright");
         speedBar->addButton(3, "are", "checkpage");
@@ -65,14 +65,14 @@ public:
     }
 };
 
-class Layout1 : public ReactionWidget {
+class Layout1 : public Widget {
 public:
-    Layout1() : ReactionWidget() { setName("Layout1"); }
-    void createGuiObject(ReactionLayout *layout) {
-        ReactionLayout *layout1 = layout->createVerticalLayout();
+    Layout1() : Widget() { setName("Layout1"); }
+    void createGuiObject(Layout *layout) {
+        Layout *layout1 = layout->createVerticalLayout();
         layout->createSpace();
-        ReactionLayout *layout2 = layout->createLabeledLayout("Hello");
-        ReactionSpeedbar *speedbar = layout1->createSpeedbar();
+        Layout *layout2 = layout->createLabeledLayout("Hello");
+        Speedbar *speedbar = layout1->createSpeedbar();
         speedbar->addButton(1, "Hello", "rescue");
         speedbar->addButton(2, "how", "arrowright");
         speedbar->addButton(3, "are", "checkpage");
@@ -80,7 +80,7 @@ public:
         speedbar->addButton(4, "you?", "warning");
         layout1->createButton("Yo");
         
-        ReactionListbrowser *listbrowser = layout2->createListbrowser();
+        Listbrowser *listbrowser = layout2->createListbrowser();
         listbrowser->setPen(PublicScreen::PENTYPE_CRITICAL);
         listbrowser->addNode("This is wrong! (CRITICAL)");
         listbrowser->setPen(PublicScreen::PENTYPE_INFO);
@@ -97,11 +97,11 @@ public:
 };
 
 
-class Panel1 : public ReactionWidget {
+class Panel1 : public Widget {
 public:
-    Panel1() : ReactionWidget() {}
-    void createGuiObject(ReactionLayout *layout) {
-        ReactionPanel *panel = new ReactionPanel(this);
+    Panel1() : Widget() {}
+    void createGuiObject(Layout *layout) {
+        Panel *panel = new Panel(this);
         panel->addWidget(new Listbrowser1);
         panel->addWidget(new Listbrowser2);
         panel->addWidget(new Listbrowser3);
@@ -109,9 +109,9 @@ public:
     }
 };
 
-class MainMenu1 : public ReactionMenu {
+class MainMenu1 : public Menubar {
 public:
-    MainMenu1(ReactionWidget *parent) : ReactionMenu(parent) {}
+    MainMenu1(Widget *parent) : Menubar(parent) {}
     void createMenu() {
         MenuReference panel1 = addCreateMenu ("Panel 1");
         MenuReference panel2 = addCreateMenu ("Panel 2");
@@ -125,21 +125,21 @@ public:
     }
 };
 
-class Menu1 : public ReactionWidget {
+class Menu1 : public Widget {
 public:
-    Menu1() : ReactionWidget() {}
-    void createGuiObject(ReactionLayout *layout) {
+    Menu1() : Widget() {}
+    void createGuiObject(Layout *layout) {
         MainMenu1 *mainMenu = new MainMenu1(this);
-        setMenu(mainMenu);
+        setMenubar(mainMenu);
         layout->createButton("Try the menu");
     }
 };
 
-class MainMenu2 : public ReactionMenu {
+class MainMenu2 : public Menubar {
 private:
-    ReactionMainWindow *parent;
+    MainWindow *parent;
 public:
-    MainMenu2(ReactionMainWindow *parent) : ReactionMenu(parent) { this->parent = parent; }
+    MainMenu2(MainWindow *parent) : Menubar(parent) { this->parent = parent; }
     void createMenu() {
         MenuReference panel1 = addCreateMenu ("Panel 1");
         MenuReference panel2 = addCreateMenu ("Panel 2");
@@ -152,20 +152,20 @@ public:
         static bool unity = true;
         if(unity) {
             parent->closeWindow();
-            parent->openSeparated();
+//            parent->openWindow();
             unity = false;
         } else {
-            parent->closeSeparated();
+//            parent->closeSeparated();
             return true;
         }
         return false;
     }
 };
 
-class MainWindow1 : public ReactionMainWindow {
+class MainWindow1 : public MainWindow {
     public:
-    MainWindow1() : ReactionMainWindow() {
-        setMenu(new MainMenu2(this));
+    MainWindow1() : MainWindow() {
+        setMenubar(new MainMenu2(this));
         setTopBar(new Speedbar1);
         setMainView(new Listbrowser1);
         addLeftPanelWidget(new Listbrowser2);

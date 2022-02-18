@@ -1,6 +1,8 @@
 #include <proto/exec.h>
 #include "LowLevel.hpp"
 
+extern struct MMUIFace *IMMU;
+
 bool is_readable_address (uint32_t addr)
 {
     uint32 attr, masked;

@@ -6,6 +6,8 @@
 #include "GoButton.hpp"
 #include "Widget.hpp"
 
+#include <iostream>
+
 GoButton::GoButton (Widget *parent, const char *text)
 {	
 	button = IIntuition->NewObject(NULL, "button.gadget",
@@ -32,5 +34,6 @@ bool GoButton::isButton(Object *o)
 {
 	char *dummy;
 	IIntuition->GetAttr(GA_Text, o, (uint32*)&dummy);
+	cout << "isButton() returns " << (dummy ? true : false) << "\n";
 	return dummy ? true : false;
 }

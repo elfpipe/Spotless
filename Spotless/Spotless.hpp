@@ -22,9 +22,9 @@ private:
     Stacktrace *stacktrace;
     Console *console;
     Disassembler *disassembler;
-    
+public:
     Debugger debugger;
-
+    
 private:
     static Spotless *spotless;
     

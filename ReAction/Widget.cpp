@@ -185,14 +185,24 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 			uint32 gadgetId = Class & WMHI_GADGETMASK;
 			
 			Object *gadget = findChild(gadgetId);
-
 			if(!gadget) break;
 			
 			IIntuition->GetAttrs(gadget,
 				GA_UserData, &parent,
 				TAG_DONE);
 
-			if(Listbrowser::isListbrowser(gadget)) {
+			if(GoButton::isButton(gadget)) {
+				char *text;
+
+				IIntuition->GetAttrs(gadget,
+					GA_Text, &text,
+				TAG_DONE);
+
+				event = new Event (Event::CLASS_GoButtonPress);
+				event->setElementId (gadgetId);
+				event->setElementDescription (text);
+			}
+			else if(Listbrowser::isListbrowser(gadget)) {
 				uint32 relEvent, selected;
 
 				IIntuition->GetAttrs(gadget,
@@ -212,16 +222,6 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 			} else if(Speedbar::isSpeedbar(gadget)) {
 				event = new Event (Event::CLASS_ButtonPress);
 				event->setElementId (Code);
-			} else if(GoButton::isButton(gadget)) {
-				char *text;
-
-				IIntuition->GetAttrs(gadget,
-					GA_Text, &text,
-				TAG_DONE);
-
-				event = new Event (Event::CLASS_GoButtonPress);
-				event->setElementId (gadgetId);
-				event->setElementDescription (text);
 			}
 			break;
 		}

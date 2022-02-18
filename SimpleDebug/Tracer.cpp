@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+extern struct DebugIFace *IDebug;
+
 Tracer::Tracer(Process *process, ExceptionContext *context) {
     this->process = process;
     this->context = context;

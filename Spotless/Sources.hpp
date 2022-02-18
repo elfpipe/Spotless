@@ -4,6 +4,8 @@
 #include "../ReAction/classes.h"
 #include "Spotless.hpp"
 
+#include "SourceRoots.hpp"
+
 #include <string>
 
 using namespace std;
@@ -12,11 +14,12 @@ class Sources : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
-
 public:
     Sources(Spotless *parent) : Widget((Widget *)parent) { setName("Source files"); spotless = parent; }
     void createGuiObject(Layout *layout) {
-        listbrowser = layout->createListbrowser();
+        Layout *vl = layout->createVerticalLayout();
+        vl->createButton("Source roots -->");
+        listbrowser = vl->createListbrowser();
     }
     string getSelectedElement() {
         return listbrowser->getNode(listbrowser->getSelectedLineNumber());

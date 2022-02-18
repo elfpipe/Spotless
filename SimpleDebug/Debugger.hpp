@@ -9,10 +9,13 @@
 #include "Strings.hpp"
 #include "TextFile.hpp"
 #include "Binary.hpp"
+#include "Roots.hpp"
 
 #include <iostream>
 #include <string>
 #include <vector>
+
+extern struct DebugIFace *IDebug;
 
 using namespace std;
 
@@ -26,6 +29,8 @@ private:
 
 	ElfHandle *handle = 0;
 	Binary *binary = 0;
+
+	Roots roots;
 
 	int line = 0;
 
@@ -43,8 +48,9 @@ public:
 		if(handle->performRelocation())
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
 	}
-	bool load(string file, string args) {
-		APTR handle = process.load("", file, args);
+	bool load(string path, string file, string args) {
+		APTR handle = process.load(path, file, args);
+		roots.add(path);
 		if (handle) open(handle, file);
 		return handle != 0;
 	}
@@ -195,8 +201,12 @@ public:
 	vector<string> functionSource() {
 		vector<string> result;
 		string source = binary->getSourceFile(process.ip());
+		cout << "Source file : " << source << "\n"; 
+		cout << "ip : " << (void *)process.ip();
 		if(source.size() == 0) return result;
-		TextFile file(source);
+		string fullPath = roots.search(source);
+		if(fullPath.size() == 0) return result;
+		TextFile file(fullPath);
 		Function *function = binary->getFunction(process.ip());
 		if(!function) return result;
 		int line = function->lines[0]->line;
@@ -213,7 +223,7 @@ public:
 					else if(breaks.isBreak(function->address + function->lines[i]->address))
 						s += " [*]: ";
 					else
-						s += "    : ";
+						s += " -  : ";
 				}
 				else
 					s += "    : ";
@@ -287,6 +297,18 @@ public:
 	}
 	bool hasSymbols() {
 		return binary != 0;
+	}
+	void addSourceRoot(string root) {
+		roots.add(root);
+	}
+	void removeSourceRoot(string root) {
+		roots.remove(root);
+	}
+	list<string> getSourceRoots() {
+		return roots.get();
+	}
+	string searchSourcePath(string file) {
+		return roots.search(file);
 	}
 };
 

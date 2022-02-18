@@ -3,6 +3,8 @@
 
 vector<string> Stacktracer::trace;
 
+extern struct DebugIFace *IDebug;
+
 int32 Stacktracer::stacktrace_callback(struct Hook *hook, struct Task *task, struct StackFrameMsg *frame) {
 	string entry;
 	switch (frame->State) {

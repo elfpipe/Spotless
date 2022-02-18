@@ -10,6 +10,13 @@
 
 #include "../SimpleDebug/Strings.hpp"
 
+string vectorToString(vector<string> v) {
+	string result;
+	for(int i = 0; i < v.size(); i++)
+		result += v[i] + "\n";
+	return result;
+}
+
 Listbrowser *Console::listbrowser = 0;
 Spotless *Spotless::spotless = 0;
 
@@ -81,7 +88,8 @@ bool Spotless::handleEvent(Event *event) {
             case Actions::Load: {
                 string path;
                 string file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
-                childLives = debugger.load(patch::fullPath(path, file), "");
+                cout << "Loading path : " << path << " and file : " << file << "\n";
+                childLives = debugger.load(path, file, "");
                 if(childLives) {
                     updateAll();
                     sources->update();
@@ -109,10 +117,22 @@ bool Spotless::handleEvent(Event *event) {
                 break;
         }
     }
+    if(event->eventClass() == Event::CLASS_GoButtonPress) { //source roots
+        SourceRoots roots(spotless);
+        roots.openWindow();
+        roots.waitForClose();
+    }
+
     if(event->eventClass() == Event::CLASS_SelectNode) {
         string file = sources->getSelectedElement();
         console->write(PublicScreen::PENTYPE_EVENT, "Source file selected : " + file);
-        code->show(file);
+        string fullPath = spotless->debugger.searchSourcePath(file);
+        code->show(fullPath);
+        cout << "Looking up function context. ip = " << (void *)spotless->debugger.getIp();
+        cout << "Function source : \n";
+        				cout << vectorToString(spotless->debugger.functionSource());
+        // cout << "Binary structure : \n";
+        // 				cout << spotless->debugger.binaryStructure();
     }
     if(event->eventClass() == Event::CLASS_CheckboxCheck) {
         code->checkboxSelected(sources->getSelectedElement(), true);

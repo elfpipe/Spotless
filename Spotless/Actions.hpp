@@ -25,7 +25,7 @@ public:
         actions = layout->createSpeedbar();
         actions->addButton(1, "Load", "open");
         actions->addSpacer();
-        actions->addButton(2, "Start", "startup");
+        actions->addButton(2, "Start", "debug");
         actions->addSpacer();
         actions->addButton(3, "Step over", "stepover");
         actions->addButton(4, "Step into", "stepinto");
