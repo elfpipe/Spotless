@@ -52,6 +52,16 @@ void AmigaProcess::cleanup ()
 	IExec->FreeSignal(signal);
 }
 
+void AmigaProcess::clear()
+{
+	process = 0;
+	exists = false;
+	running = false;
+	attached = false;
+
+	resetSignals();
+}
+
 APTR AmigaProcess::load(string path, string file, string arguments)
 {
 	BPTR lock = IDOS->Lock(path.c_str(), SHARED_LOCK);

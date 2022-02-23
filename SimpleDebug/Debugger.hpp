@@ -49,12 +49,15 @@ public:
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
 	}
 	bool load(string path, string file, string args) {
+		clear();
 		APTR handle = process.load(path, file, args);
+		roots.clear();
 		roots.add(path);
 		if (handle) open(handle, file);
 		return handle != 0;
 	}
 	bool attach(string name) {
+		clear();
 		APTR handle = process.attach(name);
 		if(handle) open(handle, name);
 		return handle != 0;
@@ -94,6 +97,8 @@ public:
 		}
 	}
 	void start() {
+		if(isDead()) return;
+
 		process.step();
 
 		breaks.activate();
@@ -111,7 +116,7 @@ public:
 		process.step();
 	}
 	void stepOver() {
-		if(!binary) return;
+		if(!binary || isDead()) return;
 
 		Function *function = binary->getFunction(process.ip());
 		if(function)
@@ -130,7 +135,7 @@ public:
 		// breaks.deactivate();
 	}
 	void stepInto() {
-		if(!binary) return;
+		if(!binary || isDead()) return;
 
 		do {
 			if(binary->getSourceFile(process.branchAddress()).size() > 0)
@@ -141,6 +146,8 @@ public:
 		//process.wakeUp();
 	}
 	void stepOut() {
+		if (!binary || isDead()) return;
+
 		Breaks outBreak;
 		if(binary->getSourceFile(process.lr()).size() > 0)
 			outBreak.insert(process.lr());
@@ -277,11 +284,13 @@ public:
 	}
     void clear() {
 		breaks.clear();
+		linebreaks.clear();
 		if(handle) delete handle;
 		if(binary) delete binary;
 		handle = 0;
 		binary = 0;
-		process.resetSignals();
+		symbols.clear();
+		process.clear(); //resetSignals();
     }
 	bool hasFunction() {
 		return binary ? binary->getFunction(getIp()) != 0 : false;

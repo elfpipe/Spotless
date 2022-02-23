@@ -8,6 +8,9 @@
 
 #include "Breaks.hpp"
 
+#include <iostream>
+using namespace std;
+
 extern struct MMUIFace *IMMU;
 
 bool Breaks::isBreak(uint32_t address)
@@ -53,7 +56,9 @@ void Breaks::remove(uint32_t address)
 
 void Breaks::clear()
 {
-	breaks.clear();
+	while(!breaks.empty()) delete breaks.front(), breaks.pop_front();
+
+	// breaks.clear();
 	// for (list<Break *>::iterator it = breaks.begin(); it != breaks.end(); it++) {
 	// 	delete *it;
 	// 	it = breaks.erase(it);
@@ -115,6 +120,8 @@ extern "C" uint32_t setbreak(uint32_t, uint32_t); //uint32_t, uint32_t);
 
 int Breaks::memory_insert_break_instruction (uint32_t address, uint32_t *buffer)
 {
+	cout << "memory_insert_break_instruction : " << (void *)address << "\n";
+
 	/* Go supervisor */
 	APTR stack = IExec->SuperState();
 
@@ -129,7 +136,7 @@ int Breaks::memory_insert_break_instruction (uint32_t address, uint32_t *buffer)
 	int hallo = meth_start;
 	*buffer = setbreak (realAddress, meth_start);
 
-	IExec->CacheClearE((APTR)address, 0xffffffff, CACRF_ClearI| CACRF_ClearD);
+	IExec->CacheClearE((APTR)address, 0xffffffff, CACRF_ClearI | CACRF_ClearD | CACRF_InvalidateD);
 
 	/* Set old attributes again */
 	IMMU->SetMemoryAttrs ((APTR)address, 4, oldAttr);
@@ -142,6 +149,8 @@ int Breaks::memory_insert_break_instruction (uint32_t address, uint32_t *buffer)
 
 int Breaks::memory_remove_break_instruction (uint32_t address, uint32_t *buffer)
 {
+	cout << "memory_remove_break_instruction : " << (void *)address << "\n";
+
 	uint32 oldAttr;
 	APTR stack;
 
@@ -157,7 +166,7 @@ int Breaks::memory_remove_break_instruction (uint32_t address, uint32_t *buffer)
 		realAddress = address;
 	setbreak (realAddress, *buffer);
 
-	IExec->CacheClearE((APTR)address, 0xffffffff, CACRF_ClearI| CACRF_ClearD);
+	IExec->CacheClearE((APTR)address, 0xffffffff, CACRF_ClearI | CACRF_ClearD | CACRF_InvalidateD);
 
 	/* Set old attributes again */
 	IMMU->SetMemoryAttrs ((APTR)address, 4, oldAttr);

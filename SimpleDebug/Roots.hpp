@@ -30,7 +30,7 @@ public:
         return file;
     }
     static string getPath(string fileLocation) {
-        for(int i = fileLocation.size()-1; i > 0; i--) {
+        for(int i = fileLocation.size()-1; i >= 0; i--) {
             if(fileLocation[i] == ':')
                 return fileLocation.substr(0, i+1);
             if(fileLocation[i] == '/')
@@ -39,11 +39,11 @@ public:
         return string();
     }
     static string getFilePart(string fileLocation) {
-        for(int i = fileLocation.size()-1; i > 0; i--) {
+        for(int i = fileLocation.size()-1; i >= 0; i--) {
             if(fileLocation[i] == ':' || fileLocation[i] == '/')
                 return fileLocation.substr(i+1, fileLocation.size() - i+1);
         }
-        return string();
+        return fileLocation;
     }
     string search(string file) {
         for(list<string>::iterator it = roots.begin(); it != roots.end(); it++) {

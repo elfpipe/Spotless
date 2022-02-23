@@ -71,6 +71,8 @@ public:
     void init();
     void cleanup();
 
+	void clear();
+	
     APTR load(string path, string command, string arguments);
 	APTR attach(string name);
 	void detach();
@@ -87,9 +89,9 @@ public:
 	void stepNoBranch();
 	uint32_t branchAddress();
 
-	uint32_t ip () { readContext(); return context.ip; }
-	uint32_t sp () { readContext(); /*return context.gpr[1]; }*/ return (uint32_t)process->pr_Task.tc_SPReg; }
-	uint32_t lr () { readContext(); return context.lr; }
+	uint32_t ip () { if(!exists) return 0; readContext(); return context.ip; }
+	uint32_t sp () { if(!exists) return 0; readContext(); /*return context.gpr[1]; }*/ return (uint32_t)process->pr_Task.tc_SPReg; }
+	uint32_t lr () { if(!exists) return 0; readContext(); return context.lr; }
 
     void go();
 	void wait();

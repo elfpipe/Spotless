@@ -19,6 +19,7 @@ private:
     static bool hasTraceBit();
 public:
     Tracer(Process *process, ExceptionContext *context);
+    ~Tracer() { breaks.clear(); }
 
     void activate(bool branching = true);
     void suspend();

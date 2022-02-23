@@ -31,8 +31,10 @@ ElfSymbols::~ElfSymbols() {
 }
 
 void ElfSymbols::clear() {
-	for (list<ElfSymbol *>::iterator it = symbols.begin (); it != symbols.end (); it++)
-		delete (*it);
+	while(!symbols.empty()) delete symbols.front(), symbols.pop_front();
+	// symbols.clear();
+	// for (list<ElfSymbol *>::iterator it = symbols.begin (); it != symbols.end (); it++)
+	// 	delete (*it);
 }
 
 void ElfSymbols::readAll(ElfHandle *elfHandle) {
