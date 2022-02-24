@@ -10,6 +10,7 @@
 
 #include <iostream>
 using namespace std;
+#include <unistd.h>
 
 extern struct MMUIFace *IMMU;
 
@@ -23,6 +24,7 @@ bool Breaks::isBreak(uint32_t address)
 
 void Breaks::activate()
 {
+	if(activated) return;
 	for (list <Break *>::iterator it = breaks.begin(); it != breaks.end(); it++)
 		memory_insert_break_instruction((*it)->address, &(*it)->buffer);
 	
@@ -31,6 +33,7 @@ void Breaks::activate()
 
 void Breaks::deactivate()
 {
+	if(!activated) return;
 	for (list<Break *>::iterator it = breaks.begin(); it != breaks.end(); it++)
 		memory_remove_break_instruction((*it)->address, &(*it)->buffer);
 	
@@ -56,6 +59,7 @@ void Breaks::remove(uint32_t address)
 
 void Breaks::clear()
 {
+	deactivate();
 	while(!breaks.empty()) delete breaks.front(), breaks.pop_front();
 
 	// breaks.clear();
@@ -103,6 +107,10 @@ asm (
 "	lwz   %r3, 0(%r5)		\n"
 "	stw   %r4, 0(%r5)		\n"
 
+// "	sync				\n"
+// "	icbi 0, %r5			\n"
+// "	isync				\n"
+
 "	sync           		\n"             //          # make sure store is complete
 "	mtmsr         %r11	\n"
 "	isync				\n"
@@ -126,20 +134,26 @@ int Breaks::memory_insert_break_instruction (uint32_t address, uint32_t *buffer)
 	APTR stack = IExec->SuperState();
 
 	/* Make sure to unprotect the memory area */
-	uint32 oldAttr = IMMU->GetMemoryAttrs ((APTR)address, 0);
-	IMMU->SetMemoryAttrs ((APTR)address, 4, MEMATTRF_READ_WRITE);
+	// uint32 oldAttr = IMMU->GetMemoryAttrs ((APTR)address, 0);
+	// IMMU->SetMemoryAttrs ((APTR)address, 4, MEMATTRF_READ_WRITE);
 
 	uint32_t realAddress = (uint32_t)IMMU->GetPhysicalAddress ((APTR)address);
 	if (realAddress == 0x0)
 		realAddress = address;
 
-	int hallo = meth_start;
+	// int hallo = meth_start;
 	*buffer = setbreak (realAddress, meth_start);
 
-	IExec->CacheClearE((APTR)address, 0xffffffff, CACRF_ClearI | CACRF_ClearD | CACRF_InvalidateD);
+	// uint32_t *a = (uint32_t *)address;
+    // // *** Install the breakpoint :
+    // *buffer = *a;
+    // *a = meth_start;
+
+	// Make sure, that it is in memory :
+	IExec->CacheClearE((APTR)address, 4, CACRF_ClearI | CACRF_ClearD );
 
 	/* Set old attributes again */
-	IMMU->SetMemoryAttrs ((APTR)address, 4, oldAttr);
+	// IMMU->SetMemoryAttrs ((APTR)address, 4, oldAttr);
 
 	/* Return to old state */
 	if (stack) IExec->UserState (stack);
@@ -151,25 +165,27 @@ int Breaks::memory_remove_break_instruction (uint32_t address, uint32_t *buffer)
 {
 	cout << "memory_remove_break_instruction : " << (void *)address << "\n";
 
-	uint32 oldAttr;
-	APTR stack;
-
 	/* Go supervisor */
-	stack = IExec->SuperState();
+	APTR stack = IExec->SuperState();
 		
 	/* Make sure to unprotect the memory area */
-	oldAttr = IMMU->GetMemoryAttrs ((APTR)address, 0);
-	IMMU->SetMemoryAttrs ((APTR)address, 4, MEMATTRF_READ_WRITE);
+	// uint32 oldAttr = IMMU->GetMemoryAttrs ((APTR)address, 0);
+	// IMMU->SetMemoryAttrs ((APTR)address, 4, MEMATTRF_READ_WRITE);
 
 	uint32_t realAddress = (uint32_t)IMMU->GetPhysicalAddress ((APTR)address);
 	if (realAddress == 0x0)
 		realAddress = address;
 	setbreak (realAddress, *buffer);
 
-	IExec->CacheClearE((APTR)address, 0xffffffff, CACRF_ClearI | CACRF_ClearD | CACRF_InvalidateD);
+	// uint32_t *a = (uint32_t *)address;
+    // // *** Wipe the trap instruction from code :
+    // *a = *buffer;
+
+	// Make sure, that it is in memory :
+	IExec->CacheClearE((APTR)address, 4, CACRF_ClearI | CACRF_ClearD );
 
 	/* Set old attributes again */
-	IMMU->SetMemoryAttrs ((APTR)address, 4, oldAttr);
+	// IMMU->SetMemoryAttrs ((APTR)address, 4, oldAttr);
 
 	/* Return to old state */
 	if (stack) IExec->UserState(stack);

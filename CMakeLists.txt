@@ -34,10 +34,10 @@ set(SPOTLESS_SOURCES main.cpp Spotless/Spotless.cpp)
 set(SOURCES ${SPOTLESS_SOURCES} ${REACTION_SOURCES} ${SIMPLEDEBUG_SOURCES})
 
 add_executable(Spotless ${SOURCES})
-target_link_libraries(Spotless -lunix -lauto)
+target_link_libraries(Spotless -lauto)
 
 add_executable(ReActionTests ReAction/Tests/test.cpp ${REACTION_SOURCES})
-target_link_libraries(ReActionTests -lunix -lauto)
+target_link_libraries(ReActionTests -lauto)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -athread=native -gstabs")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gstabs")

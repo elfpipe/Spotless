@@ -91,8 +91,8 @@ public:
 	}
 	void suspendBreaks() {
 		if(!process.isDead()) { //necessary on 440ep
-			breaks.deactivate();
 			linebreaks.deactivate();
+			breaks.deactivate();
 			//linebreaks.clear();
 		}
 	}
@@ -119,6 +119,7 @@ public:
 		if(!binary || isDead()) return;
 
 		Function *function = binary->getFunction(process.ip());
+		linebreaks.clear();
 		if(function)
 		for(int i = 0; i < function->lines.size(); i++) {
 			linebreaks.insert(function->address + function->lines[i]->address);
@@ -137,7 +138,17 @@ public:
 	void stepInto() {
 		if(!binary || isDead()) return;
 
+		// if (binary->isLastLine(process.ip())) {
+		// 	start();
+		// 	return;
+		// }
 		do {
+			int32 dummy;
+			if(PPC_DisassembleBranchInstr(*(uint32 *)process.ip(), &dummy) == PPC_BRANCHTOLINK) {
+				start();
+				return;
+			}
+
 			if(binary->getSourceFile(process.branchAddress()).size() > 0)
 				process.step();
 			else
@@ -283,8 +294,8 @@ public:
 		return process.getMessages();
 	}
     void clear() {
-		breaks.clear();
 		linebreaks.clear();
+		breaks.clear();
 		if(handle) delete handle;
 		if(binary) delete binary;
 		handle = 0;

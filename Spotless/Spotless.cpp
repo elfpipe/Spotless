@@ -77,6 +77,7 @@ void Spotless::pipeHandler() {
 }
 
 void Spotless::deathHandler() {
+    cout << "deathHandler()\n";
     if(spotless) {
         spotless->clearAll();
         spotless->childLives = false;

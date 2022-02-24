@@ -352,6 +352,12 @@ int Binary::getSourceLine(uint32_t address) {
     if (line) return line->line;
     return 0;
 }
+bool Binary::isLastLine(uint32_t address) {
+    Function *function = getFunction(address);
+    Function::SLine *line = getLocation(address);
+    if(function->lines.back() == line) return true;
+    return false;
+}
 uint32_t Binary::getFunctionAddress(string name) {
     for(int i = 0; i < objects.size(); i++) {
         SourceObject *object = objects[i];
