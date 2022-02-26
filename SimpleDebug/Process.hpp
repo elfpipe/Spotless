@@ -51,8 +51,8 @@ private:
 	struct Hook hook;
 	static ExceptionContext context;
 	static bool exists;
-	bool running;
-	bool attached;
+	static bool running;
+	static bool attached;
 
 	static struct MsgPort *port;
 	static uint8_t signal;
@@ -97,7 +97,10 @@ public:
 	void wait();
 	void wakeUp();
 
+	void suspend();
+
 	bool isDead();
+	bool isRunning();
 	void resetSignals();
 	Process *getProcess() { return process; }
 	vector<string> emptyPipe() { return vector<string>(); } //pipe.emptyPipe(); }

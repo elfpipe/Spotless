@@ -111,10 +111,10 @@ Symbol *SourceObject::interpretSymbol(astream &str, uint64_t address) {
     Symbol *result = 0;
     string name = str.get(':');
     char c = str.peek();
-    if(c != '(') str.skip();
+    if(c != '(') str.skip(); 
     Type::TypeNo no(str);
     Type *type = findType(no);
-    if(!type)
+    if(!type) 
         type = interpretType(no, str);    
     switch(c) {
         case 't':
@@ -289,8 +289,8 @@ uint32_t Binary::getLineAddress(string file, int line) {
             Function *function = object->functions[j];
             for(int k = 0; k < function->lines.size(); k++) {
                 Function::SLine *sline = function->lines[k];
-                if(!sline->source.compare(file) && sline->line == line)
-                    return function->address + sline->address;
+                if(!sline->source.compare(file) && sline->line == line) {
+                    return function->address + sline->address; }
             }
         }
     }
@@ -352,12 +352,12 @@ int Binary::getSourceLine(uint32_t address) {
     if (line) return line->line;
     return 0;
 }
-bool Binary::isLastLine(uint32_t address) {
-    Function *function = getFunction(address);
-    Function::SLine *line = getLocation(address);
-    if(function->lines.back() == line) return true;
-    return false;
-}
+// bool Binary::isLastLine(uint32_t address) {
+//     Function *function = getFunction(address);
+//     Function::SLine *line = getLocation(address);
+//     if(function->lines.back() == line) return true;
+//     return false;
+// }
 uint32_t Binary::getFunctionAddress(string name) {
     for(int i = 0; i < objects.size(); i++) {
         SourceObject *object = objects[i];

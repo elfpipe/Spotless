@@ -34,7 +34,7 @@ set(SPOTLESS_SOURCES main.cpp Spotless/Spotless.cpp)
 set(SOURCES ${SPOTLESS_SOURCES} ${REACTION_SOURCES} ${SIMPLEDEBUG_SOURCES})
 
 add_executable(Spotless ${SOURCES})
-target_link_libraries(Spotless -lauto)
+target_link_libraries(Spotless -lunix -lauto)
 
 add_executable(ReActionTests ReAction/Tests/test.cpp ${REACTION_SOURCES})
 target_link_libraries(ReActionTests -lauto)

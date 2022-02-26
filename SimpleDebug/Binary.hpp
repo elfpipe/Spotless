@@ -107,6 +107,7 @@ public:
 class Range : public Type {
 public:
     typedef enum {
+        R_Int64,
         R_UInt64,
         R_Float32,
         R_Float64,
@@ -134,6 +135,10 @@ public:
                 rangeType = R_UInt64;
                 lower = 0;
                 upper = UINT_MAX;
+            } else if (lower == 1 && upper == 0) {
+                rangeType = R_Int64;
+                lower = -INT_MAX-1;
+                upper = INT_MAX;
             } else if (upper == 0) {
                 if(lower == 4) {
                     rangeType = R_Float32;
@@ -210,6 +215,9 @@ public:
     string toString() {
         string result("r" + no.toString() + " : ");
         switch(rangeType) {
+            case R_Int64:
+                result += "<Int64>";
+                break;
             case R_UInt64:
                 result += "<UInt64>";
                 break;
@@ -424,8 +432,9 @@ public:
     : Type(T_Enum, no)
     {
         str.peekSkip('e');
-        while(1) {
-            string name = str.get(':');
+        string name;
+        do {
+            name = str.get(':');
             bool negative = str.peek() == '-';
             int _value = str.getInt();
             int64_t value = negative ? _value : (unsigned int)_value; 
@@ -435,7 +444,7 @@ public:
                 str.skip();
                 break;
             }
-        }
+        } while(name.size());
     }
     string toString() {
         string result("e {\n");
@@ -615,7 +624,7 @@ public:
             this->source = source;
         }
         string toString() {
-            return "SLINE [" + patch::toString(line) + "] 0x" + patch::toString((void *)address);
+            return "SLINE [" + patch::toString(line) + "] 0x" + patch::toString((void *)address) + " " + source;
         }
     };
     vector<SLine *> lines;
@@ -684,7 +693,7 @@ public:
     string getFunctionName(uint32_t address);
     string getSourceFile(uint32_t address);
     int getSourceLine(uint32_t address);
-    bool isLastLine(uint32_t address);
+    // bool isLastLine(uint32_t address);
     uint32_t getFunctionAddress(string name);
     vector<string> getContext(uint32_t ip, uint32_t sp);
     vector<string> getGlobals(ElfSymbols &symbols);

@@ -21,6 +21,8 @@ struct DebugIFace *IDebug = 0;
 struct MMUIFace *IMMU = 0;
 
 bool AmigaProcess::exists = false;
+bool AmigaProcess::running = false;
+bool AmigaProcess::attached = false;
 
 void AmigaProcess::init()
 {
@@ -365,6 +367,7 @@ uint32_t AmigaProcess::branchAddress() {
 void AmigaProcess::go()
 {
     IExec->RestartTask((struct Task *)process, 0);
+	running = true;
 }
 
 void AmigaProcess::wait()
@@ -377,10 +380,19 @@ void AmigaProcess::wakeUp()
 	IExec->Signal((struct Task *)IExec->FindTask(0), 1 << signal);
 }
 
+void AmigaProcess::suspend()
+{
+	IExec->SuspendTask((struct Task *)process, 0);
+	running = false;
+}
+
 bool AmigaProcess::isDead() {
 	return !exists;
 	// uint32_t signals = IExec->SetSignal(0, 0);
 	// return signals & SIGF_CHILD;
+}
+bool AmigaProcess::isRunning() {
+	return running;
 }
 
 void AmigaProcess::resetSignals() {

@@ -101,6 +101,10 @@ bool Spotless::handleEvent(Event *event) {
             case Actions::Start:
                 debugger.start();
                 break;
+            case Actions::Stop:
+                debugger.stop();
+                updateAll();
+                break;
             case Actions::StepOver:
                 debugger.stepOver();
                 break;
@@ -117,6 +121,8 @@ bool Spotless::handleEvent(Event *event) {
                 break;
         }
     }
+    actions->update();
+
     if(event->eventClass() == Event::CLASS_GoButtonPress) { //source roots
         SourceRoots roots(spotless);
         roots.openWindow();
@@ -127,7 +133,7 @@ bool Spotless::handleEvent(Event *event) {
         string file = sources->getSelectedElement();
         console->write(PublicScreen::PENTYPE_EVENT, "Source file selected : " + file);
         string fullPath = spotless->debugger.searchSourcePath(file);
-        code->show(fullPath);
+        code->show(file, fullPath);
     }
     if(event->eventClass() == Event::CLASS_CheckboxCheck) {
         code->checkboxSelected(sources->getSelectedElement(), true);

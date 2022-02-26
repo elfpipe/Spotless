@@ -78,7 +78,7 @@ public:
     }
     int getInt() { //this is a little tricky because of problems with c++ and adtools
         bool negative = false;
-        unsigned int result = 0;
+        unsigned long long result = 0;
         char c = ss.peek();
         if(c == '-') {
             negative = true;

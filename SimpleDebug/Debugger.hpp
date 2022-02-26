@@ -32,6 +32,7 @@ private:
 
 	Roots roots;
 
+	bool suspended = false;
 	int line = 0;
 
 public:
@@ -99,12 +100,17 @@ public:
 	void start() {
 		if(isDead()) return;
 
-		process.step();
-
-		breaks.activate();
+		if (!suspended) {
+			process.step();
+			breaks.activate();
+		}
 		process.go();
 		// process.wait();
 		// breaks.deactivate(); //do the last bit in trap handler
+	}
+	void stop() {
+		process.suspend();
+		suspended = true;
 	}
 	void wait() {
 		process.wait();
@@ -208,6 +214,9 @@ public:
 	}
 	bool isDead() {
 		return process.isDead();
+	}
+	bool isRunning() {
+		return process.isRunning();
 	}
 	vector<string> emptyPipe() {
 		return process.emptyPipe();
