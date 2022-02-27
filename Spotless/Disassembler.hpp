@@ -16,7 +16,11 @@ public:
     Disassembler(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { setName("Disassembler"); spotless = parent; }
     void createGuiObject(Layout *layout) {
         listbrowser = layout->createListbrowser();
-    }
+        Layout *buttonLayout = layout->createVerticalLayout(100, 0);
+        buttonLayout->createButton("Step");
+        buttonLayout->createButton("Skip");
+        buttonLayout->createSpace();
+    } 
     void update() {
         clear();
         vector<string> disassembly = spotless->debugger.disassemble();

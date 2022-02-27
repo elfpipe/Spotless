@@ -41,8 +41,8 @@ public:
 
 	void getDimensions(int *, int *, int *, int *);
 
-	Layout *createVerticalLayout ();
-	Layout *createHorizontalLayout ();
+	Layout *createVerticalLayout (int weightedHeight = 100, int weightedWidth = 100);
+	Layout *createHorizontalLayout (int weightedHeight = 100, int weightedWidth = 100);
 	Layout *createLabeledLayout (string label);
 
 	void createSpace();

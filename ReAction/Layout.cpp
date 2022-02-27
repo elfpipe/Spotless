@@ -36,20 +36,24 @@ Layout::~Layout()
 {
 }
 
-Layout *Layout::createVerticalLayout()
+Layout *Layout::createVerticalLayout(int weightedHeight, int weightedWidth)
 {
 	Layout *childLayout = new Layout(parent, LAYOUT_Vertical);
 	IIntuition->SetAttrs (layout,
 		LAYOUT_AddChild, childLayout->systemObject(),
+		CHILD_WeightedHeight,	weightedHeight,
+		CHILD_WeightedWidth,	weightedWidth,
 	TAG_DONE);
 	return childLayout;
 }
 
-Layout *Layout::createHorizontalLayout ()
+Layout *Layout::createHorizontalLayout (int weightedHeight, int weightedWidth)
 {
 	Layout *childLayout = new Layout(parent, LAYOUT_Horizontal);
 	IIntuition->SetAttrs (layout,
 		LAYOUT_AddChild, childLayout->systemObject(),
+		CHILD_WeightedHeight,	weightedHeight,
+		CHILD_WeightedWidth,	weightedWidth,
 	TAG_DONE);
 	return childLayout;
 }

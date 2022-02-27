@@ -126,12 +126,6 @@ bool Spotless::handleEvent(Event *event) {
     }
     actions->update();
 
-    // if(event->eventClass() == Event::CLASS_GoButtonPress) { //source roots
-    //     SourceRoots roots(spotless);
-    //     roots.openWindow();
-    //     roots.waitForClose();
-    // }
-
     if(event->eventClass() == Event::CLASS_SelectNode) {
         string file = sources->getSelectedElement();
         console->write(PublicScreen::PENTYPE_EVENT, "Source file selected : " + file);
@@ -148,6 +142,15 @@ bool Spotless::handleEvent(Event *event) {
         if(!event->elementDescription().compare("Globals")) {
             context->globals();
         }
+        if(!event->elementDescription().compare("Step")) {
+            debugger.step();
+            disassembler->update();
+        }
+        if(!event->elementDescription().compare("Skip")) {
+            debugger.skip();
+            disassembler->update();
+        }
+
     }
     return false;
 }
