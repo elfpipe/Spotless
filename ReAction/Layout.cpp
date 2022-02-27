@@ -1,6 +1,7 @@
 #include "Layout.hpp"
 #include "Widget.hpp"
 #include "Panel.hpp"
+#include "String.hpp"
 
 #include <proto/layout.h>
 #include <proto/space.h>
@@ -92,6 +93,17 @@ GoButton *Layout::createButton (const char *text)
 		CHILD_WeightedWidth,	0,
 	TAG_DONE);
 	return button;
+}
+
+RString *Layout::createString (const char *content)
+{
+	RString *rstring = new RString(parent, content);
+	IIntuition->SetAttrs (layout,
+		LAYOUT_AddChild, rstring->systemObject(),
+		CHILD_WeightedHeight,	0,
+		CHILD_WeightedWidth,	0,
+	TAG_DONE);
+	return rstring;
 }
 
 void Layout::addWeightBar()

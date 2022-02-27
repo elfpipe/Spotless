@@ -4,8 +4,6 @@
 #include "../ReAction/classes.h"
 #include "Spotless.hpp"
 
-#include "SourceRoots.hpp"
-
 #include <string>
 
 using namespace std;
@@ -18,7 +16,7 @@ public:
     Sources(Spotless *parent) : Widget((Widget *)parent) { setName("Source files"); spotless = parent; }
     void createGuiObject(Layout *layout) {
         Layout *vl = layout->createVerticalLayout();
-        vl->createButton("Source roots -->");
+        // vl->createButton("Source roots -->");
         listbrowser = vl->createListbrowser();
     }
     string getSelectedElement() {

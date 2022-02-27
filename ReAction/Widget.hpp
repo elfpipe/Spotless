@@ -14,6 +14,7 @@ class GoButton;
 class Speedbar;
 class Listbrowser;
 class Event;
+class RString;
 
 using namespace std;
 
@@ -98,5 +99,6 @@ public:
 	friend GoButton;
 	friend Panel;
 	friend Menubar;
+	friend RString;
 };
 #endif

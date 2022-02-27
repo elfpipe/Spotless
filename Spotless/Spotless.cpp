@@ -77,7 +77,7 @@ void Spotless::pipeHandler() {
 }
 
 void Spotless::deathHandler() {
-    cout << "deathHandler()\n";
+    // cout << "deathHandler()\n";
     if(spotless) {
         spotless->clearAll();
         spotless->childLives = false;
@@ -123,11 +123,11 @@ bool Spotless::handleEvent(Event *event) {
     }
     actions->update();
 
-    if(event->eventClass() == Event::CLASS_GoButtonPress) { //source roots
-        SourceRoots roots(spotless);
-        roots.openWindow();
-        roots.waitForClose();
-    }
+    // if(event->eventClass() == Event::CLASS_GoButtonPress) { //source roots
+    //     SourceRoots roots(spotless);
+    //     roots.openWindow();
+    //     roots.waitForClose();
+    // }
 
     if(event->eventClass() == Event::CLASS_SelectNode) {
         string file = sources->getSelectedElement();

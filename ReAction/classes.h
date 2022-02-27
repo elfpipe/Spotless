@@ -10,3 +10,4 @@
 #include "Screen.hpp"
 #include "Speedbar.hpp"
 #include "Event.hpp"
+#include "String.hpp"

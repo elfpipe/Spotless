@@ -3,6 +3,7 @@
 
 #include "../ReAction/classes.h"
 #include "Spotless.hpp"
+#include "Configure.hpp"
 
 class MainMenu : public Menubar {
 private:
@@ -16,6 +17,10 @@ public:
 
         addCreateMenuItem (panel1, "About", "", 1);
         addCreateMenuItem (panel1, "Switch public screen", "", 2);
+
+        MenuReference panel2 = addCreateMenu("Project");
+
+        addCreateMenuItem (panel2, "Configure ...", "", 3);
     }
     bool handleMenuPick(int id) {
         switch(id) {
@@ -25,12 +30,17 @@ public:
             case 2: //switch public screen
                 spotless->closeWindow();
                 if (!PublicScreen::usingPublicScreen())
-                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020 by Alpha Kilimanjaro");
+                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright ï¿½ 2020 by Alpha Kilimanjaro");
                 else
                     PublicScreen::instance()->closePublicScreen();
                 spotless->openWindow();
                 spotless->updateAll();
                 break;
+            case 3: {
+                Configure configure(spotless);
+                configure.openWindow();
+                configure.waitForClose();
+            } break;
         }
         return false;
     }

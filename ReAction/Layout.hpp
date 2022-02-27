@@ -6,6 +6,7 @@
 #include "GoButton.hpp"
 #include "Speedbar.hpp"
 #include "Listbrowser.hpp"
+#include "String.hpp"
 
 #include <string>
 
@@ -49,6 +50,7 @@ public:
 	Listbrowser *createListbrowser ();
 	Speedbar *createSpeedbar ();
 	GoButton *createButton (const char *text);
+	RString *createString (const char *content);
 
 	void addEmbeddedWidget(Widget *widget);
 	void addTabbedPanel(Panel *panel, int weight);

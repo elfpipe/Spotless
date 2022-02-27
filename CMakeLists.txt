@@ -14,6 +14,7 @@ ReAction/Screen.cpp
 ReAction/GoButton.cpp
 ReAction/Panel.cpp
 ReAction/Menubar.cpp
+ReAction/String.cpp
 )
 
 set(SIMPLEDEBUG_SOURCES

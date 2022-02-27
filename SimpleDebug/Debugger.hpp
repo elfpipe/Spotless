@@ -35,8 +35,11 @@ private:
 	bool suspended = false;
 	int line = 0;
 
+	string entryPoint;
+
 public:
 	Debugger() {
+		entryPoint = "main";
 	}
 	~Debugger() {
 		clear();
@@ -50,15 +53,29 @@ public:
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
 	}
 	bool load(string path, string file, string args) {
-		clear();
+		// clear();
 		APTR handle = process.load(path, file, args);
 		roots.clear();
 		roots.add(path);
 		if (handle) open(handle, file);
+
+		//experimental entry code, to prevent breaks in kernel :
+		if(entryPoint.size() && symbols.hasSymbols()) {
+			uint32 value = symbols.valueOf(entryPoint.c_str());
+			if(value) {
+				Breaks temp;
+				temp.insert(value);
+				temp.activate();
+				process.go();
+				process.wait();
+			}
+		}
+
+		// return success
 		return handle != 0;
 	}
 	bool attach(string name) {
-		clear();
+		// clear();
 		APTR handle = process.attach(name);
 		if(handle) open(handle, name);
 		return handle != 0;
@@ -94,7 +111,7 @@ public:
 		if(!process.isDead()) { //necessary on 440ep
 			linebreaks.deactivate();
 			breaks.deactivate();
-			//linebreaks.clear();
+			linebreaks.clear();
 		}
 	}
 	void start() {
@@ -102,8 +119,8 @@ public:
 
 		if (!suspended) {
 			process.step();
-			breaks.activate();
 		}
+		breaks.activate();
 		process.go();
 		// process.wait();
 		// breaks.deactivate(); //do the last bit in trap handler
@@ -187,6 +204,12 @@ public:
 	}
 	vector<string> globals() {
 		return binary ? binary->getGlobals(symbols) : vector<string>();
+	}
+	string getEntryPoint() {
+		return entryPoint;
+	}
+	void setEntryPoint(string newEntry) {
+		entryPoint = newEntry;
 	}
 	uint32_t getIp() {
 		return process.ip();

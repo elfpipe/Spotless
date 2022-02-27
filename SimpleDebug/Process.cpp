@@ -150,6 +150,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			IExec->PutMsg (port, (struct Message *)message);
 			sendSignal = true;  //if process has ended, we must signal caller
 			exists = false;
+			running = false;
 
 			break;
 		}
@@ -178,6 +179,8 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			IExec->PutMsg (port, (struct Message *)message);
 
 			sendSignal = true;
+
+			running = false;
 
 			// returning 1 will suspend the task
 			ret = 1;

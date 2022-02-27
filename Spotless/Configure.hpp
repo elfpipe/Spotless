@@ -8,19 +8,22 @@
 
 using namespace std;
 
-class SourceRoots: public Widget {
+class Configure: public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
 
 public:
-    SourceRoots(Spotless *parent) : Widget(0) { setName("Source roots"); spotless = parent; }
+    Configure(Spotless *parent) : Widget(0) { setName("Configure"); spotless = parent; }
     void createGuiObject(Layout *layout) {
-        listbrowser = layout->createListbrowser();
-        Layout *hl = layout->createHorizontalLayout();
+        Layout *rootsLayout = layout->createLabeledLayout("Source roots");
+        listbrowser = rootsLayout->createListbrowser();
+        Layout *hl = rootsLayout->createHorizontalLayout();
         hl->createButton("+");
         hl->createButton("-");
         hl->createButton("Done");
+        Layout *entryLayout = layout->createLabeledLayout("Entry point");
+        entryLayout->createString(spotless->debugger.getEntryPoint().c_str());
         update();
     }
     bool handleEvent (Event *event) {

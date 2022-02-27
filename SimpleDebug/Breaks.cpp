@@ -128,7 +128,7 @@ extern "C" uint32_t setbreak(uint32_t, uint32_t); //uint32_t, uint32_t);
 
 int Breaks::memory_insert_break_instruction (uint32_t address, uint32_t *buffer)
 {
-	cout << "memory_insert_break_instruction : " << (void *)address << "\n";
+	// cout << "memory_insert_break_instruction : " << (void *)address << "\n";
 
 	/* Go supervisor */
 	APTR stack = IExec->SuperState();
@@ -163,7 +163,7 @@ int Breaks::memory_insert_break_instruction (uint32_t address, uint32_t *buffer)
 
 int Breaks::memory_remove_break_instruction (uint32_t address, uint32_t *buffer)
 {
-	cout << "memory_remove_break_instruction : " << (void *)address << "\n";
+	// cout << "memory_remove_break_instruction : " << (void *)address << "\n";
 
 	/* Go supervisor */
 	APTR stack = IExec->SuperState();
