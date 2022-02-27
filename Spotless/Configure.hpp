@@ -30,7 +30,8 @@ public:
         if(event->eventClass() == Event::CLASS_GoButtonPress) {
             if(!event->elementDescription().compare("+")) {
                 string newRoot = Requesters::path(Requesters::REQUESTER_MODULE, "Choose path to add to list of source code roots...");
-                spotless->debugger.addSourceRoot(newRoot);
+                string unixRoot = Requesters::convertToUnixRelative(newRoot);
+                spotless->debugger.addSourceRoot(unixRoot);
                 update();
             }
             if(!event->elementDescription().compare("-")) {

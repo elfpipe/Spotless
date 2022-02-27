@@ -20,6 +20,18 @@ public:
         listbrowser->setColumnTitles("Break|Line|Text");
     }
     void show(string file, string foundPath) {
+        if(!foundPath.size()) {
+            clear();
+            char buffer[4096];
+            sprintf(buffer, "Failed to find source file \'%s\' in the project search path. Did you configure your project?", file.c_str());
+            vector<string> lineData;
+            lineData.push_back("");
+            lineData.push_back("");
+            lineData.push_back(buffer);
+            listbrowser->addNode(lineData);
+            highlight(0);
+            return;
+        }
         TextFile text(foundPath);
         listbrowser->clear();
         int line = 1;
@@ -42,6 +54,16 @@ public:
     }
     void update() {
         string file = spotless->debugger.getSourceFile();
+        if(!file.compare("<built-in>")) {
+            clear();
+            vector<string> lineData;
+            lineData.push_back("");
+            lineData.push_back("0");
+            lineData.push_back("<built-in>");
+            listbrowser->addNode(lineData);
+            fileName = "<built-in>";
+            return;
+        }
         if(fileName.compare(file)) {
             string filePath = spotless->debugger.searchSourcePath(file);
             show(file, filePath);

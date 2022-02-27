@@ -87,9 +87,12 @@ bool Spotless::handleEvent(Event *event) {
     if(event->eventClass() == Event::CLASS_ButtonPress) {
         switch(event->elementId()) {
             case Actions::Load: {
+                spotless->debugger.clearRoots();
                 string path;
                 string file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
-                childLives = debugger.load(path, file, "");
+                string unixPath = Requesters::convertToUnixRelative(path);
+                spotless->debugger.addSourceRoot(unixPath);
+                childLives = debugger.load(path, file, ""); //Use amigaos path for LoadSeg
                 if(childLives) {
                     updateAll();
                     sources->update();

@@ -53,10 +53,7 @@ public:
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
 	}
 	bool load(string path, string file, string args) {
-		// clear();
 		APTR handle = process.load(path, file, args);
-		roots.clear();
-		roots.add(path);
 		if (handle) open(handle, file);
 
 		//experimental entry code, to prevent breaks in kernel :
@@ -75,7 +72,6 @@ public:
 		return handle != 0;
 	}
 	bool attach(string name) {
-		// clear();
 		APTR handle = process.attach(name);
 		if(handle) open(handle, name);
 		return handle != 0;
@@ -355,6 +351,9 @@ public:
 	}
 	void removeSourceRoot(string root) {
 		roots.remove(root);
+	}
+	void clearRoots() {
+		roots.clear();
 	}
 	list<string> getSourceRoots() {
 		return roots.get();

@@ -83,6 +83,22 @@ string Requesters::path (enum RequesterCategory category, const char *format, ..
 	return result;
 }
 
+string Requesters::convertToUnixRelative(string path)
+{
+	// cout << "convertToUnixRelative : path = " << path << "\n";
+
+	string result = path;
+	for (string::iterator it = result.begin(); it != result.end(); it++) {
+		if((*it) != '/') break;
+		result.insert(it, '.'); it++;
+		result.insert(it, '.'); it++;
+	}
+
+	// cout << "convertToUnixRelative : result = " << result << "\n";
+
+	return result;
+}
+
 int Requesters::choice(const char *title, const char *gadgetsText, const char *format, ...)
 {
 	va_list argptr;
@@ -147,7 +163,7 @@ void Requesters::showAboutWindow ()
 	Object *requesterObject = (Object *)IIntuition->NewObject( IRequester->REQUESTER_GetClass(), NULL,
 		REQ_Type,       REQTYPE_INFO,
 		REQ_TitleText,  "About",
-		REQ_BodyText,   "Spotless - Copyright © 2020 Alpha Kilimanjaro",
+		REQ_BodyText,   "Spotless - Copyright ï¿½ 2020 Alpha Kilimanjaro",
 		REQ_GadgetText, "Ok",
 		TAG_DONE);
 

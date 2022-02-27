@@ -26,5 +26,7 @@ public:
 	static int choice (const char *title, const char *gadgetsText, const char *format, ...);
 	static string requestString (const char *title, const char *format, ...);
 	static void showAboutWindow();
+
+	static string convertToUnixRelative(string path);
 };
 #endif

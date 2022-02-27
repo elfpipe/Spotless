@@ -60,7 +60,7 @@ public:
 
 	void addNode (string text, void *userData = 0, bool hasChildren = false, int generation = 0);
 	void addNode (vector<string> columnTexts, void *userData = 0, bool hasChildren = false, int generation = 0);
-    void addCheckboxNode (vector<string> columnTexts, bool checkbox, bool checked = false, void *userData = 0, bool hasChildren = false, int generation = 0);
+    void addCheckboxNode (vector<string> columnTexts, bool checkbox = false, bool checked = false, void *userData = 0, bool hasChildren = false, int generation = 0);
 
 	string getNode(int line);
 	
