@@ -311,7 +311,6 @@ public:
                             result.push_back(patch::toString(*(short *)base));
                             break;
                         case 4:
-                            cout << "==INT==\n";
                             result.push_back(patch::toString(*(int *)base));
                             break;
                         case 8: {
