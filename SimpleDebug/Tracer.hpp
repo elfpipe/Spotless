@@ -25,5 +25,6 @@ public:
     void suspend();
 
     uint32_t branch();
+    static bool isBranchToLink(uint32_t address);
 };
 #endif

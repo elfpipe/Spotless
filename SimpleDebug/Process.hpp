@@ -86,6 +86,7 @@ public:
 	void skip();
 	void step();
 
+	bool isReturn(uint32_t address);
 	void stepNoBranch();
 	uint32_t branchAddress();
 

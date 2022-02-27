@@ -162,12 +162,10 @@ public:
 		// 	return;
 		// }
 		do {
-			int32 dummy;
-			if(PPC_DisassembleBranchInstr(*(uint32 *)process.ip(), &dummy) == PPC_BRANCHTOLINK) {
+			if(process.isReturn(process.ip())) { //if we are returning from the function, we need to let go and run normally
 				start();
 				return;
 			}
-
 			if(binary->getSourceFile(process.branchAddress()).size() > 0)
 				process.step();
 			else

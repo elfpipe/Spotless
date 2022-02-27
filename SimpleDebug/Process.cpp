@@ -365,6 +365,10 @@ uint32_t AmigaProcess::branchAddress() {
 	return tracer.branch();
 }
 
+bool AmigaProcess::isReturn(uint32_t address)
+{
+	return Tracer::isBranchToLink(address);
+}
 // --------------------------------------------------------------------------- //
 
 void AmigaProcess::go()
