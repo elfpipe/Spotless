@@ -23,8 +23,8 @@ public:
         add = hl->createButton("+");
         remove = hl->createButton("-");
         done = hl->createButton("Done");
-        Layout *entryLayout = layout->createLabeledLayout("Entry point");
-        entryLayout->createString(spotless->debugger.getEntryPoint().c_str());
+        // Layout *entryLayout = layout->createLabeledLayout("Entry point");
+        // entryLayout->createString(spotless->debugger.getEntryPoint().c_str());
         update();
     }
     bool handleEvent (Event *event) {

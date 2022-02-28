@@ -35,11 +35,11 @@ private:
 	bool suspended = false;
 	int line;
 
-	string entryPoint;
+	// string entryPoint;
 
 public:
 	Debugger() : handle(0), binary(0), suspended(false), line(0) {
-		entryPoint = "main";
+		// entryPoint = "main";
 	}
 	~Debugger() {
 		clear();
@@ -223,12 +223,12 @@ public:
 	vector<string> globals() {
 		return binary ? binary->getGlobals(symbols) : vector<string>();
 	}
-	string getEntryPoint() {
-		return entryPoint;
-	}
-	void setEntryPoint(string newEntry) {
-		entryPoint = newEntry;
-	}
+	// string getEntryPoint() {
+	// 	return entryPoint;
+	// }
+	// void setEntryPoint(string newEntry) {
+	// 	entryPoint = newEntry;
+	// }
 	uint32_t getIp() {
 		return process.ip();
 	}
