@@ -27,18 +27,18 @@ private:
     ElfSymbols symbols;
     Breaks breaks, linebreaks;
 
-	ElfHandle *handle = 0;
-	Binary *binary = 0;
+	ElfHandle *handle;
+	Binary *binary;
 
 	Roots roots;
 
 	bool suspended = false;
-	int line = 0;
+	int line;
 
 	string entryPoint;
 
 public:
-	Debugger() {
+	Debugger() : handle(0), binary(0), suspended(false), line(0) {
 		entryPoint = "main";
 	}
 	~Debugger() {
@@ -57,16 +57,16 @@ public:
 		if (handle) open(handle, file);
 
 		//experimental entry code, to prevent breaks in kernel :
-		if(entryPoint.size() && symbols.hasSymbols()) {
-			uint32 value = symbols.valueOf(entryPoint.c_str());
-			if(value) {
-				Breaks temp;
-				temp.insert(value);
-				temp.activate();
-				process.go();
-				process.wait();
-			}
-		}
+		// if(entryPoint.size() && symbols.hasSymbols()) {
+		// 	uint32 value = symbols.valueOf(entryPoint.c_str());
+		// 	if(value) {
+		// 		Breaks temp;
+		// 		temp.insert(value);
+		// 		temp.activate();
+		// 		process.go();
+		// 		process.wait();
+		// 	}
+		// }
 
 		// return success
 		return handle != 0;
@@ -111,9 +111,9 @@ public:
 		}
 	}
 	void start() {
-		if(isDead()) return;
+		if(process.isDead() || process.isRunning()) return;
 
-		if (!suspended) {
+		if (!suspended && isLocation(process.ip())) {
 			process.step();
 		}
 		breaks.activate();
@@ -129,13 +129,28 @@ public:
 		process.wait();
 	}
 	void skip() {
-		process.skip();
+		if(!isDead() && binary->getFunction(process.ip()))
+			process.skip();
 	}
 	void step() {
-		process.step();
+		if(!isDead() && binary->getFunction(process.ip()))
+			process.step();
+	}
+	void safeStep() {
+		if(isDead() || !binary->getFunction(process.ip())) return;
+
+		if(binary->getSourceFile(process.branchAddress()).size() > 0)
+			process.step();
+		else
+			process.stepNoBranch();
 	}
 	void stepOver() {
-		if(!binary || isDead()) return;
+		if(!binary || process.isDead()) return;
+
+		if(!binary->getFunction(process.ip())) { //if not inside known code, just keep running
+			start();
+			return;
+		}
 
 		Function *function = binary->getFunction(process.ip());
 		linebreaks.clear();
@@ -155,8 +170,12 @@ public:
 		// breaks.deactivate();
 	}
 	void stepInto() {
-		if(!binary || isDead()) return;
+		if(!binary || process.isDead()) return;
 
+		if(!binary->getFunction(process.ip())) {
+			start();
+			return;
+		}
 		// if (binary->isLastLine(process.ip())) {
 		// 	start();
 		// 	return;
@@ -174,7 +193,12 @@ public:
 		//process.wakeUp();
 	}
 	void stepOut() {
-		if (!binary || isDead()) return;
+		if (!binary || process.isDead()) return;
+
+		if(!binary->getFunction(process.ip())) {
+			start();
+			return;
+		}
 
 		Breaks outBreak;
 		if(binary->getSourceFile(process.lr()).size() > 0)
@@ -281,13 +305,9 @@ public:
 		if(!function) return result;
 		int entry = 1;
 		result.push_back(function->name + " :");
-        for(int i = 0; i < function->lines.size(); i++) {
-			int maxOffset = function->lines[i]->address + 4;
-			if(i < function->lines.size() - 1)
-				maxOffset = function->lines[i+1]->address;
+		Scope *scope = function->locals[0];
 
-			for(uint32_t offset = function->lines[i]->address; offset < maxOffset; offset += 4) {
-				uint32_t address = function->address + offset;
+			for(uint32_t address = scope->begin; address <= scope->end; address += 4) {
 				char opcode[256], operands[256];
 				IDebug->DisassembleNative((APTR)address, opcode, operands);
 
@@ -301,7 +321,27 @@ public:
 				//for hightlighting
 				if(address == getIp()) line = entry;
 			}
-        }
+        // for(int i = 0; i < function->lines.size(); i++) {
+		// 	int maxOffset = function->lines[i]->address + 4;
+		// 	if(i < function->lines.size() - 1)
+		// 		maxOffset = function->lines[i+1]->address;
+
+		// 	for(uint32_t offset = function->lines[i]->address; offset < maxOffset; offset += 4) {
+		// 		uint32_t address = function->address + offset;
+		// 		char opcode[256], operands[256];
+		// 		IDebug->DisassembleNative((APTR)address, opcode, operands);
+
+		// 		entry++;
+		// 		if(isLocation(address)) {
+		// 			result.push_back(printStringFormat("[line %d] 0x%x : %s %s", getSourceLine(address), address, opcode, operands));
+		// 		} else {
+		// 			result.push_back(printStringFormat("          0x%x : %s %s", address, opcode, operands));
+		// 		}
+
+		// 		//for hightlighting
+		// 		if(address == getIp()) line = entry;
+		// 	}
+        // }
 		return result;
 	}
 	int getDisassebmlyLine() {

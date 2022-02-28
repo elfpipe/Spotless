@@ -3,9 +3,15 @@
 
 #include <proto/intuition.h>
 
+#include <list>
+using namespace std;
+
 class Widget;
 class Layout;
-class GoButton {
+class RButton {
+private:
+	static list<Object *> buttons;
+
 public:
 	static bool isButton(Object *o);
 
@@ -16,12 +22,16 @@ private:
 private:
 	const char *text;
 	struct Icon *icon;
-	
+	unsigned int id;
+
 public:
-	GoButton(Widget *parent, const char *text);
-	~GoButton();
+	RButton(Widget *parent, const char *text, const char *iconName = "");
+	~RButton();
 	
 	void setText(const char *text);
+	const char *getText();
+
+	unsigned int getId() { return id; }
 
 public:
 	friend Widget;

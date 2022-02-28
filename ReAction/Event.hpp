@@ -11,11 +11,11 @@ public:
 		CLASS_NoClass = 0,
 		CLASS_MouseButtonDown = 1,
 		CLASS_MouseMove,
-		CLASS_ButtonPress,
+		CLASS_ActionButtonPress,
 		CLASS_CheckboxCheck,
 		CLASS_CheckboxUncheck,
 		CLASS_SelectNode,
-		CLASS_GoButtonPress
+		CLASS_ButtonPress
 	};
 private:
 	EventClass eClass;

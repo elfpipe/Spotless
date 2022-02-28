@@ -11,14 +11,15 @@ class Disassembler : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
-
+    RButton *asmStep, *asmSkip;
+    
 public:
     Disassembler(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { setName("Disassembler"); spotless = parent; }
     void createGuiObject(Layout *layout) {
         listbrowser = layout->createListbrowser();
         Layout *buttonLayout = layout->createVerticalLayout(100, 0);
-        buttonLayout->createButton("Step");
-        buttonLayout->createButton("Skip");
+        asmStep = buttonLayout->createButton("Step", "scrolldown");
+        asmSkip = buttonLayout->createButton("Skip", "scrollend");
         buttonLayout->createSpace();
     } 
     void update() {
@@ -30,6 +31,12 @@ public:
     }
     void clear() {
         listbrowser->clear();
+    }
+    unsigned int getAsmStepId() {
+        return asmStep->getId();
+    }
+    unsigned int getAsmSkipId() {
+        return asmSkip->getId();
     }
 };
 #endif

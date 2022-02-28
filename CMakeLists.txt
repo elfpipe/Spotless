@@ -11,7 +11,7 @@ ReAction/Progress.cpp
 ReAction/Layout.cpp
 ReAction/Widget.cpp
 ReAction/Screen.cpp
-ReAction/GoButton.cpp
+ReAction/Button.cpp
 ReAction/Panel.cpp
 ReAction/Menubar.cpp
 ReAction/String.cpp

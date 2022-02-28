@@ -6,6 +6,7 @@
 #include "reaction.h"
 #include "Screen.hpp"
 
+#include <string.h>
 #include <iostream>
 
 Widget::Widget(Widget *parentWidget)
@@ -131,10 +132,11 @@ Widget *Widget::topLevelParent()
 	return top ? top : this;
 }
 
-void Widget::addChild(Object *object)
+unsigned int Widget::addChild(Object *object)
 {
 	children.push_back(object);
-	IIntuition->SetAttrs(object, GA_ID, gadgetId++, TAG_DONE);
+	IIntuition->SetAttrs(object, GA_ID, gadgetId, TAG_DONE);
+	return gadgetId++;
 }
 
 Object *Widget::findChild(unsigned int id)
@@ -191,18 +193,18 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 				GA_UserData, &parent,
 				TAG_DONE);
 
-			if(GoButton::isButton(gadget)) {
+			if(RButton::isButton(gadget)) {
 				char *text;
 
 				IIntuition->GetAttrs(gadget,
 					GA_Text, &text,
 				TAG_DONE);
 
-				event = new Event (Event::CLASS_GoButtonPress);
+				cout << "gadgetId : " << gadgetId << "\n";
+				event = new Event (Event::CLASS_ButtonPress);
 				event->setElementId (gadgetId);
-				event->setElementDescription (text);
-			}
-			else if(Listbrowser::isListbrowser(gadget)) {
+				event->setElementDescription ("");
+			} else if(Listbrowser::isListbrowser(gadget)) {
 				uint32 relEvent, selected;
 
 				IIntuition->GetAttrs(gadget,
@@ -220,7 +222,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 				event->setElementId(gadgetId);
 				event->setItemId (selected);
 			} else if(Speedbar::isSpeedbar(gadget)) {
-				event = new Event (Event::CLASS_ButtonPress);
+				event = new Event (Event::CLASS_ActionButtonPress);
 				event->setElementId (Code);
 			}
 			break;

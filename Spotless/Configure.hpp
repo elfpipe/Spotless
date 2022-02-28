@@ -12,6 +12,7 @@ class Configure: public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
+    RButton *add, *remove, *done;
 
 public:
     Configure(Spotless *parent) : Widget(0) { setName("Configure"); spotless = parent; }
@@ -19,15 +20,15 @@ public:
         Layout *rootsLayout = layout->createLabeledLayout("Source roots");
         listbrowser = rootsLayout->createListbrowser();
         Layout *hl = rootsLayout->createHorizontalLayout();
-        hl->createButton("+");
-        hl->createButton("-");
-        hl->createButton("Done");
+        add = hl->createButton("+");
+        remove = hl->createButton("-");
+        done = hl->createButton("Done");
         Layout *entryLayout = layout->createLabeledLayout("Entry point");
         entryLayout->createString(spotless->debugger.getEntryPoint().c_str());
         update();
     }
     bool handleEvent (Event *event) {
-        if(event->eventClass() == Event::CLASS_GoButtonPress) {
+        if(event->eventClass() == Event::CLASS_ButtonPress) {
             if(!event->elementDescription().compare("+")) {
                 string newRoot = Requesters::path(Requesters::REQUESTER_MODULE, "Choose path to add to list of source code roots...");
                 string unixRoot = Requesters::convertToUnixRelative(newRoot);
@@ -53,6 +54,15 @@ public:
     }
     void clear() {
         listbrowser->clear();
+    }
+    unsigned int getAddId() {
+        return add->getId();
+    }
+    unsigned int getRemoveId() {
+        return remove->getId();
+    }
+    unsigned int getDoneId() {
+        return done->getId();
     }
 };
 #endif

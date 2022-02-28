@@ -1,5 +1,5 @@
 #include "Widget.hpp"
-#include "GoButton.hpp"
+#include "Button.hpp"
 #include "Layout.hpp"
 #include "Listbrowser.hpp"
 #include "MainWindow.hpp"

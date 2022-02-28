@@ -10,7 +10,7 @@ class Menubar;
 class Panel;
 class MainWindow;
 class Layout;
-class GoButton;
+class RButton;
 class Speedbar;
 class Listbrowser;
 class Event;
@@ -35,7 +35,7 @@ private:
 	unsigned int gadgetId;
 	vector<Object *> children; //We need this to delegate input events
 
-	void addChild(Object *object);
+	unsigned int addChild(Object *object); //return id
 	Object *findChild(unsigned int id);
 
 private:
@@ -96,7 +96,7 @@ public:
 	friend Listbrowser;
 	friend Speedbar;
 	friend Layout;
-	friend GoButton;
+	friend RButton;
 	friend Panel;
 	friend Menubar;
 	friend RString;

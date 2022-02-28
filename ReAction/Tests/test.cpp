@@ -8,7 +8,7 @@
 #include "../Panel.hpp"
 #include "../Event.hpp"
 #include "../Menubar.hpp"
-#include "../GoButton.hpp"
+#include "../Button.hpp"
 #include "../Speedbar.hpp"
 #include "../../SimpleDebug/Strings.hpp"
 #include "../../SimpleDebug/Strings.cpp"
@@ -74,7 +74,7 @@ public:
     }
 
     bool handleEvent(Event *event) {
-        if(event->eventClass() == Event::CLASS_GoButtonPress) {
+        if(event->eventClass() == Event::CLASS_ButtonPress) {
             closeWindow();
             Widget *widget = 0;
             if(!event->elementDescription().compare("Listbrowser1"))

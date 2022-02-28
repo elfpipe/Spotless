@@ -84,7 +84,7 @@ void Spotless::deathHandler() {
     }
 }
 bool Spotless::handleEvent(Event *event) {
-    if(event->eventClass() == Event::CLASS_ButtonPress) {
+    if(event->eventClass() == Event::CLASS_ActionButtonPress) {
         switch(event->elementId()) {
             case Actions::Load: {
                 spotless->debugger.clearRoots();
@@ -123,8 +123,8 @@ bool Spotless::handleEvent(Event *event) {
                 return true;
                 break;
         }
+        actions->update();
     }
-    actions->update();
 
     if(event->eventClass() == Event::CLASS_SelectNode) {
         string file = sources->getSelectedElement();
@@ -138,15 +138,19 @@ bool Spotless::handleEvent(Event *event) {
     if(event->eventClass() == Event::CLASS_CheckboxUncheck) {
         code->checkboxSelected(sources->getSelectedElement(), false);
     }
-    if(event->eventClass() == Event::CLASS_GoButtonPress) {
-        if(!event->elementDescription().compare("Globals")) {
+    if(event->eventClass() == Event::CLASS_ButtonPress) {
+        cout << "Event::CLASS_ButtonPress.\n";
+        if(event->elementId() == context->getGlobalsId()) {
             context->globals();
         }
-        if(!event->elementDescription().compare("Step")) {
-            debugger.step();
+        if(event->elementId() == disassembler->getAsmStepId()) {
+            debugger.safeStep();
             disassembler->update();
+            sources->update();
+            context->update();
         }
-        if(!event->elementDescription().compare("Skip")) {
+        if(event->elementId() == disassembler->getAsmSkipId()) {
+            // this is inherently unsafe
             debugger.skip();
             disassembler->update();
         }

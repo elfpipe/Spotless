@@ -10,7 +10,8 @@ class Context : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
-    GoButton *button;
+    RButton *button;
+
 
 public:
     Context(Spotless *parent) : Widget((Widget *)parent) { setName("Variables"); spotless = parent; }
@@ -40,6 +41,9 @@ public:
     }
     void clear() {
         listbrowser->clear();
+    }
+    unsigned int getGlobalsId() {
+        return button->getId();
     }
 };
 #endif

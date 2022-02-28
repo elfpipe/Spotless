@@ -3,7 +3,7 @@
 
 #include <proto/intuition.h>
 
-#include "GoButton.hpp"
+#include "Button.hpp"
 #include "Speedbar.hpp"
 #include "Listbrowser.hpp"
 #include "String.hpp"
@@ -49,7 +49,7 @@ public:
 
 	Listbrowser *createListbrowser ();
 	Speedbar *createSpeedbar ();
-	GoButton *createButton (const char *text);
+	RButton *createButton (const char *text, const char *image = "");
 	RString *createString (const char *content);
 
 	void addEmbeddedWidget(Widget *widget);

@@ -53,6 +53,7 @@ void MainWindow::openWindow() {
 				
 		WINDOW_ParentLayout,	createContent(),
         WINDOW_MenuStrip,       mainMenu ? mainMenu->systemObject() : 0,
+        WINDOW_GadgetHelp,      TRUE,
 	EndWindow;
 	
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
