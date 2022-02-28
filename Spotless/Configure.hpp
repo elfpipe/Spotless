@@ -29,17 +29,17 @@ public:
     }
     bool handleEvent (Event *event) {
         if(event->eventClass() == Event::CLASS_ButtonPress) {
-            if(!event->elementDescription().compare("+")) {
+            if(event->elementId() == getAddId()) {
                 string newRoot = Requesters::path(Requesters::REQUESTER_MODULE, "Choose path to add to list of source code roots...");
                 string unixRoot = Requesters::convertToUnixRelative(newRoot);
                 spotless->debugger.addSourceRoot(unixRoot);
                 update();
             }
-            if(!event->elementDescription().compare("-")) {
+            if(event->elementId() == getRemoveId()) {
                 spotless->debugger.removeSourceRoot(listbrowser->getNode(listbrowser->getSelectedLineNumber()));
                 update();
             }
-            if(!event->elementDescription().compare("Done")) {                
+            if(event->elementId() == getDoneId()) {                
                 return true;
             }
         }
