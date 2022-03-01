@@ -16,10 +16,12 @@ RString::RString (Widget *parent, const char *content)
 		GA_UserData,	parent,
 		GA_RelVerify,	true,
 		GA_TabCycle,	true,
-		STRINGA_MaxChars,		1023,
+		STRINGA_MaxChars,		1024,
 		STRINGA_TextVal,		content,
 	TAG_DONE);
 
+	this->parent = parent;
+	
 	parent->topLevelParent()->addChild(rstring);
 }
 
@@ -38,7 +40,10 @@ RString::~RString ()
 
 void RString::setContent (const char *newContent)
 {
-	IIntuition->SetAttrs (rstring,
+	// IIntuition->SetAttrs (rstring,
+	// 	STRINGA_TextVal,	newContent,
+	// TAG_DONE);
+	IIntuition->RefreshSetGadgetAttrs((struct Gadget *)rstring, parent->topLevelParent()->windowPointer(), 0,
 		STRINGA_TextVal,	newContent,
 	TAG_DONE);
 }
@@ -46,8 +51,9 @@ void RString::setContent (const char *newContent)
 string RString::getContent()
 {
 	char *content;
-	IIntuition->SetAttrs (rstring,
+	IIntuition->GetAttrs (rstring,
 		STRINGA_TextVal, &content,
 	TAG_DONE);
+	cout << "getContent() : STRINGA_TextVal = " << content << "\n";
 	return string(content);
 }

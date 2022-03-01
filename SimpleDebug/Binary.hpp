@@ -351,6 +351,10 @@ public:
         uint32_t address = base;
         uint32_t place = lower;
 
+        if(!type) {
+            result.push_back("no type for array");
+            return result;
+        }
         while(place <= upper) {
             vector<string> v = type->values(address);
             result.insert(result.end(), v.begin(), v.end());

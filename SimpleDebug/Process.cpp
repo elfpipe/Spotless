@@ -342,6 +342,11 @@ void AmigaProcess::skip() {
 	IDebug->WriteTaskContext((struct Task *)process, &context, RTCF_STATE);
 }
 
+void AmigaProcess::backSkip() {
+	context.ip -= 4;
+	IDebug->WriteTaskContext((struct Task *)process, &context, RTCF_STATE);
+}
+
 void AmigaProcess::step() {
 	Tracer tracer(process, &context);
 	tracer.activate();

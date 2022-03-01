@@ -13,6 +13,8 @@ private:
 	Object *rstring;
 	Object *systemObject () { return rstring; }
 
+	Widget *parent;
+	
 private:
 	char contents[1024];
 	

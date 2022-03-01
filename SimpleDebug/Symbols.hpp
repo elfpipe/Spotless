@@ -20,8 +20,9 @@ public:
 	struct ElfSymbol {
 		string name;
 		uint32 value;
-		
-		ElfSymbol (string _name, uint32 _value) : name(_name), value(_value) { }
+		uint16 size;
+
+		ElfSymbol (string _name, uint32 _value, uint16 _size) : name(_name), value(_value), size(_size) { }
 	};
 
 private:
@@ -36,9 +37,10 @@ public:
 	void clear();
 	
 	void readAll(ElfHandle *handle);
-	void addSymbol(string name, uint32 value);
+	void addSymbol(string name, uint32 value, uint16 size);
 	
 	uint32 valueOf(string name);
+	uint16 sizeOf (string name);
 	string nameFromValue(uint32 value);
 
     vector<string> printable();

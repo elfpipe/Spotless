@@ -84,6 +84,7 @@ public:
 	void writeContext ();
 
 	void skip();
+	void backSkip();
 	void step();
 
 	bool isReturn(uint32_t address);

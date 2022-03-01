@@ -33,7 +33,7 @@ private:
 	Roots roots;
 
 	bool suspended = false;
-	int line;
+	int line, hexLine;
 
 	// string entryPoint;
 
@@ -51,6 +51,8 @@ public:
 
 		if(handle->performRelocation())
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
+
+		cout << (void *)symbols.valueOf("puts") << "\n";
 	}
 	bool load(string path, string file, string args) {
 		APTR handle = process.load(path, file, args);
@@ -103,6 +105,16 @@ public:
 		if(address)	set ? breaks.insert(address) : breaks.remove(address);
 		return address != 0;
 	}
+	bool breakpointSymbol(string symbolName, bool set) {
+		uint32_t address = symbols.valueOf(symbolName);
+		if(address)	set ? breaks.insert(address) : breaks.remove(address);
+		return address != 0;
+	}
+	void activateBreaks() { // only for blind running
+		if(!process.isDead()) { //necessary on 440ep
+			breaks.activate();
+		}
+	}
 	void suspendBreaks() {
 		if(!process.isDead()) { //necessary on 440ep
 			linebreaks.deactivate();
@@ -129,11 +141,15 @@ public:
 		process.wait();
 	}
 	void skip() {
-		if(!isDead() && binary->getFunction(process.ip()))
+		if(!isDead() && binary->getFunction(process.ip()+4))
 			process.skip();
 	}
+	void backSkip() {
+		if(!isDead() && binary->getFunction(process.ip()-4))
+			process.backSkip();
+	}
 	void step() {
-		if(!isDead() && binary->getFunction(process.ip()))
+		if(!isDead() && binary->getFunction(process.ip()+4))
 			process.step();
 	}
 	void safeStep() {
@@ -250,6 +266,12 @@ public:
 	bool isBreakpoint(string file, int line) {
 		return binary ? breaks.isBreak(binary->getLineAddress(file, line)) : false;
 	}
+	uint32_t getSymbolValue(string symbolName) {
+		return symbols. valueOf(symbolName);
+	}
+	string getSymbolFromAddress(uint32_t address) {
+		return symbols.nameFromValue(address);
+	}
 	string printLocation() {
 		return binary ? binary->getSourceFile(process.ip()) + " at line " + patch::toString(binary->getSourceLine(process.ip())) : string();
 	}
@@ -311,11 +333,19 @@ public:
 				char opcode[256], operands[256];
 				IDebug->DisassembleNative((APTR)address, opcode, operands);
 
+				int32 offset;
+				string symbolName;
+				ppctype branchType = PPC_DisassembleBranchInstr(*(uint32_t *)address, &offset);
+				if (branchType == PPC_BRANCH || branchType == PPC_BRANCHCOND) {
+					string name = symbols.nameFromValue(address + offset);
+					symbolName = " <" + name + ">";
+				}
+
 				entry++;
 				if(isLocation(address)) {
-					result.push_back(printStringFormat("[line %d] 0x%x : %s %s", getSourceLine(address), address, opcode, operands));
+					result.push_back(printStringFormat("[line %d] 0x%x : %s %s", getSourceLine(address), address, opcode, operands) + symbolName);
 				} else {
-					result.push_back(printStringFormat("          0x%x : %s %s", address, opcode, operands));
+					result.push_back(printStringFormat("          0x%x : %s %s", address, opcode, operands) + symbolName);
 				}
 
 				//for hightlighting
@@ -344,9 +374,76 @@ public:
         // }
 		return result;
 	}
+	vector<string> disassembleSymbol(string symbolName) {
+		cout << "Disassemble : " << symbolName << "\n";
+		vector<string> result;
+		uint32_t addressBegin = symbols.valueOf(symbolName);
+
+		cout << "addressBegin : " << (void *)addressBegin << "\n";
+		if(!addressBegin) {
+			result.push_back("<No such address>");
+			return result;
+		}
+		if(!is_readable_address(addressBegin)) {
+			result.push_back("<not a readable address>");
+			return result;
+		}
+		int entry = 1;
+		for(uint32_t offset = 0; offset < symbols.sizeOf(symbolName); offset += 4) {
+				uint32_t address = addressBegin + offset;
+
+				char opcode[256], operands[256];
+				IDebug->DisassembleNative((APTR)address, opcode, operands);
+
+				int32 branchOffset;
+				string symbolName;
+				ppctype branchType = PPC_DisassembleBranchInstr(*(uint32_t *)address, &branchOffset);
+				if (branchType == PPC_BRANCH || branchType == PPC_BRANCHCOND) {
+					string name = symbols.nameFromValue(address + branchOffset);
+					symbolName = " <" + name + ">";
+				}
+
+				if(isLocation(address)) {
+					result.push_back(printStringFormat("[line %d] 0x%x : %s %s", getSourceLine(address), address, opcode, operands) + symbolName);
+				} else {
+					result.push_back(printStringFormat("          0x%x : %s %s", address, opcode, operands) + symbolName);
+				}
+				cout << "line : " << entry << " , ip : " << (void *)getIp() << "\n";
+				//for hightlighting
+				if(address == getIp()) line = entry;
+				entry++;
+
+				// string op(opcode);
+				// if(!op.compare("b") || !op.compare("blr") || !op.compare("bctr")) break;
+
+				// address += 4;
+			}
+			return result;
+	}
 	int getDisassebmlyLine() {
 		return line;
 	}
+	vector<string> hexDump(string addressString) {
+		uint32_t address = (uint32_t)strtol(addressString.c_str(), 0, 0);
+		vector<string> result;
+		cout << "hexDump : address = " << (void *)address << "\n";
+		if(!address) {
+			result.push_back("<not a readable address>");
+			return result;
+		}
+		int entry = 1;
+		uint32_t begin = address - address % 4096;
+		for(uint32_t offset = 0x0; offset < 4096; offset+=32) {
+			result.push_back(printStringFormat("0x%x + 0x%x : 0x%x 0x%x 0x%x 0x%x", begin, offset, *(uint32_t *)(begin + offset), *(uint32_t *)(begin + offset + 4), *(uint32_t *)(begin + offset + 8), *(uint32_t *)(begin + offset+ 12)));
+			if(address - begin >= offset && address - begin < offset + 32) hexLine = entry;
+			entry++;
+		}
+		return result;
+	}
+	int getHexLine() {
+		return hexLine;
+	}
+
 	uint32_t getTrapSignal() {
 		return process.getTrapSignal();
 	}

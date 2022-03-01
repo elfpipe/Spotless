@@ -7,6 +7,7 @@
 #include "Stacktrace.hpp"
 #include "Disassembler.hpp"
 #include "Spotless.hpp"
+#include "MemorySurfer.hpp"
 
 #include "../SimpleDebug/Strings.hpp"
 
@@ -139,9 +140,13 @@ bool Spotless::handleEvent(Event *event) {
         code->checkboxSelected(sources->getSelectedElement(), false);
     }
     if(event->eventClass() == Event::CLASS_ButtonPress) {
-        cout << "Event::CLASS_ButtonPress.\n";
         if(event->elementId() == context->getGlobalsId()) {
             context->globals();
+        }
+        if(event->elementId() == disassembler->getAsmBackSkipId()) {
+            // this is inherently unsafe
+            debugger.backSkip();
+            disassembler->update();
         }
         if(event->elementId() == disassembler->getAsmStepId()) {
             debugger.safeStep();
@@ -154,7 +159,11 @@ bool Spotless::handleEvent(Event *event) {
             debugger.skip();
             disassembler->update();
         }
-
+        if(event->elementId() == disassembler->getMemSurfId()) {
+                MemorySurfer memorySurfer(spotless);
+                memorySurfer.openWindow();
+                memorySurfer.waitForClose();
+        }
     }
     return false;
 }

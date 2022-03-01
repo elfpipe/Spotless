@@ -177,7 +177,7 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
             case N_SO:
                 end = sym->n_value;
                 *_sym = ++sym;
-                if(closeScope) scope->end = function->address + function->lines[function->lines.size()-1]->address;
+                if(closeScope) scope->end = end-4; //  function->address + function->lines[function->lines.size()-1]->address;
                 return;
             case N_SOL:
                 source = string(stabstr + sym->n_strx);

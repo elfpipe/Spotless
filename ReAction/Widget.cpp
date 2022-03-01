@@ -184,14 +184,19 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 	Widget *parent = 0;
 	switch (Class & WMHI_CLASSMASK) {
 		case WMHI_GADGETUP: {
+			cout << "WMHI_GADGETUP\n";
 			uint32 gadgetId = Class & WMHI_GADGETMASK;
+				cout << "gadgetId : " << gadgetId << "\n";
 			
 			Object *gadget = findChild(gadgetId);
 			if(!gadget) break;
-			
+
+			cout << "gadget : " << (void *) gadget << "\n";			
 			IIntuition->GetAttrs(gadget,
 				GA_UserData, &parent,
 				TAG_DONE);
+
+			cout << "parent : " << (void *)parent << "\n";
 
 			if(RButton::isButton(gadget)) {
 				char *text;
@@ -200,7 +205,6 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 					GA_Text, &text,
 				TAG_DONE);
 
-				cout << "gadgetId : " << gadgetId << "\n";
 				event = new Event (Event::CLASS_ButtonPress);
 				event->setElementId (gadgetId);
 				event->setElementDescription ("");

@@ -18,7 +18,7 @@ using namespace std;
 ULONG amigaos_symbols_callback(struct Hook *hook, struct Task *task, struct SymbolMsg *symbolmsg) {
 	if (symbolmsg->Name) {
 		ElfSymbols *symbols = (ElfSymbols *)hook->h_Data;
-		symbols->addSymbol (string ((const char *)symbolmsg->Name), symbolmsg->AbsValue);
+		symbols->addSymbol (string ((const char *)symbolmsg->Name), symbolmsg->AbsValue, (uint16)symbolmsg->Sym->st_size);
 	}
 	return 1;
 }
@@ -32,9 +32,6 @@ ElfSymbols::~ElfSymbols() {
 
 void ElfSymbols::clear() {
 	while(!symbols.empty()) delete symbols.front(), symbols.pop_front();
-	// symbols.clear();
-	// for (list<ElfSymbol *>::iterator it = symbols.begin (); it != symbols.end (); it++)
-	// 	delete (*it);
 }
 
 void ElfSymbols::readAll(ElfHandle *elfHandle) {
@@ -48,8 +45,8 @@ void ElfSymbols::readAll(ElfHandle *elfHandle) {
 	loaded = true;
 }
 
-void ElfSymbols::addSymbol(string name, uint32 value) {
-	ElfSymbol *symbol = new ElfSymbol(name, value);
+void ElfSymbols::addSymbol(string name, uint32 value, uint16 size) {
+	ElfSymbol *symbol = new ElfSymbol(name, value, size);
 	symbols.push_back(symbol);
 }
 
@@ -57,6 +54,13 @@ uint32 ElfSymbols::valueOf (string name) {
 	for (list <ElfSymbol *>::iterator it = symbols.begin (); it != symbols.end (); it++)
 		if (!(*it)->name.compare(name))
 			return (*it)->value;
+	return 0; //we should at least throw something in this case ??
+}
+
+uint16 ElfSymbols::sizeOf (string name) {
+	for (list <ElfSymbol *>::iterator it = symbols.begin (); it != symbols.end (); it++)
+		if (!(*it)->name.compare(name))
+			return (*it)->size;
 	return 0; //we should at least throw something in this case ??
 }
 
