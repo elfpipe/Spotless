@@ -144,12 +144,6 @@ public:
         addressString->setContent(buffer2);
         updateHex();
     }
-    // unsigned int getDisassembleId() {
-    //     return disassemble->getId();
-    // }
-    // unsigned int getReadHexId() {
-    //     return readHex->getId();
-    // }
     unsigned int getSymbolNameId() {
         return symbolName->getId();
     }
@@ -171,6 +165,8 @@ public:
     unsigned int getAsmBackSkipId() {
         return asmBackSkip->getId();
     }
-
+    void clear() {
+        //what to do?
+    }
 };
 #endif
