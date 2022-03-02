@@ -42,9 +42,7 @@ bool Widget::openWindow()
 		WA_DragBar,			TRUE,
 		WA_CloseGadget,		TRUE,
 		WA_Activate,		TRUE,
-//		WA_IDCMP,			IDCMP_MENUPICK,
-	//   WINDOW_IconTitle, "Example",
-//    WINDOW_AppPort, AppPort,
+		WA_IDCMP,			IDCMP_RAWKEY,
 
 		WINDOW_Position,	WPOS_CENTERSCREEN,
 		WINDOW_ParentLayout,	createContent(),
@@ -126,7 +124,7 @@ int Widget::waitForClose()
 	bool closeAll = false;
 	
 	while (!closeAll) {
-		uint32 result = IExec->Wait (handlerSignals() | /*windowSignalMask() |*/ openedWindowsSignalMask() | SIGBREAKF_CTRL_C | (AppPort ? 1L << AppPort->mp_SigBit : 0x0));
+		uint32 result = IExec->Wait (handlerSignals() | /*windowSignalMask() |*/ openedWindowsSignalMask() | SIGBREAKF_CTRL_C /*| (AppPort ? 1L << AppPort->mp_SigBit : 0x0)*/);
 
 		if (result & SIGBREAKF_CTRL_C) {
 			closeAll = true;
@@ -181,18 +179,18 @@ int Widget::waitForClose()
 						}
 							break;
 
-						case WMHI_ICONIFY : {
-							iconify();
-							result = 0x0;
+						// case WMHI_ICONIFY : {
+						// 	iconify();
+						// 	result = 0x0;
 
-							uint32 newResult = IExec->Wait (1L << AppPort->mp_SigBit);
-							uniconify();
-							break;
-						}
+						// 	uint32 newResult = IExec->Wait (1L << AppPort->mp_SigBit);
+						// 	uniconify();
+						// 	break;
+						// }
 
 						case WMHI_RAWKEY :
-							if ((Code & WMHI_KEYMASK) == RAWKEY_ESC && target == this)
-								done = true;
+							if ((Code & WMHI_KEYMASK) == RAWKEY_ESC && target != this)
+								close = true;
 							break;
 
 						default:
@@ -203,7 +201,7 @@ int Widget::waitForClose()
 					}
 				}
 			}
-			if(close) { closeNewWindow(target); result = 0x0; }
+			if(close && target != this) { closeNewWindow(target); result = 0x0; } close = false;
 		}
 	}
 	// closeWindow ();

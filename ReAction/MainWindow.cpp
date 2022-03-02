@@ -18,11 +18,11 @@ MainWindow::MainWindow()
 {
 }
 
-struct MsgPort *AppPort = 0;
+// struct MsgPort *AppPort = 0;
 
 MainWindow::~MainWindow()
 {
-    if(AppPort) IExec->FreeSysObject(ASOT_PORT, AppPort);
+    // if(AppPort) IExec->FreeSysObject(ASOT_PORT, AppPort);
 }
 
 bool MainWindow::openWindow() {
@@ -36,7 +36,7 @@ bool MainWindow::openWindow() {
 
 	bool backdropWindow = PublicScreen::usingPublicScreen();
 
-    if (AppPort == 0) AppPort = (struct MsgPort *)IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE);
+    // if (AppPort == 0) AppPort = (struct MsgPort *)IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 
 	object = WindowObject,
 		WA_ScreenTitle,         "Spotless",
@@ -55,13 +55,13 @@ bool MainWindow::openWindow() {
 		//WA_Borderless,          backdropWindow,
 		WA_Activate,			TRUE,
 		WA_ReportMouse,			TRUE,
-				
+				        
 		WINDOW_ParentLayout,	createContent(),
         WINDOW_MenuStrip,       mainMenu ? mainMenu->systemObject() : 0,
         WINDOW_GadgetHelp,      TRUE,
-        WINDOW_IconifyGadget,   TRUE,
-	  WINDOW_IconTitle, "Example",
-	   WINDOW_AppPort, AppPort,
+    //     WINDOW_IconifyGadget,   TRUE,
+	//   WINDOW_IconTitle, "Example",
+	//    WINDOW_AppPort, AppPort,
 EndWindow;
 	
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
