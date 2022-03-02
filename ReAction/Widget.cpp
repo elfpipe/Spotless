@@ -6,6 +6,8 @@
 #include "reaction.h"
 #include "Screen.hpp"
 
+#include <libraries/keymap.h>
+
 #include <string.h>
 #include <iostream>
 
@@ -41,7 +43,10 @@ bool Widget::openWindow()
 		WA_CloseGadget,		TRUE,
 		WA_Activate,		TRUE,
 //		WA_IDCMP,			IDCMP_MENUPICK,
-	
+	//   WINDOW_IconTitle, "Example",
+//    WINDOW_AppPort, AppPort,
+
+		WINDOW_Position,	WPOS_CENTERSCREEN,
 		WINDOW_ParentLayout,	createContent(),
 		WINDOW_MenuStrip,		mainMenu ? mainMenu->systemObject() : 0,
         WINDOW_GadgetHelp,      TRUE,
@@ -104,12 +109,24 @@ void Widget::closeAllWindows()
 		closeNewWindow(*it);
 }
 
+void Widget::closeAllExceptThis()
+{
+	list<Widget *> opened(openedWindows);
+	for (list<Widget *>::iterator it = opened.begin(); it != opened.end(); it++) {
+		if((*it) != this) closeNewWindow(*it);
+	}
+	openedWindows.clear();
+	openedWindows.push_back(this);
+}
+
+extern struct MsgPort *AppPort;
+
 int Widget::waitForClose()
 {
 	bool closeAll = false;
 	
 	while (!closeAll) {
-		uint32 result = IExec->Wait (handlerSignals() | /*windowSignalMask() |*/ openedWindowsSignalMask() | SIGBREAKF_CTRL_C);
+		uint32 result = IExec->Wait (handlerSignals() | /*windowSignalMask() |*/ openedWindowsSignalMask() | SIGBREAKF_CTRL_C | (AppPort ? 1L << AppPort->mp_SigBit : 0x0));
 
 		if (result & SIGBREAKF_CTRL_C) {
 			closeAll = true;
@@ -120,17 +137,26 @@ int Widget::waitForClose()
 				handlers[i]->handler();
 		}
 
-		cout << "SIGNAL : " << (void *)result << "\n";
+		// cout << "SIGNAL : " << (void *)result << "\n";
+		// if(result & (AppPort ? 1L << AppPort->mp_SigBit : 0x0)) {
+		// 	bool done = false;
+		// 	while(!done) {
 
+		// 		uint32 Class;
+		// 		uint16 Code;
+		// 		Class = IIntuition->IDoMethod (object, WM_HANDLEINPUT, &Code);
+
+		// }
 		while(result) {
 			bool close = false;
 			Widget *target = findOpenedWindowWidget(result);
-			cout << "target : " << (void *) target << "\n";
+			// cout << "target : " << (void *) target << "\n";
 			if(!target) { result = 0x0; continue; }
 			result ^= target->windowSignalMask();
-			cout << "result : " << (void *)result << "\n";
+			// cout << "result : " << (void *)result << "\n";
 			Object *object = target->windowObject();
-			cout << "object : " << (void *)object << "\n";
+			// cout << "object : " << (void *)object << "\n";
+			if(!target->windowPointer()) continue;
 
 			bool done = false;
 			while(!done) {
@@ -153,6 +179,20 @@ int Widget::waitForClose()
 							done = close;
 							closeAll = (close && target==this);
 						}
+							break;
+
+						case WMHI_ICONIFY : {
+							iconify();
+							result = 0x0;
+
+							uint32 newResult = IExec->Wait (1L << AppPort->mp_SigBit);
+							uniconify();
+							break;
+						}
+
+						case WMHI_RAWKEY :
+							if ((Code & WMHI_KEYMASK) == RAWKEY_ESC && target == this)
+								done = true;
 							break;
 
 						default:
@@ -206,9 +246,11 @@ void Widget::setName(string name)
 
 void Widget::iconify()
 {
-	if(object)
+	if(object) {
 		RA_Iconify(object);
-	window = 0;
+		cout << "RA_Iconify.\n";
+		window = 0;
+	}
 }
 
 void Widget::uniconify()
@@ -247,7 +289,7 @@ uint32 Widget::openedWindowsSignalMask()
 
 Widget *Widget::findOpenedWindowWidget(uint32 mask) {
 	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
-		cout << "windowSignalMask() : " << (void *)(*it)->windowSignalMask() << "\n";
+		// cout << "windowSignalMask() : " << (void *)(*it)->windowSignalMask() << "\n";
 		if(mask & (*it)->windowSignalMask())
 			return *it;
 		// Object *object = (*it)->windowObject();
@@ -264,6 +306,8 @@ Widget *Widget::findOpenedWindowWidget(uint32 mask) {
 
 bool Widget::processEvent (uint32 Class, uint16 Code)
 {
+	if(!window) return false; // if iconified
+
 	int MouseX = window->MouseX;
 	int MouseY = window->MouseY;
 

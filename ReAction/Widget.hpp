@@ -91,6 +91,7 @@ public:
 	void closeNewWindow(Widget *);
 
 	void closeAllWindows();
+	void closeAllExceptThis();
 
 	void iconify();
 	void uniconify();
