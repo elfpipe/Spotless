@@ -22,7 +22,7 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::openWindow() {
+bool MainWindow::openWindow() {
 	if(window) {
 		IIntuition->CloseWindow(window);
 		window = 0;
@@ -54,9 +54,14 @@ void MainWindow::openWindow() {
 		WINDOW_ParentLayout,	createContent(),
         WINDOW_MenuStrip,       mainMenu ? mainMenu->systemObject() : 0,
         WINDOW_GadgetHelp,      TRUE,
+        WINDOW_IconifyGadget,   TRUE,
 	EndWindow;
 	
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
+
+	openedWindows.push_back(this);
+
+    return window != 0;
 }
 
 Object *MainWindow::createContent() {

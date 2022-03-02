@@ -27,7 +27,7 @@ public:
     MainWindow();
     ~MainWindow();
 
-    void openWindow();
+    bool openWindow();
 
     void setMainView(Widget *view);
     void setTopBar(Widget *top);

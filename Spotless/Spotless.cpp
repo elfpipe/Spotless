@@ -33,6 +33,8 @@ void Spotless::create() {
     console = new Console(spotless);
     disassembler = new Disassembler(spotless);
 
+    memorySurfer = new MemorySurfer(spotless);
+
     setMenubar(menu);
     setTopBar(actions);
     setMainView(code);
@@ -160,10 +162,9 @@ bool Spotless::handleEvent(Event *event) {
             disassembler->update();
         }
         if(event->elementId() == disassembler->getMemSurfId()) {
-                MemorySurfer memorySurfer(spotless);
-                memorySurfer.openWindow();
-                memorySurfer.waitForClose();
-                updateAll();
+            if(memorySurfer) {
+                openNewWindow((Widget *)memorySurfer);
+            }
         }
     }
     return false;
@@ -177,6 +178,7 @@ void Spotless::updateAll() {
     stacktrace->update();
     console->clear();
     disassembler->update();
+    if(memorySurfer && memorySurfer->windowObject()) memorySurfer->updateDisassembly();
 }
 
 void Spotless::clearAll() {
@@ -187,4 +189,5 @@ void Spotless::clearAll() {
     stacktrace->clear();
     disassembler->clear();
     debugger.clear();
+
 }

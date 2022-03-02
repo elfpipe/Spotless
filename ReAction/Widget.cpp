@@ -21,13 +21,13 @@ Widget::Widget(Widget *parentWidget)
 
 Widget::~Widget()
 {
-    closeWindow();
+    if(window) closeWindow();
 	handlers.clear();
 }
 
-void Widget::openWindow()
+bool Widget::openWindow()
 {
-	if (window) return;
+	if (window) return true;
 
 	struct Screen *publicScreen = PublicScreen::instance()->screenPointer();
 
@@ -44,9 +44,25 @@ void Widget::openWindow()
 	
 		WINDOW_ParentLayout,	createContent(),
 		WINDOW_MenuStrip,		mainMenu ? mainMenu->systemObject() : 0,
+        WINDOW_GadgetHelp,      TRUE,
+
 	EndWindow;
 	
 	if (object) window = (struct Window *) RA_OpenWindow (object);
+
+	openedWindows.push_back(this);
+
+	return window != 0;
+}
+
+bool Widget::openNewWindow(Widget *widget)
+{
+	if(widget->openWindow()) {
+		//widget->setMenubar(mainMenu);
+		openedWindows.push_back(widget);
+		return true;
+	}
+	return false;
 }
 
 Object *Widget::createContent()
@@ -75,15 +91,28 @@ void Widget::closeWindow ()
 	children.clear();
 }
 
+void Widget::closeNewWindow(Widget *widget)
+{
+	widget->closeWindow();
+	openedWindows.remove(widget);
+
+}
+void Widget::closeAllWindows()
+{
+	list<Widget *> opened(openedWindows);
+	for (list<Widget *>::iterator it = opened.begin(); it != opened.end(); it++)
+		closeNewWindow(*it);
+}
+
 int Widget::waitForClose()
 {
-	bool close = false;
+	bool closeAll = false;
 	
-	while (!close) {
-		uint32 result = IExec->Wait (handlerSignals() | windowSignalMask() | SIGBREAKF_CTRL_C);
+	while (!closeAll) {
+		uint32 result = IExec->Wait (handlerSignals() | /*windowSignalMask() |*/ openedWindowsSignalMask() | SIGBREAKF_CTRL_C);
 
 		if (result & SIGBREAKF_CTRL_C) {
-			close = true;
+			closeAll = true;
 		}
 
 		for(int i = 0; i < handlers.size(); i++) {
@@ -91,36 +120,54 @@ int Widget::waitForClose()
 				handlers[i]->handler();
 		}
 
-		bool done = false;
-		while(!done) {
-			uint32 Class;
-			uint16 Code;
-			Class = IIntuition->IDoMethod (object, WM_HANDLEINPUT, &Code);
-			if(Class == WMHI_LASTMSG) {
-				done = true;
-			} else {
-				switch (Class & WMHI_CLASSMASK) {
-					case WMHI_CLOSEWINDOW:
-						close = true;
-						break;
+		cout << "SIGNAL : " << (void *)result << "\n";
 
-					case WMHI_MENUPICK: {
-						uint32 id = NO_MENU_ID;
-						while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID)
-						close = mainMenu->handleMenuPick(id);
-						done = close;
+		while(result) {
+			bool close = false;
+			Widget *target = findOpenedWindowWidget(result);
+			cout << "target : " << (void *) target << "\n";
+			if(!target) { result = 0x0; continue; }
+			result ^= target->windowSignalMask();
+			cout << "result : " << (void *)result << "\n";
+			Object *object = target->windowObject();
+			cout << "object : " << (void *)object << "\n";
+
+			bool done = false;
+			while(!done) {
+
+				uint32 Class;
+				uint16 Code;
+				Class = IIntuition->IDoMethod (object, WM_HANDLEINPUT, &Code);
+				if(Class == WMHI_LASTMSG) {
+					done = true;
+				} else {
+					switch (Class & WMHI_CLASSMASK) {
+						case WMHI_CLOSEWINDOW:
+							close = true;
+							break;
+
+						case WMHI_MENUPICK: {
+							uint32 id = NO_MENU_ID;
+							while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID)
+							close = mainMenu->handleMenuPick(id);
+							done = close;
+							closeAll = (close && target==this);
+						}
+							break;
+
+						default:
+							close = target->processEvent(Class, Code);
+							done = close;
+							closeAll = (close && target==this);
+							break;
 					}
-						break;
-
-					default:
-						close = processEvent(Class, Code);
-						done = close;
-						break;
 				}
 			}
+			if(close) { closeNewWindow(target); result = 0x0; }
 		}
 	}
-	closeWindow ();
+	// closeWindow ();
+	closeAllWindows();
 	return 0;
 }
 
@@ -180,6 +227,39 @@ uint32 Widget::windowSignalMask ()
 	uint32 mask = 0x0;
 	if (object) IIntuition->GetAttr (WINDOW_SigMask, object, &mask);
 	return mask;
+}
+
+uint32 Widget::openedWindowsSignalMask()
+{
+	uint32 mask = 0x0;
+	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
+		mask |= (*it)->windowSignalMask();
+	// 	Object *object = (*it)->windowObject();
+	// 	uint32 sigMask;
+	// 	if (object) {
+	// 		IIntuition->GetAttr (WINDOW_SigMask, object, &sigMask);
+	// 		mask |= sigMask;
+	// 	}
+	// }
+	}
+	return mask;
+}
+
+Widget *Widget::findOpenedWindowWidget(uint32 mask) {
+	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
+		cout << "windowSignalMask() : " << (void *)(*it)->windowSignalMask() << "\n";
+		if(mask & (*it)->windowSignalMask())
+			return *it;
+		// Object *object = (*it)->windowObject();
+		// uint32 sigMask;
+		// if (object) {
+		// 	IIntuition->GetAttr (WINDOW_SigMask, object, &sigMask);
+		// 	if(sigMask & mask) {
+		// 		return *it;
+		// 	}
+		// }
+	}
+	return 0x0;
 }
 
 bool Widget::processEvent (uint32 Class, uint16 Code)

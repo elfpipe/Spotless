@@ -48,6 +48,8 @@ public:
         done = layout->createButton("Done");
     }
     bool handleEvent (Event *event) {
+        bool result = false;
+
         if (event->eventClass() == Event::CLASS_StringEntry) {
             if(event->elementId() == getSymbolNameId()) {
                 updateDisassembly();
@@ -95,11 +97,11 @@ public:
             }
             if(event->elementId() == getDoneId()) {
                 breaks.clear();
-                return true;
+                result = true;
             }
             spotless->updateAll();
         }
-        return false;
+        return result;
     }
 
     void updateDisassembly() {

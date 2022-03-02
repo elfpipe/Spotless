@@ -5,6 +5,8 @@
 
 #include <string>
 #include <vector>
+#include <list>
+using namespace std;
 
 class Menubar;
 class Panel;
@@ -15,6 +17,7 @@ class Speedbar;
 class Listbrowser;
 class Event;
 class RString;
+class Spotless;
 
 using namespace std;
 
@@ -22,10 +25,13 @@ class Widget {
 private:
 	Object *object;
 	struct Window *window;
+	list<Widget *> openedWindows;
 
 	Object *createContent();
 
 	uint32 windowSignalMask();
+	uint32 openedWindowsSignalMask();
+
 	bool processEvent (uint32 Class, uint16 Code);
 
 	struct Window *windowPointer() { return window; }
@@ -37,6 +43,8 @@ private:
 
 	unsigned int addChild(Object *object); //return id
 	Object *findChild(unsigned int id);
+
+	Widget *findOpenedWindowWidget(uint32 mask);
 
 private:
 	string widgetName;
@@ -76,9 +84,14 @@ public:
 	string name() { return widgetName; }
 		
 	virtual int waitForClose();
-	virtual void openWindow();
+	virtual bool openWindow();
+	bool openNewWindow(Widget *);
+
 	void closeWindow();
-	
+	void closeNewWindow(Widget *);
+
+	void closeAllWindows();
+
 	void iconify();
 	void uniconify();
 	void windowToFront();
@@ -100,5 +113,6 @@ public:
 	friend Panel;
 	friend Menubar;
 	friend RString;
+	friend Spotless;
 };
 #endif
