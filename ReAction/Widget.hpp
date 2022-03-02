@@ -72,7 +72,7 @@ public:
 	void setParentLayout(Layout *layout) { parentLayout = layout; }	
 	void setMenubar(Menubar *menu);
 
-	void setName(string name) { widgetName = name; }
+	void setName(string name);
 	string name() { return widgetName; }
 		
 	virtual int waitForClose();

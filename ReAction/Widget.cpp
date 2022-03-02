@@ -34,7 +34,7 @@ void Widget::openWindow()
 	object = WindowObject,
 		WA_PubScreen,		publicScreen,
 		WA_ScreenTitle,		"Spotless",
-		WA_Title,			"Spotless",
+		WA_Title,			widgetName.size() ? widgetName.c_str() : "Spotless",
  		WA_DepthGadget,		TRUE,
 		WA_SizeGadget,		TRUE,
 		WA_DragBar,			TRUE,
@@ -150,6 +150,13 @@ Object *Widget::findChild(unsigned int id)
 	}
 	return 0;
 }
+
+void Widget::setName(string name)
+{
+	widgetName = name;
+	if(window) IIntuition->SetWindowTitles(window, name.c_str(), "Spotless");
+}
+
 void Widget::iconify()
 {
 	if(object)
