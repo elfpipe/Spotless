@@ -71,12 +71,12 @@ public:
             }
             if(event->elementId() == getAsmBackSkipId()) {
                 // this is inherently unsafe
-                spotless->debugger.backSkip();
+                spotless->debugger.unsafeBackSkip();
                 updateDisassembly();
                 updateHex();
             }
             if(event->elementId() == getAsmStepId()) {
-                spotless->debugger.step();
+                spotless->debugger.unsafeStep();
                 string newSymbol = spotless->debugger.getSymbolFromAddress(spotless->debugger.getIp());
                 if(newSymbol.size()) {
                     sprintf(buffer1, "%s", newSymbol.c_str());
@@ -89,7 +89,7 @@ public:
             }
             if(event->elementId() == getAsmSkipId()) {
                 // this is inherently unsafe
-                spotless->debugger.skip();
+                spotless->debugger.unsafeSkip();
                 updateDisassembly();
                 updateHex();
             }

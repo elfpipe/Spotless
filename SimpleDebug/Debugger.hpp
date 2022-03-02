@@ -143,10 +143,6 @@ public:
 	void wait() {
 		process.wait();
 	}
-	void skip() {
-		if(!isDead() && binary->getFunction(process.ip()+4))
-			process.skip();
-	}
 	void backSkip() {
 		if(!isDead() && binary->getFunction(process.ip()-4))
 			process.backSkip();
@@ -154,6 +150,22 @@ public:
 	void step() {
 		if(!isDead() && binary->getFunction(process.ip()+4))
 			process.step();
+	}
+	void skip() {
+		if(!isDead() && binary->getFunction(process.ip()+4))
+			process.skip();
+	}
+	void unsafeBackSkip() {
+		if(!isDead())
+			process.backSkip();
+	}
+	void unsafeStep() {
+		if(!isDead())
+			process.step();
+	}
+	void unsafeSkip() {
+		if(!isDead())
+			process.skip();
 	}
 	void safeStep() {
 		if(isDead() || !binary->getFunction(process.ip())) return;
