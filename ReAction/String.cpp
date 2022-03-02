@@ -4,11 +4,16 @@
 #include <gadgets/string.h>
 
 #include <string>
+#include <list>
 
 #include "String.hpp"
 #include "Widget.hpp"
 
 #include <iostream>
+
+using namespace std;
+
+list<Object *> RString::strings;
 
 RString::RString (Widget *parent, const char *content)
 {	
@@ -20,9 +25,10 @@ RString::RString (Widget *parent, const char *content)
 		STRINGA_TextVal,		content,
 	TAG_DONE);
 
+	strings.push_back(rstring);
 	this->parent = parent;
-	
-	parent->topLevelParent()->addChild(rstring);
+
+	id = parent->topLevelParent()->addChild(rstring);
 }
 
 // gb_StringGad = (struct Gadget *) IIntuition->NewObject(IString->STRING_GetClass(),NULL,
@@ -54,6 +60,14 @@ string RString::getContent()
 	IIntuition->GetAttrs (rstring,
 		STRINGA_TextVal, &content,
 	TAG_DONE);
-	cout << "getContent() : STRINGA_TextVal = " << content << "\n";
+	// cout << "getContent() : STRINGA_TextVal = " << content << "\n";
 	return string(content);
+}
+
+bool RString::isString(Object *o)
+{
+	for(list<Object *>::iterator it = strings.begin(); it != strings.end(); it++) {
+		if((*it) == o) return true;
+	}
+	return false;
 }

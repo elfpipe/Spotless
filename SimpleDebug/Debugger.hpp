@@ -51,8 +51,6 @@ public:
 
 		if(handle->performRelocation())
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
-
-		cout << (void *)symbols.valueOf("puts") << "\n";
 	}
 	bool load(string path, string file, string args) {
 		APTR handle = process.load(path, file, args);
@@ -132,6 +130,11 @@ public:
 		process.go();
 		// process.wait();
 		// breaks.deactivate(); //do the last bit in trap handler
+	}
+	void justGo() {
+		if(process.isDead() || process.isRunning()) return;
+
+		process.go();
 	}
 	void stop() {
 		process.suspend();
@@ -291,8 +294,8 @@ public:
 	vector<string> functionSource() {
 		vector<string> result;
 		string source = binary->getSourceFile(process.ip());
-		cout << "Source file : " << source << "\n"; 
-		cout << "ip : " << (void *)process.ip();
+		// cout << "Source file : " << source << "\n"; 
+		// cout << "ip : " << (void *)process.ip();
 		if(source.size() == 0) return result;
 		string fullPath = roots.search(source);
 		if(fullPath.size() == 0) return result;
@@ -375,11 +378,9 @@ public:
 		return result;
 	}
 	vector<string> disassembleSymbol(string symbolName) {
-		cout << "Disassemble : " << symbolName << "\n";
 		vector<string> result;
 		uint32_t addressBegin = symbols.valueOf(symbolName);
 
-		cout << "addressBegin : " << (void *)addressBegin << "\n";
 		if(!addressBegin) {
 			result.push_back("<No such address>");
 			return result;
@@ -408,7 +409,6 @@ public:
 				} else {
 					result.push_back(printStringFormat("          0x%x : %s %s", address, opcode, operands) + symbolName);
 				}
-				cout << "line : " << entry << " , ip : " << (void *)getIp() << "\n";
 				//for hightlighting
 				if(address == getIp()) line = entry;
 				entry++;
@@ -426,7 +426,6 @@ public:
 	vector<string> hexDump(string addressString) {
 		uint32_t address = (uint32_t)strtol(addressString.c_str(), 0, 0);
 		vector<string> result;
-		cout << "hexDump : address = " << (void *)address << "\n";
 		if(!address) {
 			result.push_back("<not a readable address>");
 			return result;

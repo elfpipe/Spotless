@@ -66,7 +66,7 @@ uint16 ElfSymbols::sizeOf (string name) {
 
 string ElfSymbols::nameFromValue(uint32 value) {
 	for (list <ElfSymbol *>::iterator it = symbols.begin (); it != symbols.end (); it++)
-		if ((*it)->value == value)
+		if ((*it)->value <= value && value < (*it)->value + (*it)->size)
 			return (*it)->name;
 	return string(); //throw something in this case too ??
 }

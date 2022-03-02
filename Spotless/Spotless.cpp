@@ -163,6 +163,7 @@ bool Spotless::handleEvent(Event *event) {
                 MemorySurfer memorySurfer(spotless);
                 memorySurfer.openWindow();
                 memorySurfer.waitForClose();
+                updateAll();
         }
     }
     return false;

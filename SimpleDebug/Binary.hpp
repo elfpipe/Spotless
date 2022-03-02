@@ -253,6 +253,12 @@ public:
             return result;
         }
         switch(rangeType) {
+            case R_Int64: { // TODO : Fix toString incompatibility with long long
+                //result.push_back(patch::toString(*(unsigned long long *)base)); //crashes
+                int value = *(long long *)base;
+                result.push_back(patch::toString(value));
+                break;
+            }
             case R_UInt64: {
                 //result.push_back(patch::toString(*(unsigned long long *)base)); //crashes
                 unsigned int value = *(unsigned long long *)base;
@@ -518,7 +524,7 @@ public:
     }
     vector<string> values(uint32_t base) {
         vector<string> result;
-        result.push_back("<unknwon array>");
+        result.push_back("<unknown array>");
         return result;
     }
 };
@@ -577,7 +583,7 @@ public:
         vector<string> result;
         vector<string> v;
         if(type) v = type->values(base + address);
-        if(v.size() == 1)
+        if(v.size() <= 1)
             result.push_back(name + " " + typeString() + " : " + v[0]);
         else {
             result.push_back(name + " " + typeString() + " : {");

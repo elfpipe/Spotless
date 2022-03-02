@@ -6,51 +6,66 @@
 #include "../ReAction/classes.h"
 #include "../SimpleDebug/Strings.hpp"
 #include "Spotless.hpp"
+#include "../SimpleDebug/Breaks.hpp"
 
 class MemorySurfer : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *disassembly, *hex;
-    RButton *disassemble, *readHex, *done, *run;
-    RString *symbolName, *addressString, *breakpointString;
+    RButton /**disassemble,*/ /**readHex,*/ *done, *run;
+    RString *symbolName, *addressString; //, *breakpointString;
     RButton *asmBackSkip, *asmStep, *asmSkip;
+
+    Breaks breaks;
 
     char buffer1[4096], buffer2[4096];
 
 public:
     MemorySurfer(Spotless *parent) : Widget(0) { setName("Memory surfer"); spotless = parent; }
     void createGuiObject(Layout *layout) {
+        run = layout->createButton("Run", "debug");
+
         Layout *disassemblyLayout = layout->createLabeledLayout("Disassemble symbol");
-        Layout *disassemblyInputLayout = layout->createHorizontalLayout();
-        symbolName = disassemblyInputLayout->createString("");
-        disassemble = disassemblyInputLayout->createButton("Disassemble");
-        disassembly = disassemblyLayout->createListbrowser();
+        symbolName = disassemblyLayout->createString("");
+        // disassemble = disassemblyInputLayout->createButton("Disassemble");
+        Layout *hLayout = disassemblyLayout->createHorizontalLayout();
+        disassembly = hLayout->createListbrowser();
+        disassembly->setColumnTitles("Br|Command");
+        Layout *vLayout = hLayout->createVerticalLayout(100, 0);
+        asmBackSkip = vLayout->createButton("Back skip", "scrollstart");
+        asmStep = vLayout->createButton("Asm step", "scrolldown");
+        asmSkip = vLayout->createButton("Asm skip", "scrollend");
+        vLayout->createSpace();
 
         Layout *hexLayout = layout->createLabeledLayout("Hex view");
-        Layout *hexInputLayout = hexLayout->createHorizontalLayout();
-        addressString = hexInputLayout->createString("");
-        readHex = hexInputLayout->createButton("Read hex");
+        addressString = hexLayout->createString("");
+        // readHex = hexInputLayout->createButton("Read hex");
         hex = hexLayout->createListbrowser();
 
-        Layout *runnerLayout = layout->createLabeledLayout("Blind runner");
-        Layout *runnerInputLayout = runnerLayout->createHorizontalLayout();
-        breakpointString = runnerInputLayout->createString("<enter breakpoint symbol>");
-        run = runnerInputLayout->createButton("Run");
-        asmBackSkip = runnerInputLayout->createButton("Back skip", "scrollstart");
-        asmStep = runnerInputLayout->createButton("Asm step", "scrolldown");
-        asmSkip = runnerInputLayout->createButton("Asm skip", "scrollend");
+        // Layout *runnerInputLayout = runnerLayout->createHorizontalLayout();
+        // breakpointString = runnerInputLayout->createString("<enter breakpoint symbol>");
 
         done = layout->createButton("Done");
     }
     bool handleEvent (Event *event) {
-        cout << "handleEvent : elementId() == " << event->elementId() << "\n";
-        if(event->eventClass() == Event::CLASS_ButtonPress) {
-            if(event->elementId() == getDisassembleId()) {
+        if (event->eventClass() == Event::CLASS_StringEntry) {
+            if(event->elementId() == getSymbolNameId()) {
                 updateDisassembly();
             }
-            if(event->elementId() == getReadHexId()) {
+            if(event->elementId() == getAddressId()) {
                 updateHex();
             }
+
+        }
+        if(event->eventClass() == Event::CLASS_CheckboxCheck) {
+            breaks.insert((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()));
+            updateDisassembly();
+        }
+        if(event->eventClass() == Event::CLASS_CheckboxUncheck) {
+            breaks.remove((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()));
+            updateDisassembly();
+        }
+        if(event->eventClass() == Event::CLASS_ButtonPress) {
             if(event->elementId() == getRunId()) {
                 blindRunner();
             }
@@ -79,8 +94,10 @@ public:
                 updateHex();
             }
             if(event->elementId() == getDoneId()) {
+                breaks.clear();
                 return true;
             }
+            spotless->updateAll();
         }
         return false;
     }
@@ -88,34 +105,36 @@ public:
     void updateDisassembly() {
         disassembly->clear();
         string symbol = symbolName->getContent();
-        cout << "updateDisassembly : symbol = " << symbol << "\n";
         vector<string> result = spotless->debugger.disassembleSymbol(symbol);
-        for(vector<string>::iterator it = result.begin(); it != result.end(); it++)
-            disassembly->addNode((*it));
+        if(result.size()) {
+            uint32_t address = spotless->debugger.getSymbolValue(symbol);
+            for(vector<string>::iterator it = result.begin(); it != result.end(); it++) {
+                vector<string> data;
+                data.push_back("");
+                data.push_back(*it);
+                disassembly->addCheckboxNode(data, true, breaks.isBreak(address), (void *)address);
+                address += 4;
+            }
+        }
         int line = spotless->debugger.getDisassebmlyLine();
-        cout << "focus of dissasmbly : line = " << line << "\n";
         disassembly->focus(line);
     }
     void updateHex() {
         hex->clear();
         string hexString = addressString->getContent();
-        cout << "updateHex : hexString = " << hexString << "\n";
         vector<string> result = spotless->debugger.hexDump(hexString);
         for(vector<string>::iterator it = result.begin(); it != result.end(); it++)
             hex->addNode((*it));
         hex->focus(spotless->debugger.getHexLine());
     }
     void blindRunner() {
-        string breakpoint = breakpointString->getContent();
-        if(breakpoint.size()) {
-            spotless->debugger.breakpointSymbol(breakpoint, true);
-        }
-        spotless->debugger.activateBreaks();
-        spotless->debugger.start();
+        breaks.activate();
+        spotless->debugger.justGo();
         spotless->debugger.wait();
-        spotless->debugger.suspendBreaks();
-        spotless->debugger.breakpointSymbol(breakpoint, false);
+        breaks.deactivate();
 
+        string breakpoint = spotless->debugger.getSymbolFromAddress(spotless->debugger.getIp());
+        if(!breakpoint.size()) breakpoint = "<not a symbol>";
         sprintf(buffer1, "%s", breakpoint.c_str());
         symbolName->setContent(buffer1);
         updateDisassembly();
@@ -123,11 +142,17 @@ public:
         addressString->setContent(buffer2);
         updateHex();
     }
-    unsigned int getDisassembleId() {
-        return disassemble->getId();
+    // unsigned int getDisassembleId() {
+    //     return disassemble->getId();
+    // }
+    // unsigned int getReadHexId() {
+    //     return readHex->getId();
+    // }
+    unsigned int getSymbolNameId() {
+        return symbolName->getId();
     }
-    unsigned int getReadHexId() {
-        return readHex->getId();
+    unsigned int getAddressId() {
+        return addressString->getId();
     }
     unsigned int getDoneId() {
         return done->getId();
