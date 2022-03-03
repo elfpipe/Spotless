@@ -65,11 +65,11 @@ public:
         }
         if(event->eventClass() == Event::CLASS_CheckboxCheck) {
             breaks.insert((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()));
-            updateDisassembly();
+            // updateDisassembly();
         }
         if(event->eventClass() == Event::CLASS_CheckboxUncheck) {
             breaks.remove((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()));
-            updateDisassembly();
+            // updateDisassembly();
         }
         if(event->eventClass() == Event::CLASS_ButtonPress) {
             if(event->elementId() == getRunId()) {
@@ -81,39 +81,29 @@ public:
             }
             if(event->elementId() == getStepOverId()) {
                 spotless->debugger.asmStepOver();
-                updateDisassembly();
+                update();
             }
             if(event->elementId() == getStepIntoId()) {
                 spotless->debugger.asmStepInto();
-                updateDisassembly();
+                update();
             }
             if(event->elementId() == getStepOutId()) {
                 spotless->debugger.asmStepOut();
-                updateDisassembly();
+                update();
             }
             if(event->elementId() == getAsmBackSkipId()) {
                 // this is inherently unsafe
                 spotless->debugger.unsafeBackSkip();
-                updateDisassembly();
-                updateHex();
+                update();
             }
             if(event->elementId() == getAsmStepId()) {
                 spotless->debugger.unsafeStep();
-                string newSymbol = spotless->debugger.getSymbolFromAddress(spotless->debugger.getIp());
-                if(newSymbol.size()) {
-                    sprintf(buffer1, "%s", newSymbol.c_str());
-                    symbolName->setContent(buffer1);
-                }
-                updateDisassembly();
-                sprintf(buffer2, "0x%x", spotless->debugger.getIp());
-                addressString->setContent(buffer2);
-                updateHex();
+                update();
             }
             if(event->elementId() == getAsmSkipId()) {
                 // this is inherently unsafe
                 spotless->debugger.unsafeSkip();
-                updateDisassembly();
-                updateHex();
+                update();
             }
             if(event->elementId() == getDoneId()) {
                 breaks.clear();
@@ -155,6 +145,9 @@ public:
         spotless->debugger.wait();
         breaks.deactivate();
 
+        update();
+    }
+    void update() {
         string breakpoint = spotless->debugger.getSymbolFromAddress(spotless->debugger.getIp());
         if(!breakpoint.size()) breakpoint = "<not a symbol>";
         sprintf(buffer1, "%s", breakpoint.c_str());

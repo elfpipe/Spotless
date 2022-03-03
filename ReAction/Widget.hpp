@@ -17,6 +17,7 @@ class Speedbar;
 class Listbrowser;
 class Event;
 class RString;
+class Checkbox;
 class Spotless;
 
 using namespace std;
@@ -116,6 +117,7 @@ public:
 	friend Panel;
 	friend Menubar;
 	friend RString;
+	friend Checkbox;
 	friend Spotless;
 };
 #endif

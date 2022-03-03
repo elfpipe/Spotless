@@ -157,6 +157,7 @@ int Widget::waitForClose()
 						case WMHI_CLOSEWINDOW:
 							done = true;
 							close = true;
+							if(target == this) closeAll = true;
 							break;
 
 						case WMHI_MENUPICK: {
@@ -320,12 +321,16 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 
 			// cout << "parent : " << (void *)parent << "\n";
 
-			if(RButton::isButton(gadget)) {
-				char *text;
+			if(Checkbox::isCheckbox(gadget)) {
+				event = new Event (Event::CLASS_CheckboxPress);
+				event->setElementId (gadgetId);
+				event->setElementDescription ("");
+			} else if(RButton::isButton(gadget)) {
+				// char *text;
 
-				IIntuition->GetAttrs(gadget,
-					GA_Text, &text,
-				TAG_DONE);
+				// IIntuition->GetAttrs(gadget,
+				// 	GA_Text, &text,
+				// TAG_DONE);
 
 				event = new Event (Event::CLASS_ButtonPress);
 				event->setElementId (gadgetId);

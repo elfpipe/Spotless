@@ -376,8 +376,12 @@ vector<string> Binary::getContext(uint32_t ip, uint32_t sp) {
 
     /* parameters */
     for(int i = 0; i < function->params.size(); i++) {
-        vector<string> values = function->params[i]->values(sp);
-        result.insert(result.end(), values.begin(), values.end());
+        if (function->params[i]) {
+            vector<string> values = function->params[i]->values(sp);
+            result.insert(result.end(), values.begin(), values.end());
+        } else {
+            result.push_back("<no symbol info>");
+        }
     }
 
     /* locals */

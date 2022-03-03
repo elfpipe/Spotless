@@ -461,8 +461,8 @@ public:
 			return result;
 		}
 		int entry = 1;
-		uint32_t begin = address - address % 4096;
-		for(uint32_t offset = 0x0; offset < 4096; offset+=32) {
+		uint32_t begin = address - address % 1024;
+		for(uint32_t offset = 0x0; offset < 1024; offset+=32) {
 			result.push_back(printStringFormat("0x%x + 0x%x : 0x%x 0x%x 0x%x 0x%x", begin, offset, *(uint32_t *)(begin + offset), *(uint32_t *)(begin + offset + 4), *(uint32_t *)(begin + offset + 8), *(uint32_t *)(begin + offset+ 12)));
 			if(address - begin >= offset && address - begin < offset + 32) hexLine = entry;
 			entry++;

@@ -15,6 +15,7 @@ ReAction/Button.cpp
 ReAction/Panel.cpp
 ReAction/Menubar.cpp
 ReAction/String.cpp
+ReAction/Checkbox.cpp
 )
 
 set(SIMPLEDEBUG_SOURCES

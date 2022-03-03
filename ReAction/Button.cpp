@@ -45,7 +45,7 @@ RButton::RButton (Widget *parent, const char *text, const char *iconName)
 		TAG_DONE);
 	} else {
 		button = IIntuition->NewObject(NULL, "button.gadget",
-			GA_ID,			id,
+			// GA_ID,			id,
 			GA_UserData,	parent,
 			GA_RelVerify,	true,
 			GA_Text,		text,

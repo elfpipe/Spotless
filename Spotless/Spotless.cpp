@@ -35,7 +35,7 @@ void Spotless::create() {
 
     memorySurfer = new MemorySurfer(spotless);
     configure = new Configure(spotless);
-    
+
     setMenubar(menu);
     setTopBar(actions);
     setMainView(code);
@@ -142,10 +142,12 @@ bool Spotless::handleEvent(Event *event) {
     if(event->eventClass() == Event::CLASS_CheckboxUncheck) {
         code->checkboxSelected(sources->getSelectedElement(), false);
     }
-    if(event->eventClass() == Event::CLASS_ButtonPress) {
+    if(event->eventClass() == Event::CLASS_CheckboxPress) {
         if(event->elementId() == context->getGlobalsId()) {
             context->globals();
         }
+    }
+    if(event->eventClass() == Event::CLASS_ButtonPress) {
         if(event->elementId() == disassembler->getAsmBackSkipId()) {
             // this is inherently unsafe
             debugger.backSkip();

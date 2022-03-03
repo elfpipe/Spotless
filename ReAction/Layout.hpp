@@ -7,6 +7,7 @@
 #include "Speedbar.hpp"
 #include "Listbrowser.hpp"
 #include "String.hpp"
+#include "Checkbox.hpp"
 
 #include <string>
 
@@ -51,7 +52,8 @@ public:
 	Speedbar *createSpeedbar ();
 	RButton *createButton (const char *text, const char *image = "");
 	RString *createString (const char *content);
-
+	Checkbox *createCheckbox (const char *text, bool checked = false);
+	
 	void addEmbeddedWidget(Widget *widget);
 	void addTabbedPanel(Panel *panel, int weight);
 	void addWeightBar();

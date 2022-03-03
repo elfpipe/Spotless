@@ -10,16 +10,16 @@ class Context : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
-    RButton *button;
+    Checkbox *globalsCheckbox;
 
-
+    bool showGlobals;
 public:
-    Context(Spotless *parent) : Widget((Widget *)parent) { setName("Variables"); spotless = parent; }
+    Context(Spotless *parent) : Widget((Widget *)parent), showGlobals(false) { setName("Variables"); spotless = parent; }
     void createGuiObject(Layout *layout) {
         Layout *vertical = layout->createVerticalLayout();
         listbrowser = vertical->createListbrowser();
         listbrowser->setHierachical(true);
-        button = vertical->createButton("Globals");
+        globalsCheckbox = vertical->createCheckbox("Show globals", showGlobals);
     }
     void add(vector<string> context, int generation) {
         for(int i = 0; i < context.size(); i++) {
@@ -34,16 +34,20 @@ public:
     void update() {
         clear();
         add(spotless->debugger.context(), 1);
+        if(showGlobals) add(spotless->debugger.globals(), 1);
     }
     void globals() {
-        listbrowser->addNode("Globals", 0, true, 1);
-        add(spotless->debugger.globals(), 2);
+        showGlobals = globalsCheckbox->getChecked();
+        cout << "showGlobals : " << (showGlobals ? "true" : "false") << "\n";
+        // listbrowser->addNode("Globals", 0, true, 1);
+        // add(spotless->debugger.globals(), 2);
+        update();
     }
     void clear() {
         listbrowser->clear();
     }
     unsigned int getGlobalsId() {
-        return button->getId();
+        return globalsCheckbox->getId();
     }
 };
 #endif

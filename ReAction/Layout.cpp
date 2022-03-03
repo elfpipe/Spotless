@@ -110,6 +110,17 @@ RString *Layout::createString (const char *content)
 	return rstring;
 }
 
+Checkbox *Layout::createCheckbox (const char *text, bool checked)
+{
+	Checkbox *checkbox = new Checkbox(parent, text, checked);
+	IIntuition->SetAttrs (layout,
+		LAYOUT_AddChild, checkbox->systemObject(),
+		CHILD_WeightedHeight,	0,
+		CHILD_WeightedWidth,	0,
+	TAG_DONE);
+	return checkbox;
+}
+
 void Layout::addWeightBar()
 {
 	IIntuition->SetAttrs (layout, LAYOUT_WeightBar, TRUE, TAG_DONE);

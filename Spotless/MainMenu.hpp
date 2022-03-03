@@ -30,7 +30,7 @@ public:
             case 2: //switch public screen
                 spotless->closeWindow();
                 if (!PublicScreen::usingPublicScreen())
-                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright � 2020 by Alpha Kilimanjaro");
+                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alpha Kilimanjaro");
                 else
                     PublicScreen::instance()->closePublicScreen();
                 spotless->openWindow();
@@ -40,9 +40,6 @@ public:
                 if(spotless->configure) {
                     spotless->openNewWindow((Widget *)spotless->configure);
                 }
-                // Configure configure(spotless);
-                // configure.openWindow();
-                // configure.waitForClose();
             } break;
         }
         return false;
