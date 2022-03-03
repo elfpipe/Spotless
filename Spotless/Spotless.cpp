@@ -34,7 +34,8 @@ void Spotless::create() {
     disassembler = new Disassembler(spotless);
 
     memorySurfer = new MemorySurfer(spotless);
-
+    configure = new Configure(spotless);
+    
     setMenubar(menu);
     setTopBar(actions);
     setMainView(code);

@@ -37,9 +37,12 @@ public:
                 spotless->updateAll();
                 break;
             case 3: {
-                Configure configure(spotless);
-                configure.openWindow();
-                configure.waitForClose();
+                if(spotless->configure) {
+                    spotless->openNewWindow((Widget *)spotless->configure);
+                }
+                // Configure configure(spotless);
+                // configure.openWindow();
+                // configure.waitForClose();
             } break;
         }
         return false;

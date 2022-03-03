@@ -58,7 +58,7 @@ bool MainWindow::openWindow() {
         WINDOW_MenuStrip,       mainMenu ? mainMenu->systemObject() : 0,
         WINDOW_GadgetHelp,      TRUE,
         WINDOW_IconifyGadget,   TRUE,
-	  WINDOW_IconTitle, "Example",
+	  WINDOW_IconTitle, "Spotless",
 	   WINDOW_AppPort, appPort,
 EndWindow;
 	
