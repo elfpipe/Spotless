@@ -16,7 +16,8 @@ Widget::Widget(Widget *parentWidget)
 		window(0),
 		parentLayout(0),
 		mainMenu(0),
-		gadgetId(1)
+		gadgetId(1),
+		appPort(0)
 {
 	this->parentWidget = parentWidget;
 }
@@ -124,7 +125,7 @@ int Widget::waitForClose()
 	bool closeAll = false;
 	
 	while (!closeAll) {
-		uint32 result = IExec->Wait (handlerSignals() | /*windowSignalMask() |*/ openedWindowsSignalMask() | SIGBREAKF_CTRL_C /*| (AppPort ? 1L << AppPort->mp_SigBit : 0x0)*/);
+		uint32 result = IExec->Wait (handlerSignals() | openedWindowsSignalMask() | SIGBREAKF_CTRL_C );
 
 		if (result & SIGBREAKF_CTRL_C) {
 			closeAll = true;
@@ -135,26 +136,13 @@ int Widget::waitForClose()
 				handlers[i]->handler();
 		}
 
-		// cout << "SIGNAL : " << (void *)result << "\n";
-		// if(result & (AppPort ? 1L << AppPort->mp_SigBit : 0x0)) {
-		// 	bool done = false;
-		// 	while(!done) {
+		for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
 
-		// 		uint32 Class;
-		// 		uint16 Code;
-		// 		Class = IIntuition->IDoMethod (object, WM_HANDLEINPUT, &Code);
-
-		// }
-		while(result) {
 			bool close = false;
-			Widget *target = findOpenedWindowWidget(result);
-			// cout << "target : " << (void *) target << "\n";
-			if(!target) { result = 0x0; continue; }
-			result ^= target->windowSignalMask();
-			// cout << "result : " << (void *)result << "\n";
-			Object *object = target->windowObject();
-			// cout << "object : " << (void *)object << "\n";
+			Widget *target = (*it);
+			if(!target) continue;
 			if(!target->windowPointer()) continue;
+			Object *object = target->windowObject();
 
 			bool done = false;
 			while(!done) {
@@ -167,6 +155,7 @@ int Widget::waitForClose()
 				} else {
 					switch (Class & WMHI_CLASSMASK) {
 						case WMHI_CLOSEWINDOW:
+							done = true;
 							close = true;
 							break;
 
@@ -179,14 +168,18 @@ int Widget::waitForClose()
 						}
 							break;
 
-						// case WMHI_ICONIFY : {
-						// 	iconify();
-						// 	result = 0x0;
+						case WMHI_ICONIFY : {
+							if(!appPort) break;
 
-						// 	uint32 newResult = IExec->Wait (1L << AppPort->mp_SigBit);
-						// 	uniconify();
-						// 	break;
-						// }
+							closeAllExceptThis();
+							iconify();
+							result = 0x0;
+
+							uint32 newResult = IExec->Wait (1L << appPort->mp_SigBit);
+							uniconify();
+							done = true;
+							break;
+						}
 
 						case WMHI_RAWKEY :
 							if ((Code & WMHI_KEYMASK) == RAWKEY_ESC && target != this)
@@ -201,7 +194,7 @@ int Widget::waitForClose()
 					}
 				}
 			}
-			if(close && target != this) { closeNewWindow(target); result = 0x0; } close = false;
+			if(close && target != this) { closeNewWindow(target); result = 0x0; break; } close = false;
 		}
 	}
 	// closeWindow ();

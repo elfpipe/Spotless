@@ -46,6 +46,8 @@ private:
 
 	Widget *findOpenedWindowWidget(uint32 mask);
 
+    struct MsgPort *appPort;
+
 private:
 	string widgetName;
 

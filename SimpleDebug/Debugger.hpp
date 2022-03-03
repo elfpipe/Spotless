@@ -167,6 +167,24 @@ public:
 		if(!isDead())
 			process.skip();
 	}
+	void asmStepOver() {
+		if(isDead()) return;
+		process.stepNoBranch();
+	}
+	void asmStepInto() {
+		unsafeStep();
+	}
+	void asmStepOut() {
+		if(isDead()) return;
+
+		Breaks outBreak;
+		outBreak.insert(process.lr());
+
+		outBreak.activate();
+		process.go();
+		process.wait();
+		outBreak.deactivate();
+	}
 	void safeStep() {
 		if(isDead() || !binary->getFunction(process.ip())) return;
 

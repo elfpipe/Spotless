@@ -12,8 +12,9 @@ class MemorySurfer : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *disassembly, *hex;
-    RButton /**disassemble,*/ /**readHex,*/ *done, *run;
-    RString *symbolName, *addressString; //, *breakpointString;
+    RButton *done, *run, *stepOver, *stepInto, *stepOut;
+    RString *symbolName, *addressString;
+    RButton *clearBreaks;
     RButton *asmBackSkip, *asmStep, *asmSkip;
 
     Breaks breaks;
@@ -23,11 +24,18 @@ private:
 public:
     MemorySurfer(Spotless *parent) : Widget(0) { setName("Memory surfer"); spotless = parent; }
     void createGuiObject(Layout *layout) {
-        run = layout->createButton("Run", "debug");
+        Layout *controlLayout = layout->createHorizontalLayout(0, 0);
+        run = controlLayout->createButton("Run", "debug");
+        stepOver = controlLayout->createButton("Step over", "stepover");
+        stepInto = controlLayout->createButton("Step into", "stepinto");
+        stepOut = controlLayout->createButton("Step out", "stepout");
+        controlLayout->createSpace();
 
         Layout *disassemblyLayout = layout->createLabeledLayout("Disassemble symbol");
-        symbolName = disassemblyLayout->createString("");
-        // disassemble = disassemblyInputLayout->createButton("Disassemble");
+        Layout *inputLayout = disassemblyLayout->createVerticalLayout(100, 0);
+        symbolName = inputLayout->createString("");
+        inputLayout->createSpace();
+        clearBreaks = inputLayout->createButton("Clear breaks");
         Layout *hLayout = disassemblyLayout->createHorizontalLayout();
         disassembly = hLayout->createListbrowser();
         disassembly->setColumnTitles("Br|Command");
@@ -39,11 +47,7 @@ public:
 
         Layout *hexLayout = layout->createLabeledLayout("Hex view");
         addressString = hexLayout->createString("");
-        // readHex = hexInputLayout->createButton("Read hex");
         hex = hexLayout->createListbrowser();
-
-        // Layout *runnerInputLayout = runnerLayout->createHorizontalLayout();
-        // breakpointString = runnerInputLayout->createString("<enter breakpoint symbol>");
 
         done = layout->createButton("Done");
     }
@@ -70,6 +74,22 @@ public:
         if(event->eventClass() == Event::CLASS_ButtonPress) {
             if(event->elementId() == getRunId()) {
                 blindRunner();
+            }
+            if(event->elementId() == getClearBreaksId()) {
+                breaks.clear();
+                updateDisassembly();
+            }
+            if(event->elementId() == getStepOverId()) {
+                spotless->debugger.asmStepOver();
+                updateDisassembly();
+            }
+            if(event->elementId() == getStepIntoId()) {
+                spotless->debugger.asmStepInto();
+                updateDisassembly();
+            }
+            if(event->elementId() == getStepOutId()) {
+                spotless->debugger.asmStepOut();
+                updateDisassembly();
             }
             if(event->elementId() == getAsmBackSkipId()) {
                 // this is inherently unsafe
@@ -150,11 +170,23 @@ public:
     unsigned int getAddressId() {
         return addressString->getId();
     }
+    unsigned int getClearBreaksId() {
+        return clearBreaks->getId();
+    }
     unsigned int getDoneId() {
         return done->getId();
     }
     unsigned int getRunId() {
         return run->getId();
+    }
+    unsigned int getStepOverId() {
+        return stepOver->getId();
+    }
+    unsigned int getStepIntoId() {
+        return stepInto->getId();
+    }
+    unsigned int getStepOutId() {
+        return stepOut->getId();
     }
     unsigned int getAsmStepId() {
         return asmStep->getId();
