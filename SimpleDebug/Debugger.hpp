@@ -319,7 +319,7 @@ public:
 	}
 	vector<string> stacktrace() {
 		Stacktracer stacktracer;
-		return process.isDead() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), getSp());
+		return process.isDead() || process.isRunning() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), getSp());
 	}
 	vector<string> functionSource() {
 		vector<string> result;
@@ -356,6 +356,8 @@ public:
 	}
 	vector<string> disassemble() {
 		vector<string> result;
+		if(process.isDead() || process.isRunning()) return result;
+
 		Function *function = binary ? binary->getFunction(getIp()) : 0;
 		if(!function) return result;
 		int entry = 1;
@@ -409,6 +411,8 @@ public:
 	}
 	vector<string> disassembleSymbol(string symbolName) {
 		vector<string> result;
+		if(process.isDead() || process.isRunning()) return result;
+
 		uint32_t addressBegin = symbols.valueOf(symbolName);
 
 		if(!addressBegin) {

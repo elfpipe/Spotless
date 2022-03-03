@@ -107,6 +107,7 @@ bool Spotless::handleEvent(Event *event) {
             }
             case Actions::Start:
                 debugger.start();
+                // debugger.justGo();
                 break;
             case Actions::Stop:
                 debugger.stop();

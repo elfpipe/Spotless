@@ -40,7 +40,7 @@ public:
     }
     void globals() {
         showGlobals = globalsCheckbox->getChecked();
-        cout << "showGlobals : " << (showGlobals ? "true" : "false") << "\n";
+        // cout << "showGlobals : " << (showGlobals ? "true" : "false") << "\n";
         // listbrowser->addNode("Globals", 0, true, 1);
         // add(spotless->debugger.globals(), 2);
         update();
