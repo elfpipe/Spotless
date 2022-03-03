@@ -30,8 +30,6 @@ private:
 
 private:
 	void init ();
-	void attach();
-	void detach();
 
 	void *systemObject() { return object; }
 	unsigned int getId();
@@ -57,6 +55,9 @@ public:
     bool checkboxChecked();
 
 	void setPen (PublicScreen::PenType pen);
+
+	void attach();
+	void detach();
 
 	void addNode (string text, void *userData = 0, bool hasChildren = false, int generation = 0);
 	void addNode (vector<string> columnTexts, void *userData = 0, bool hasChildren = false, int generation = 0);

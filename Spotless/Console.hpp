@@ -17,7 +17,9 @@ public:
     static void write(PublicScreen::PenType pen, string text) {
         if(listbrowser) {
             listbrowser->setPen(pen);
+            listbrowser->detach();
             listbrowser->addNode(text);
+            listbrowser->attach();
         }
     }
     void clear() {

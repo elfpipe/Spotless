@@ -208,9 +208,9 @@ void Listbrowser::addCheckboxNode (vector<string> columnTexts, bool checkbox, bo
 		TAG_END);
 	}
 
-	detach();
+	// detach();
 	IExec->AddTail (&labels, node);
-	attach();
+	// attach();
 }
 
 int Listbrowser::getSelectedLineNumber()

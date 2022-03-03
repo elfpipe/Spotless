@@ -28,13 +28,16 @@ public:
             lineData.push_back("");
             lineData.push_back("");
             lineData.push_back(buffer);
+            listbrowser->detach();
             listbrowser->addNode(lineData);
+            listbrowser->attach();
             highlight(0);
             return;
         }
         TextFile text(foundPath);
         listbrowser->clear();
         int line = 1;
+        listbrowser->detach();
         while(text.good()) {
             string textLine = text.getLine();
             vector<string> data;
@@ -48,6 +51,7 @@ public:
             );
             line++;
         }
+        listbrowser->attach();
     }
     void highlight(int line) {
         listbrowser->focus(line);
@@ -60,7 +64,9 @@ public:
             lineData.push_back("");
             lineData.push_back("0");
             lineData.push_back("<built-in>");
+            listbrowser->detach();
             listbrowser->addNode(lineData);
+            listbrowser->attach();
             fileName = "<built-in>";
             return;
         }

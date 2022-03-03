@@ -22,6 +22,7 @@ public:
         globalsCheckbox = vertical->createCheckbox("Show globals", showGlobals);
     }
     void add(vector<string> context, int generation) {
+        listbrowser->detach();
         for(int i = 0; i < context.size(); i++) {
             astream str(context[i]);
             int nextGeneration = generation;
@@ -30,6 +31,7 @@ public:
             else listbrowser->addNode(context[i], 0, nextGeneration > generation, generation);
             generation = nextGeneration;
         }
+        listbrowser->attach();
     }
     void update() {
         clear();

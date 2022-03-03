@@ -27,8 +27,10 @@ public:
     void update() {
         clear();
         vector<string> disassembly = spotless->debugger.disassemble();
+        listbrowser->detach();
         for(int i = 0; i < disassembly.size(); i++)
             listbrowser->addNode(disassembly[i]);
+        listbrowser->attach();
         listbrowser->focus(spotless->debugger.getDisassebmlyLine());
     }
     void clear() {

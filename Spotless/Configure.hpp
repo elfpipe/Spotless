@@ -48,9 +48,11 @@ public:
     void update() {
         clear();
         list<string> roots = spotless->debugger.getSourceRoots();
+        listbrowser->detach();
         for(list<string>::iterator it = roots.begin(); it != roots.end(); it++) {
             listbrowser->addNode(*it);
         }
+        listbrowser->attach();
     }
     void clear() {
         listbrowser->clear();

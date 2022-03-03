@@ -25,8 +25,10 @@ public:
     void update() {
         vector<string> sources = spotless->debugger.sourceFiles();
         listbrowser->clear();
+        listbrowser->detach();
         for(int i = 0; i < sources.size(); i++)
             listbrowser->addNode(sources[i]);
+        listbrowser->attach();
     }
     void clear() {
         listbrowser->clear();

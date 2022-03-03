@@ -120,6 +120,7 @@ public:
         vector<string> result = spotless->debugger.disassembleSymbol(symbol);
         if(result.size()) {
             uint32_t address = spotless->debugger.getSymbolValue(symbol);
+            disassembly->detach();
             for(vector<string>::iterator it = result.begin(); it != result.end(); it++) {
                 vector<string> data;
                 data.push_back("");
@@ -127,6 +128,7 @@ public:
                 disassembly->addCheckboxNode(data, true, breaks.isBreak(address), (void *)address);
                 address += 4;
             }
+            disassembly->attach();
         }
         int line = spotless->debugger.getDisassebmlyLine();
         disassembly->focus(line);
@@ -135,8 +137,10 @@ public:
         hex->clear();
         string hexString = addressString->getContent();
         vector<string> result = spotless->debugger.hexDump(hexString);
+        hex->detach();
         for(vector<string>::iterator it = result.begin(); it != result.end(); it++)
             hex->addNode((*it));
+        hex->attach();
         hex->focus(spotless->debugger.getHexLine());
     }
     void blindRunner() {
