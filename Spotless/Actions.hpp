@@ -39,6 +39,7 @@ public:
 
     void update() {
         if(spotless->debugger.isDead()) {
+            cout << "spotless->debugger.isDead()\n";
             actions->enableButton(Load, true);
             actions->enableButton(Quit, true);
         } else {

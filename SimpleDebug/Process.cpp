@@ -24,6 +24,11 @@ bool AmigaProcess::exists = false;
 bool AmigaProcess::running = false;
 bool AmigaProcess::attached = false;
 
+struct Process *AmigaProcess::process = 0;
+vector<AmigaProcess::TaskData *> AmigaProcess::tasks;
+
+struct Hook AmigaProcess::hook;
+
 void AmigaProcess::init()
 {
 	IDebug = (struct DebugIFace *)IExec->GetInterface ((struct Library *)SysBase, "debug", 1, 0);
@@ -109,8 +114,9 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 	} else {
 		IExec->SuspendTask ((struct Task *)process, 0L);		
 		exists = true;
+		cout << "load : SuspendTask() exists = true\n";
 
-		hookOn();
+		hookOn((struct Task *)process);
 		readContext();
 		IExec->Permit();
 	}
@@ -138,6 +144,23 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 	/* these are the 4 types of debug msgs: */
 	switch (dbgmsg->type)
 	{
+		case DBHMT_ADDTASK: {
+			//IDOS->Printf("ADDTASK\n");
+
+			struct DebugMessage *message = (struct DebugMessage *)IExec->AllocSysObjectTags (ASOT_MESSAGE,
+				ASOMSG_Size, sizeof(struct DebugMessage),
+				TAG_DONE
+			);
+			message->type = MSGTYPE_ADDTASK;
+			message->task = currentTask;
+			message->contextCopy = *dbgmsg->message.context;
+
+			IExec->PutMsg (port, (struct Message *)message);
+
+			hookOn(currentTask);
+		}
+		break;
+
 		case DBHMT_REMTASK: {
 			//IDOS->Printf("REMTASK\n");
 
@@ -145,13 +168,20 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 				ASOMSG_Size, sizeof(struct DebugMessage),
 				TAG_DONE
 			);
-			message->type = MSGTYPE_CHILDDIED;
-			
+			message->type = MSGTYPE_REMTASK;
+			message->task = currentTask;
+			message->contextCopy = *dbgmsg->message.context;
+
+			// IDOS->Printf("REMTASK\n");
+			// IDOS->Printf("[HOOK] ip = 0x%x\n", context.ip);
+			// IDOS->Printf("[HOOK} trap = 0x%x\n", context.Traptype);
+
 			IExec->PutMsg (port, (struct Message *)message);
 			sendSignal = true;  //if process has ended, we must signal caller
-			exists = false;
-			running = false;
-
+			if(process == (struct Process *)currentTask) { // only change state to 'isDead' if this is the end of the main process
+				exists = false;
+				running = false;
+			}
 			break;
 		}
 		case DBHMT_EXCEPTION: {
@@ -170,11 +200,13 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			
 			if (traptype == 0x700 || traptype == 0xd00) {
 				message->type = MSGTYPE_TRAP;
-				sendSignal = true; //it's a trap
+				// sendSignal = true; //it's a trap
 			} else {
 				message->type = MSGTYPE_EXCEPTION;
-				sendSignal = true;
+				// sendSignal = true;
 			}
+			message->task = currentTask;
+			message->contextCopy = *dbgmsg->message.context;
 
 			IExec->PutMsg (port, (struct Message *)message);
 
@@ -195,6 +227,8 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			);
 			message->type = MSGTYPE_OPENLIB;
 			message->library = dbgmsg->message.library;
+			message->task = currentTask;
+			message->contextCopy = *dbgmsg->message.context;
 				
 			IExec->PutMsg(port, (struct Message *)message);			
 		}
@@ -209,6 +243,8 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			);
 			message->type = MSGTYPE_CLOSELIB;
 			message->library = dbgmsg->message.library;
+			message->task = currentTask;
+			message->contextCopy = *dbgmsg->message.context;
 				
 			IExec->PutMsg(port, (struct Message *)message);
 		}
@@ -223,19 +259,19 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 	return ret;
 }
 
-void AmigaProcess::hookOn()
+void AmigaProcess::hookOn(struct Task *task)
 {
 	struct HookData *data = new HookData(IExec->FindTask(0), signal);
 
     hook.h_Entry = (ULONG (*)())amigaos_debug_callback;
     hook.h_Data =  (APTR)data;
 
-	IDebug->AddDebugHook((struct Task *)process, &hook);
+	IDebug->AddDebugHook(task, &hook);
 }
 
-void AmigaProcess::hookOff()
+void AmigaProcess::hookOff(struct Task *task)
 {
-	IDebug->AddDebugHook((struct Task*)process, 0);
+	IDebug->AddDebugHook(task, 0);
 }
 
 bool AmigaProcess::handleMessages() {
@@ -263,10 +299,13 @@ bool AmigaProcess::handleMessages() {
 				cout << "==CLOSELIB\n";
 				break;
 
-			case AmigaProcess::MSGTYPE_CHILDDIED:
+			case AmigaProcess::MSGTYPE_REMTASK:
 				cout << "Child has DIED (exit)\n";
 				process = 0;
 				exit = true;
+				break;
+			case AmigaProcess::MSGTYPE_ADDTASK:
+				cout << "A task has been added.\n";
 				break;
 		}
 		message = (struct AmigaProcess::DebugMessage *)IExec->GetMsg(port);
@@ -303,7 +342,7 @@ APTR AmigaProcess::attach(string name)
 	running = false;
 	attached = true;
     
-	hookOn ();
+	hookOn ((struct Task *)process);
 
 //	readTaskContext ();
 
@@ -318,8 +357,11 @@ APTR AmigaProcess::attach(string name)
 
 void AmigaProcess::detach()
 {
-	hookOff();
-	
+	hookOff((struct Task*)process);
+	// for(list<Task *>::iterator it = tasks.begin(); it != tasks.end(); it++)
+	// 	hookOff(*it);
+	// tasks.clear();
+
 	exists = false;
 	running = false;
 	attached = false;
@@ -379,6 +421,11 @@ bool AmigaProcess::isReturn(uint32_t address)
 void AmigaProcess::go()
 {
     IExec->RestartTask((struct Task *)process, 0);
+	if(tasks.size()) {
+		for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) {
+			IExec->RestartTask((*it)->task, 0);
+		}
+	}
 	running = true;
 }
 
@@ -395,6 +442,11 @@ void AmigaProcess::wakeUp()
 void AmigaProcess::suspend()
 {
 	IExec->SuspendTask((struct Task *)process, 0);
+	if(tasks.size()) {
+		for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) {
+			IExec->SuspendTask((*it)->task, 0);
+		}
+	}
 	running = false;
 }
 
@@ -412,33 +464,46 @@ void AmigaProcess::resetSignals() {
 	if(signals) IExec->Wait(signals);
 }
 
+vector<AmigaProcess::TaskData *> AmigaProcess::getTasks()
+{
+	return tasks;
+}
+
 vector<string> AmigaProcess::getMessages() {
 	vector<string> result;
 	DebugMessage *message = (DebugMessage *)IExec->GetMsg(port);
 	while(message) {
 		switch(message->type) {
 			case AmigaProcess::MSGTYPE_EXCEPTION:
-				result.push_back("==EXCEPTION (ip = 0x" + patch::toString((void *)ip()) + ")");
+				result.push_back("EXCEPTION (ip = 0x" + patch::toString((void *)message->contextCopy.ip) + ")");
 				break;
 
 			case AmigaProcess::MSGTYPE_TRAP:
-				result.push_back("==TRAP (ip = 0x" + patch::toString((void *)ip()) + ")");
+				result.push_back("TRAP (ip = 0x" + patch::toString((void *)message->contextCopy.ip) + ")");
 				break;
 
 			case AmigaProcess::MSGTYPE_CRASH:
-				result.push_back("==CRASH (ip = 0x" + patch::toString((void *)ip()) + ")");
+				result.push_back("CRASH (ip = 0x" + patch::toString((void *)message->contextCopy.ip) + ")");
 				break;
 
 			case AmigaProcess::MSGTYPE_OPENLIB:
-				result.push_back("==OPENLIB");
+				result.push_back(printStringFormat("OPENLIB : task (0x%x)", (void *)message->task));
 				break;
 
 			case AmigaProcess::MSGTYPE_CLOSELIB:
-				result.push_back("==CLOSELIB");
+				result.push_back(printStringFormat("CLOSELIB : task (0x%x)", (void *)message->task));
 				break;
 
-			case AmigaProcess::MSGTYPE_CHILDDIED:
-				result.push_back("Child has DIED (exit)");
+			case AmigaProcess::MSGTYPE_REMTASK:
+				result.push_back(printStringFormat("A task has been removed... (0x%x)", (void *)message->task));
+				for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) {
+					if((*it)->task == message->task) { tasks.erase(it); break; }
+				}
+				break;
+			case AmigaProcess::MSGTYPE_ADDTASK:
+				result.push_back(printStringFormat("A new sub-task has been started... (0x%x)", (void *)message->task));
+				struct TaskData *data = new TaskData(message->task, &message->contextCopy);
+				tasks.push_back(data);
 				break;
 		}
 		message = (struct AmigaProcess::DebugMessage *)IExec->GetMsg(port);

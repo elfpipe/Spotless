@@ -322,8 +322,19 @@ public:
 		return process.isDead() || process.isRunning() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), getSp());
 	}
 	vector<string> functionSource() {
+		vector<string> result = functionSource(process.ip());
+		vector<AmigaProcess::TaskData *> tasks = process.getTasks();
+		for(int i = 0; i < tasks.size(); i++) {
+			result.push_back("");
+			result.push_back(printStringFormat("Sub-Task %d : (0x%x)", i+1, (void *)tasks[i]->task));
+			vector<string> taskResults = functionSource(tasks[i]->contextCopy.ip);
+            result.insert(result.end(), taskResults.begin(), taskResults.end());
+		}
+		return result;
+	}
+	vector<string> functionSource(uint32_t address) {
 		vector<string> result;
-		string source = binary->getSourceFile(process.ip());
+		string source = binary->getSourceFile(address);
 		// cout << "Source file : " << source << "\n"; 
 		// cout << "ip : " << (void *)process.ip();
 		if(source.size() == 0) return result;
@@ -355,10 +366,50 @@ public:
 		return result;
 	}
 	vector<string> disassemble() {
+		vector<string> result = binary && binary->getFunction(process.ip()) ? disassembleFunction(process.ip()) : disassembleAddress(process.ip());
+		vector<AmigaProcess::TaskData *> tasks = process.getTasks();
+		for(int i = 0; i < tasks.size(); i++) {
+			result.push_back("");
+			result.push_back(printStringFormat("Sub-Task %d : (0x%x)", i+1, (void *)tasks[i]->task));
+			vector<string> taskResults = binary && binary->getFunction(tasks[i]->contextCopy.ip) ? disassembleFunction(tasks[i]->contextCopy.ip) : disassembleAddress(tasks[i]->contextCopy.ip);
+            result.insert(result.end(), taskResults.begin(), taskResults.end());
+		}
+		return result;
+	}
+	vector<string> disassembleAddress(uint32_t start) {
+		vector<string> result;
+		if(process.isDead() || process.isRunning()) return result;
+		if(!is_readable_address(start)) { result.push_back("<not a readable address>"); return result; }
+		int entry = 1;
+		for(uint32_t address = start; address < start+128; address += 4) {
+			char opcode[256], operands[256];
+			IDebug->DisassembleNative((APTR)address, opcode, operands);
+
+			int32 offset;
+			string symbolName;
+			ppctype branchType = PPC_DisassembleBranchInstr(*(uint32_t *)address, &offset);
+			if (branchType == PPC_BRANCH || branchType == PPC_BRANCHCOND) {
+				string name = symbols.nameFromValue(address + offset);
+				symbolName = " <" + name + ">";
+			}
+
+			entry++;
+			if(isLocation(address)) {
+				result.push_back(printStringFormat("[line %d] 0x%x : %s %s", getSourceLine(address), address, opcode, operands) + symbolName);
+			} else {
+				result.push_back(printStringFormat("          0x%x : %s %s", address, opcode, operands) + symbolName);
+			}
+
+			//for hightlighting
+			if(address == getIp()) line = entry;
+		}
+		return result;
+	}
+	vector<string> disassembleFunction(uint32_t address) {
 		vector<string> result;
 		if(process.isDead() || process.isRunning()) return result;
 
-		Function *function = binary ? binary->getFunction(getIp()) : 0;
+		Function *function = binary ? binary->getFunction(address) : 0;
 		if(!function) return result;
 		int entry = 1;
 		result.push_back(function->name + " :");

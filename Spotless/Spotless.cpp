@@ -68,7 +68,7 @@ void Spotless::portHandler() {
     if(spotless) {
         vector<string> messages = spotless->debugger.getMessages();
         for(int i = 0; i < messages.size(); i++)
-            Console::write(PublicScreen::PENTYPE_CRITICAL, messages[i]);
+            Console::write(PublicScreen::PENTYPE_INFO, messages[i]);
     }
 }
 
@@ -81,7 +81,7 @@ void Spotless::pipeHandler() {
 }
 
 void Spotless::deathHandler() {
-    // cout << "deathHandler()\n";
+    cout << "deathHandler()\n";
     if(spotless) {
         spotless->clearAll();
         spotless->childLives = false;
@@ -180,7 +180,7 @@ void Spotless::updateAll() {
     //sources->update();
     context->update();
     stacktrace->update();
-    console->clear();
+    // console->clear();
     disassembler->update();
     if(memorySurfer && memorySurfer->windowObject()) memorySurfer->updateDisassembly();
 }

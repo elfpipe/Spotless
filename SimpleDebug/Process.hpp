@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include <string>
 
+#include <list>
+#include <vector>
+
 #include "Pipe.hpp"
 
 using namespace std;
@@ -28,13 +31,25 @@ public:
 		MSGTYPE_CRASH,
 		MSGTYPE_OPENLIB,
 		MSGTYPE_CLOSELIB,
-		MSGTYPE_CHILDDIED
+		MSGTYPE_REMTASK,
+		MSGTYPE_ADDTASK
 	} DebugMessageType;
 
 	struct DebugMessage {
 		struct Message msg;
 		DebugMessageType type;
 		struct Library *library;
+		struct Task *task;
+	    struct ExceptionContext contextCopy;
+	};
+
+	struct TaskData {
+		TaskData(struct Task *task, struct ExceptionContext *context) {
+			this->task = task;
+			this->contextCopy = *context;
+		}
+		struct Task *task;
+	    struct ExceptionContext contextCopy;
 	};
 
 	struct HookData {
@@ -47,8 +62,9 @@ public:
 	};
 
 private:
-    struct Process *process = 0;
-	struct Hook hook;
+    static struct Process *process;
+	static vector<struct TaskData *> tasks;
+	static struct Hook hook;
 	static ExceptionContext context;
 	static bool exists;
 	static bool running;
@@ -77,8 +93,8 @@ public:
 	APTR attach(string name);
 	void detach();
 
-	void hookOn();
-	void hookOff();
+	static void hookOn(struct Task *task);
+	static void hookOff(struct Task *task);
 
 	void readContext ();
 	void writeContext ();
@@ -94,6 +110,8 @@ public:
 	uint32_t ip () { if(!exists) return 0; readContext(); return context.ip; }
 	uint32_t sp () { if(!exists) return 0; readContext(); /*return context.gpr[1]; }*/ return (uint32_t)process->pr_Task.tc_SPReg; }
 	uint32_t lr () { if(!exists) return 0; readContext(); return context.lr; }
+
+	vector<TaskData *> getTasks();
 
     void go();
 	void wait();
