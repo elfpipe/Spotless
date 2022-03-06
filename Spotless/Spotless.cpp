@@ -9,6 +9,10 @@
 #include "Spotless.hpp"
 #include "MemorySurfer.hpp"
 
+#include <libraries/keymap.h>
+
+#include <proto/exec.h>
+
 #include "../SimpleDebug/Strings.hpp"
 
 string vectorToString(vector<string> v) {
@@ -48,7 +52,7 @@ void Spotless::create() {
     addSignalHandler(deathHandler, SIGF_CHILD);
     addSignalHandler(trapHandler, debugger.getTrapSignal());
     addSignalHandler(portHandler, debugger.getPortSignal());
-    addSignalHandler(pipeHandler, debugger.getPipeSignal());
+    // addSignalHandler(pipeHandler, debugger.getPipeSignal());
 }
 
 int Spotless::unfold() {
@@ -59,16 +63,22 @@ int Spotless::unfold() {
 void Spotless::trapHandler() {
     if(spotless) {
         spotless->debugger.suspendBreaks();
-        if(spotless->childLives) spotless->updateAll();
+        if(spotless) spotless->updateAll();
         Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
     }
 }
 
 void Spotless::portHandler() {
     if(spotless) {
-        vector<string> messages = spotless->debugger.getMessages();
-        for(int i = 0; i < messages.size(); i++)
-            Console::write(PublicScreen::PENTYPE_INFO, messages[i]);
+        // vector<string> messages = spotless->debugger.getMessages();
+        // for(int i = 0; i < messages.size(); i++)
+        //     Console::write(PublicScreen::PENTYPE_INFO, messages[i]);
+        // if(spotless->debugger.isDead()) 
+        spotless->debugger.handleMessages();
+        // if(!spotless->debugger.lives()) {
+        //     spotless->clearAll();
+        //     spotless->childLives = false;
+        // }
     }
 }
 
@@ -87,6 +97,7 @@ void Spotless::deathHandler() {
         spotless->childLives = false;
     }
 }
+
 bool Spotless::handleEvent(Event *event) {
     if(event->eventClass() == Event::CLASS_ActionButtonPress) {
         switch(event->elementId()) {
@@ -169,6 +180,16 @@ bool Spotless::handleEvent(Event *event) {
             if(memorySurfer) {
                 openNewWindow((Widget *)memorySurfer);
             }
+        }
+    }
+    if(event->eventClass() == Event::CLASS_KeyPress) {
+        if(event->elementId() == RAWKEY_F1) {
+                            debugger.justGo();
+
+        }
+        if(event->elementId() == RAWKEY_F2) {
+                            debugger.stop();
+
         }
     }
     return false;

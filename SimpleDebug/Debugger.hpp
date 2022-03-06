@@ -32,13 +32,12 @@ private:
 
 	Roots roots;
 
-	bool suspended = false;
 	int line, hexLine;
 
 	// string entryPoint;
 
 public:
-	Debugger() : handle(0), binary(0), suspended(false), line(0) {
+	Debugger() : handle(0), binary(0), line(0) {
 		// entryPoint = "main";
 	}
 	~Debugger() {
@@ -54,7 +53,7 @@ public:
 	}
 	bool load(string path, string file, string args) {
 		APTR handle = process.load(path, file, args);
-		if (handle) open(handle, file);
+		if (handle) { open(handle, file); }
 
 		//experimental entry code, to prevent breaks in kernel :
 		// if(entryPoint.size() && symbols.hasSymbols()) {
@@ -79,8 +78,8 @@ public:
 	void detach() {
 		process.detach();
 	}
-	bool handleMessages() {
-		return process.handleMessages();
+	void handleMessages() {
+		process.handleMessages();
 	}
 	vector<string> sourceFiles() {
 		return binary ? binary->getSourceNames() : vector<string>();
@@ -109,73 +108,71 @@ public:
 		return address != 0;
 	}
 	void activateBreaks() { // only for blind running
-		if(!process.isDead()) { //necessary on 440ep
+		if(process.lives()) { //necessary on 440ep
 			breaks.activate();
 		}
 	}
 	void suspendBreaks() {
-		if(!process.isDead()) { //necessary on 440ep
+		if(process.lives()) { //necessary on 440ep
 			linebreaks.deactivate();
 			breaks.deactivate();
 			linebreaks.clear();
 		}
 	}
 	void start() {
-		if(process.isDead() || process.isRunning()) return;
+		if(!process.lives() || process.isRunning()) return;
 
-		if (!suspended && isLocation(process.ip())) {
+		if (!process.isRunning() && isLocation(process.ip())) {
 			process.step();
 		}
 		breaks.activate();
-		process.go();
+		process.restartAll();
 		// process.wait();
 		// breaks.deactivate(); //do the last bit in trap handler
 	}
 	void justGo() {
-		if(process.isDead() || process.isRunning()) return;
-
-		process.go();
+		if(process.lives() || !process.isRunning())
+			process.restartAll();
 	}
 	void stop() {
-		process.suspend();
-		suspended = true;
+		if(process.isRunning()) process.suspendAll();
 	}
 	void wait() {
 		process.wait();
 	}
 	void backSkip() {
-		if(!isDead() && binary->getFunction(process.ip()-4))
+		if(lives() && binary->getFunction(process.ip()-4))
 			process.backSkip();
 	}
 	void step() {
-		if(!isDead() && binary->getFunction(process.ip()+4))
+		if(lives() && binary->getFunction(process.ip()+4))
 			process.step();
 	}
 	void skip() {
-		if(!isDead() && binary->getFunction(process.ip()+4))
+		if(lives() && binary->getFunction(process.ip()+4))
 			process.skip();
 	}
 	void unsafeBackSkip() {
-		if(!isDead())
+		if(lives())
 			process.backSkip();
 	}
 	void unsafeStep() {
-		if(!isDead())
+		if(lives())
 			process.step();
 	}
 	void unsafeSkip() {
-		if(!isDead())
+		if(lives())
 			process.skip();
 	}
 	void asmStepOver() {
-		if(isDead()) return;
+		if(lives())
 		process.stepNoBranch();
 	}
 	void asmStepInto() {
 		unsafeStep();
 	}
 	void asmStepOut() {
-		if(isDead()) return;
+		if(!lives()) return;
 
 		Breaks outBreak;
 		outBreak.insert(process.lr());
@@ -186,7 +183,7 @@ public:
 		outBreak.deactivate();
 	}
 	void safeStep() {
-		if(isDead() || !binary->getFunction(process.ip())) return;
+		if(!lives() || !binary->getFunction(process.ip())) return;
 
 		if(binary->getSourceFile(process.branchAddress()).size() > 0)
 			process.step();
@@ -194,7 +191,7 @@ public:
 			process.stepNoBranch();
 	}
 	void stepOver() {
-		if(!binary || process.isDead()) return;
+		if(!binary || !process.lives()) return;
 
 		if(!binary->getFunction(process.ip())) { //if not inside known code, just keep running
 			start();
@@ -219,7 +216,7 @@ public:
 		// breaks.deactivate();
 	}
 	void stepInto() {
-		if(!binary || process.isDead()) return;
+		if(!binary || !process.lives()) return;
 
 		if(!binary->getFunction(process.ip())) {
 			start();
@@ -242,7 +239,7 @@ public:
 		//process.wakeUp();
 	}
 	void stepOut() {
-		if (!binary || process.isDead()) return;
+		if (!binary || !process.lives()) return;
 
 		if(!binary->getFunction(process.ip())) {
 			start();
@@ -261,10 +258,10 @@ public:
 		process.go();
 		process.wait();
 
-		if(!process.isDead()) {
+		// if(process.lives()) {
 			outBreak.deactivate();
 			breaks.deactivate();
-		}
+		// }
 	}
 	vector<string> context() {
 		return binary ? binary->getContext(process.ip(), process.sp()) : vector<string>();
@@ -308,8 +305,8 @@ public:
 	string printLocation() {
 		return binary ? binary->getSourceFile(process.ip()) + " at line " + patch::toString(binary->getSourceLine(process.ip())) : string();
 	}
-	bool isDead() {
-		return process.isDead();
+	bool lives() {
+		return process.lives();
 	}
 	bool isRunning() {
 		return process.isRunning();
@@ -319,7 +316,7 @@ public:
 	}
 	vector<string> stacktrace() {
 		Stacktracer stacktracer;
-		return process.isDead() || process.isRunning() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), getSp());
+		return !process.lives() || process.isRunning() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), getSp());
 	}
 	vector<string> functionSource() {
 		vector<string> result = functionSource(process.ip());
@@ -378,7 +375,7 @@ public:
 	}
 	vector<string> disassembleAddress(uint32_t start) {
 		vector<string> result;
-		if(process.isDead() || process.isRunning()) return result;
+		if(!process.lives() || process.isRunning()) return result;
 		if(!is_readable_address(start)) { result.push_back("<not a readable address>"); return result; }
 		int entry = 1;
 		for(uint32_t address = start; address < start+128; address += 4) {
@@ -407,7 +404,7 @@ public:
 	}
 	vector<string> disassembleFunction(uint32_t address) {
 		vector<string> result;
-		if(process.isDead() || process.isRunning()) return result;
+		if(!process.lives() || process.isRunning()) return result;
 
 		Function *function = binary ? binary->getFunction(address) : 0;
 		if(!function) return result;
@@ -462,7 +459,7 @@ public:
 	}
 	vector<string> disassembleSymbol(string symbolName) {
 		vector<string> result;
-		if(process.isDead() || process.isRunning()) return result;
+		if(!process.lives() || process.isRunning()) return result;
 
 		uint32_t addressBegin = symbols.valueOf(symbolName);
 
@@ -537,9 +534,9 @@ public:
 	uint32_t getPipeSignal() {
 		return process.getPipeSignal();
 	}
-	vector<string> getMessages() {
-		return process.getMessages();
-	}
+	// vector<string> getMessages() {
+	// 	return process.getMessages();
+	// }
     void clear() {
 		linebreaks.clear();
 		breaks.clear();
@@ -591,7 +588,7 @@ int main(int argc, char *argv[])
 
 	bool exit = false;
 	while(!exit) {
-		if(debugger.isDead()) break;
+		if(!debugger.lives()) break;
 
 		if(debugger.getSourceLine())
 			cout << debugger.printLocation() << "\n";

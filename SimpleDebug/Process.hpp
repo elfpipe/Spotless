@@ -63,9 +63,13 @@ public:
 
 private:
     static struct Process *process;
+
 	static vector<struct TaskData *> tasks;
+	// static APTR tasksMutex;
+
 	static struct Hook hook;
 	static ExceptionContext context;
+
 	static bool exists;
 	static bool running;
 	static bool attached;
@@ -82,7 +86,7 @@ public:
 	AmigaProcess() { init(); }
 	~AmigaProcess() { cleanup(); }
 
-	bool handleMessages();
+	static void handleMessages();
 
     void init();
     void cleanup();
@@ -112,14 +116,20 @@ public:
 	uint32_t lr () { if(!exists) return 0; readContext(); return context.lr; }
 
 	vector<TaskData *> getTasks();
+	// void releaseTasks();
 
     void go();
 	void wait();
 	void wakeUp();
 
-	void suspend();
+	void restartAll();
+	static void restartTask(struct Task *);
 
-	bool isDead();
+	void suspend();
+	static void suspendTask(struct Task *);
+	void suspendAll();
+
+	bool lives();
 	bool isRunning();
 	void resetSignals();
 	Process *getProcess() { return process; }
@@ -134,6 +144,6 @@ public:
 	uint32_t getPipeSignal() {
 		return 0x0; //fix
 	}
-	vector<string> getMessages();
+	// vector<string> getMessages();
 };
 #endif

@@ -26,7 +26,7 @@ private:
     Disassembler *disassembler;
     MemorySurfer *memorySurfer;
     Configure *configure;
-    
+
 public:
     Debugger debugger;
     
@@ -47,7 +47,7 @@ public:
     static void pipeHandler();
     static void deathHandler();
     bool handleEvent(Event *event);
-
+    
     void updateAll();
     void clearAll();
     

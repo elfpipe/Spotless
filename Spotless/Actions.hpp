@@ -38,23 +38,22 @@ public:
     }
 
     void update() {
-        if(spotless->debugger.isDead()) {
-            cout << "spotless->debugger.isDead()\n";
-            actions->enableButton(Load, true);
-            actions->enableButton(Quit, true);
-        } else {
+        if(spotless->debugger.lives()) {
             actions->enableButton(Load, false);
             actions->enableButton(Quit, false);
+        } else {
+            actions->enableButton(Load, true);
+            actions->enableButton(Quit, true);
         }
         
         if(spotless->debugger.isRunning()) {
             actions->enableButton(Start, false);
             actions->enableButton(Stop, true);
-        } else if(spotless->debugger.isDead()) { //doesn't exist
-            actions->enableButton(Start, false);
+        } else if(spotless->debugger.lives()) {
+            actions->enableButton(Start, true);
             actions->enableButton(Stop, false);
         } else {
-            actions->enableButton(Start, true);
+            actions->enableButton(Start, false);
             actions->enableButton(Stop, false);
         }
 

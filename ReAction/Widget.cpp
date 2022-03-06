@@ -185,6 +185,9 @@ int Widget::waitForClose()
 						case WMHI_RAWKEY :
 							if ((Code & WMHI_KEYMASK) == RAWKEY_ESC && target != this)
 								close = true;
+							else {
+								target->processEvent(Class, Code);
+							}
 							break;
 
 						default:
@@ -306,6 +309,13 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 	Event *event = 0;
 	Widget *parent = 0;
 	switch (Class & WMHI_CLASSMASK) {
+		case WMHI_RAWKEY : {
+			event = new Event (Event::CLASS_KeyPress);
+			event->setElementId (Code & WMHI_KEYMASK);
+			event->setElementDescription ("");
+		}
+		break;
+
 		case WMHI_GADGETUP: {
 			// cout << "WMHI_GADGETUP\n";
 			uint32 gadgetId = Class & WMHI_GADGETMASK;
