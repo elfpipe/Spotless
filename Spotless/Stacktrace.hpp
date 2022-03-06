@@ -19,7 +19,7 @@ public:
     }
     void update() {
         clear();
-        if(!spotless->childLives) return;
+        // if(!spotless->childLives) return;
         vector<string> trace = spotless->debugger.stacktrace();
         listbrowser->detach();
         for(int i = 0; i < trace.size(); i++)

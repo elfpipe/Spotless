@@ -15,17 +15,18 @@ using namespace std;
 
 ExceptionContext AmigaProcess::context;
 struct MsgPort *AmigaProcess::port = 0;
+bool AmigaProcess::tracing = false;
 uint8_t AmigaProcess::signal = 0x0;
 
 struct DebugIFace *IDebug = 0;
 struct MMUIFace *IMMU = 0;
 
-bool AmigaProcess::exists = false;
-bool AmigaProcess::running = false;
-bool AmigaProcess::attached = false;
+// bool AmigaProcess::exists = false;
+// bool AmigaProcess::running = false;
+// bool AmigaProcess::attached = false;
 
 struct Process *AmigaProcess::process = 0;
-vector<AmigaProcess::TaskData *> AmigaProcess::tasks;
+// vector<AmigaProcess::TaskData *> AmigaProcess::tasks;
 // APTR AmigaProcess::tasksMutex = 0;;
 
 struct Hook AmigaProcess::hook;
@@ -44,8 +45,6 @@ void AmigaProcess::init()
 	if(!port)
 		port = (struct MsgPort *)IExec->AllocSysObject(ASOT_PORT, TAG_DONE);
 	signal = IExec->AllocSignal(-1);
-
-	// tasksMutex = (APTR) IExec->AllocSysObjectTags(ASOT_MUTEX, TAG_DONE);
 }
 
 void AmigaProcess::cleanup ()
@@ -60,7 +59,6 @@ void AmigaProcess::cleanup ()
 
 	if(port) IExec->FreeSysObject(ASOT_PORT, port);
 	IExec->FreeSignal(signal);
-	// if(tasksMutex) IExec->FreeSysObject(ASOT_MUTEX, tasksMutex);
 }
 
 void AmigaProcess::clear()
@@ -93,8 +91,6 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 
 	IExec->Forbid(); //can we avoid this
 
-	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
-
     process = IDOS->CreateNewProcTags(
 		NP_Seglist,					seglist,
 //		NP_Entry,					foo,
@@ -118,15 +114,15 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 
 	if (!process) {
 		IExec->Permit();
-		// if(tasksMutex) IExec->MutexRelease(tasksMutex);
 		return 0;
 	} else {
 		IExec->SuspendTask ((struct Task *)process, 0L);		
 		exists = true;
+		running = false;
+		attached = false;
 
 		hookOn((struct Task *)process);
 		readContext();
-		// if(tasksMutex) IExec->MutexRelease(tasksMutex);
 		IExec->Permit();
 	}
 
@@ -142,8 +138,6 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 
 ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *currentTask, struct KernelDebugMessage *dbgmsg)
 {
-	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
-
     struct ExecIFace *IExec = (struct ExecIFace *)((struct ExecBase *)SysBase)->MainInterface;
 	uint32 traptype = 0;
 
@@ -204,6 +198,10 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 		case DBHMT_EXCEPTION: {
 			traptype = dbgmsg->message.context->Traptype;
 
+			if (tracing && traptype == 0x700 || traptype == 0xd00) {
+				IExec->Signal(data->caller, 1 << data->signal);
+				return 1;
+			}
 			// memcpy (&context, dbgmsg->message.context, sizeof(struct ExceptionContext));
 			
 			// IDOS->Printf("EXCEPTION\n");
@@ -217,7 +215,6 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			
 			if (traptype == 0x700 || traptype == 0xd00) {
 				message->type = MSGTYPE_TRAP;
-				// sendSignal = true; //it's a trap
 			} else {
 				message->type = MSGTYPE_EXCEPTION;
 				// sendSignal = true;
@@ -270,10 +267,6 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 		default:
 			break;
 	}
-
-	// if(sendSignal) IExec->Signal(data->caller, 1 << data->signal);
-
-	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
 	return ret;
 }
 
@@ -395,7 +388,6 @@ APTR AmigaProcess::attach(string name)
 
 void AmigaProcess::detach()
 {
-	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
 	hookOff((struct Task*)process);
 	// for(list<Task *>::iterator it = tasks.begin(); it != tasks.end(); it++)
 	// 	hookOff(*it);
@@ -404,7 +396,6 @@ void AmigaProcess::detach()
 	exists = false;
 	running = false;
 	attached = false;
-	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
 }
 
 void AmigaProcess::readContext ()
@@ -432,16 +423,18 @@ void AmigaProcess::backSkip() {
 void AmigaProcess::step() {
 	Tracer tracer(process, &context);
 	tracer.activate();
+	tracing = true;
 	go();
-	wait();
+	waitTrace();
 	tracer.suspend();
 }
 
 void AmigaProcess::stepNoBranch() {
 	Tracer tracer(process, &context);
 	tracer.activate(false);
+	tracing = true;
 	go();
-	wait();
+	waitTrace();
 	tracer.suspend();
 }
 
@@ -471,10 +464,18 @@ void AmigaProcess::go()
 	running = true;
 }
 
-void AmigaProcess::wait()
+void AmigaProcess::waitTrace()
 {
-	// IExec->Wait(1 << signal);
-	IExec->WaitPort(port);
+	uint32 received = IExec->Wait(1 << signal | SIGF_CHILD);
+	tracing = false;
+	running = false;
+	if(received & SIGF_CHILD) exists = false;
+	// IExec->WaitPort(port);
+}
+
+void AmigaProcess::setTrace()
+{
+	tracing = true;
 }
 
 void AmigaProcess::wakeUp()

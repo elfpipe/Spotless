@@ -64,17 +64,17 @@ public:
 private:
     static struct Process *process;
 
-	static vector<struct TaskData *> tasks;
-	// static APTR tasksMutex;
+	vector<struct TaskData *> tasks;
 
 	static struct Hook hook;
 	static ExceptionContext context;
 
-	static bool exists;
-	static bool running;
-	static bool attached;
+	bool exists;
+	bool running;
+	bool attached;
 
 	static struct MsgPort *port;
+	static bool tracing;
 	static uint8_t signal;
 
 	Pipe pipe;
@@ -86,7 +86,7 @@ public:
 	AmigaProcess() { init(); }
 	~AmigaProcess() { cleanup(); }
 
-	static bool handleMessages();
+	bool handleMessages();
 
     void init();
     void cleanup();
@@ -116,17 +116,17 @@ public:
 	uint32_t lr () { if(!exists) return 0; readContext(); return context.lr; }
 
 	vector<TaskData *> getTasks();
-	// void releaseTasks();
 
     void go();
-	void wait();
 	void wakeUp();
+	void waitTrace();
+	void setTrace();
 
 	void restartAll();
-	static void restartTask(struct Task *);
+	void restartTask(struct Task *);
 
 	void suspend();
-	static void suspendTask(struct Task *);
+	void suspendTask(struct Task *);
 	void suspendAll();
 
 	bool lives();
@@ -135,9 +135,9 @@ public:
 	Process *getProcess() { return process; }
 	vector<string> emptyPipe() { return vector<string>(); } //pipe.emptyPipe(); }
 
-	uint32_t getTrapSignal() {
-		return 1 << signal;
-	}
+	// uint32_t getTrapSignal() {
+	// 	return 1 << signal;
+	// }
 	uint32_t getPortSignal() {
 		return 1 << port->mp_SigBit;
 	}

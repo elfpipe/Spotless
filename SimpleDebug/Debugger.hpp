@@ -137,8 +137,11 @@ public:
 	void stop() {
 		if(process.isRunning()) process.suspendAll();
 	}
-	void wait() {
-		process.wait();
+	void setTrace() {
+		process.setTrace();
+	}
+	void waitTrace() {
+		process.waitTrace();
 	}
 	void backSkip() {
 		if(lives() && binary->getFunction(process.ip()-4))
@@ -178,8 +181,9 @@ public:
 		outBreak.insert(process.lr());
 
 		outBreak.activate();
+		process.setTrace();
 		process.go();
-		process.wait();
+		process.waitTrace();
 		outBreak.deactivate();
 	}
 	void safeStep() {
@@ -256,8 +260,9 @@ public:
 		breaks.activate();
 		outBreak.activate();
 
+		process.setTrace();
 		process.go();
-		process.wait();
+		process.waitTrace();
 
 		if(process.lives()) {
 			outBreak.deactivate();
@@ -528,9 +533,9 @@ public:
 		return hexLine;
 	}
 
-	uint32_t getTrapSignal() {
-		return process.getTrapSignal();
-	}
+	// uint32_t getTrapSignal() {
+	// 	return process.getTrapSignal();
+	// }
 	uint32_t getPortSignal() {
 		return process.getPortSignal();
 	}

@@ -147,11 +147,12 @@ public:
     }
     void blindRunner() {
         breaks.activate();
+        spotless->debugger.setTrace();
         spotless->debugger.justGo();
-        spotless->debugger.wait();
+        spotless->debugger.waitTrace();
         breaks.deactivate();
 
-        update();
+        spotless->updateAll();
     }
     void update() {
         string breakpoint = spotless->debugger.getSymbolFromAddress(spotless->debugger.getIp());

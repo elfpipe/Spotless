@@ -118,7 +118,7 @@ public:
                     return true;
                     break;
             }
-            spotless->actions->update();
+            update();
         }
         return false;
     }

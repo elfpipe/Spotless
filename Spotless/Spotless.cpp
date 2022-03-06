@@ -76,7 +76,10 @@ void Spotless::portHandler() {
         // if(spotless->debugger.isDead()) 
         if(spotless->debugger.handleMessages()) { // if trap or exception
                 spotless->debugger.suspendBreaks();
-                spotless->updateAll();
+                if(spotless->debugger.lives())
+                    spotless->updateAll();
+                else
+                    spotless->clearAll();
                 Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
         }
         // if(!spotless->debugger.lives()) {
