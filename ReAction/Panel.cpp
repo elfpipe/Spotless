@@ -23,7 +23,7 @@ void Panel::setTabbed(bool tabbed) {
 
 void Panel::addWidget(Widget *widget) {
     widgets.push_back(widget);
-    widget->setParent(parentWidget);
+    // widget->setParent(parentWidget);
 }
 
 Object *Panel::createGuiObject() {
@@ -33,7 +33,7 @@ Object *Panel::createGuiObject() {
     for(int i = 0; i < widgets.size(); i++) {
         pageLabels[i] = strdup(widgets[i]->name().c_str());
 
-        Layout *layout = new Layout(parentWidget);
+        Layout *layout = new Layout(widgets[i]); //parentWidget);
         widgets[i]->createGuiObject(layout);
         widgets[i]->setParentLayout(layout);
         IIntuition->SetAttrs(pages, PAGE_Add, layout->systemObject(), TAG_DONE);

@@ -3,7 +3,8 @@
 
 #include "../ReAction/classes.h"
 #include "Spotless.hpp"
-
+#include "Sources.hpp"
+#include "Console.hpp"
 class Actions : public Widget {
 public:
     typedef enum {
@@ -21,8 +22,9 @@ private:
     Speedbar *actions;
 
 public:
-    Actions(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { spotless = parent; setName("Actions"); }
+    Actions(Spotless *spotless) : Widget(this) { this->spotless = spotless; setName("Actions"); }
     void createGuiObject(Layout *layout) {
+        layout->setParent(this);
         actions = layout->createSpeedbar();
         actions->addButton(Load, "Load", "open");
         actions->addSpacer();
@@ -73,6 +75,52 @@ public:
         for(int i = 2; i <= 6; i++)
             actions->enableButton(i, false);
         actions->enableButton(7, true);
+    }
+
+    bool handleEvent(Event *event) {
+        if(event->eventClass() == Event::CLASS_ActionButtonPress) {
+            switch(event->elementId()) {
+                case Actions::Load: {
+                    spotless->debugger.clearRoots();
+                    string path;
+                    string file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
+                    string unixPath = Requesters::convertToUnixRelative(path);
+                    spotless->debugger.addSourceRoot(unixPath);
+                    spotless->childLives = spotless->debugger.load(path, file, ""); //Use amigaos path for LoadSeg
+                    if(spotless->childLives) {
+                        spotless->updateAll();
+                        spotless->sources->update();
+                    } else {
+                        spotless->console->write(PublicScreen::PENTYPE_CRITICAL, "Failed to load selected file.");
+                    }
+                    break;
+                }
+                case Actions::Start:
+                    spotless->debugger.start();
+                    // debugger.justGo();
+                    break;
+                case Actions::Stop:
+                    spotless->debugger.stop();
+                    spotless->updateAll();
+                    break;
+                case Actions::StepOver:
+                    spotless->debugger.stepOver();
+                    break;
+                case Actions::StepInto:
+                    spotless->debugger.stepInto();
+                    spotless->updateAll();
+                    break;
+                case Actions::StepOut:
+                    spotless->debugger.stepOut();
+                    spotless->updateAll();
+                    break;
+                case Actions::Quit:
+                    return true;
+                    break;
+            }
+            spotless->actions->update();
+        }
+        return false;
     }
 };
 #endif

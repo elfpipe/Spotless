@@ -14,8 +14,10 @@ private:
     RButton *asmBackSkip, *asmStep, *asmSkip, *memSurf;
     
 public:
-    Disassembler(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { setName("Disassembler"); spotless = parent; }
+    Disassembler(Spotless *spotless) : Widget(spotless) { setName("Disassembler"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
+                layout->setParent(this);
+
         listbrowser = layout->createListbrowser();
         Layout *buttonLayout = layout->createVerticalLayout(100, 0);
         asmBackSkip = buttonLayout->createButton("Back skip", "scrollstart");
@@ -48,5 +50,34 @@ public:
     unsigned int getMemSurfId() {
         return memSurf->getId();
     }
+
+    bool handleEvent(Event *event) {
+
+        if(event->eventClass() == Event::CLASS_ButtonPress) {
+            if(event->elementId() == spotless->disassembler->getAsmBackSkipId()) {
+                // this is inherently unsafe
+                spotless->debugger.backSkip();
+                spotless->disassembler->update();
+            }
+            if(event->elementId() == spotless->disassembler->getAsmStepId()) {
+                spotless->debugger.safeStep();
+                spotless->disassembler->update();
+                spotless->sources->update();
+                spotless->context->update();
+            }
+            if(event->elementId() == spotless->disassembler->getAsmSkipId()) {
+                // this is inherently unsafe
+                spotless->debugger.skip();
+                spotless->disassembler->update();
+            }
+            if(event->elementId() == spotless->disassembler->getMemSurfId()) {
+                if(spotless->memorySurfer) {
+                    spotless->openNewWindow((Widget *)spotless->memorySurfer);
+                }
+            }
+        }
+        return false;
+    }
+
 };
 #endif

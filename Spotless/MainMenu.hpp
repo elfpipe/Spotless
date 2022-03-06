@@ -11,7 +11,7 @@ private:
     PublicScreen *screen;
     bool usingPublicScreen = false;
 public:
-    MainMenu(Spotless *parent) : Menubar(dynamic_cast<Widget *>(parent)) { spotless = parent; }
+    MainMenu(Spotless *spotless) : Menubar(0) { this->spotless = spotless; }
     void createMenu() {
         MenuReference panel1 = addCreateMenu("Spotless");
 

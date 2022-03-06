@@ -22,7 +22,7 @@ private:
     char buffer1[4096], buffer2[4096];
 
 public:
-    MemorySurfer(Spotless *parent) : Widget(0) { setName("Memory surfer"); spotless = parent; }
+    MemorySurfer(Spotless *spotless) : Widget(0) { setName("Memory surfer"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
         Layout *controlLayout = layout->createHorizontalLayout(0, 0);
         run = controlLayout->createButton("Run", "debug");

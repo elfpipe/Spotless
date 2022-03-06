@@ -3,7 +3,9 @@
 
 #include "../ReAction/classes.h"
 #include "Spotless.hpp"
-
+#include "Context.hpp"
+#include "Code.hpp"
+#include "Console.hpp"
 #include <string>
 
 using namespace std;
@@ -13,8 +15,10 @@ private:
     Spotless *spotless;
     Listbrowser *listbrowser;
 public:
-    Sources(Spotless *parent) : Widget((Widget *)parent) { setName("Source files"); spotless = parent; }
+    Sources(Spotless *spotless) : Widget(spotless) { setName("Source files"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
+                layout->setParent(this);
+
         Layout *vl = layout->createVerticalLayout();
         // vl->createButton("Source roots -->");
         listbrowser = vl->createListbrowser();
@@ -26,12 +30,27 @@ public:
         vector<string> sources = spotless->debugger.sourceFiles();
         listbrowser->clear();
         listbrowser->detach();
-        for(int i = 0; i < sources.size(); i++)
-            listbrowser->addNode(sources[i]);
+        cout << "Sources : \n";
+        for(int i = 0; i < sources.size(); i++) {
+            listbrowser->addNode(sources[i]); cout << sources[i] << "\n"; }
         listbrowser->attach();
     }
     void clear() {
         listbrowser->clear();
+    }
+    bool handleEvent(Event *event) {
+        if(event->eventClass() == Event::CLASS_SelectNode) {
+            string file = spotless->sources->getSelectedElement();
+            spotless->console->write(PublicScreen::PENTYPE_EVENT, "Source file selected : " + file);
+            string fullPath = spotless->debugger.searchSourcePath(file);
+            spotless->code->show(file, fullPath);
+        }
+        if(event->eventClass() == Event::CLASS_CheckboxPress) {
+            if(event->elementId() == spotless->context->getGlobalsId()) {
+                spotless->context->globals();
+            }
+        }
+        return false;
     }
 };
 #endif

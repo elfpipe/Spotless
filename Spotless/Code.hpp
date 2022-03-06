@@ -14,8 +14,10 @@ private:
     string fileName;
 
 public:
-    Code(Spotless *parent) : Widget((Widget *)parent) { spotless = parent; }
+    Code(Spotless *spotless) : Widget(spotless) { setName("Code"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
+        layout->setParent(this);
+
         listbrowser = layout->createListbrowser();
         listbrowser->setColumnTitles("Break|Line|Text");
     }
@@ -85,5 +87,7 @@ public:
     void clear() {
         listbrowser->clear();
     }
+    bool handleEvent(Event *event);
+
 };
 #endif

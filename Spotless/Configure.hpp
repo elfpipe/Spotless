@@ -15,7 +15,7 @@ private:
     RButton *add, *remove, *done;
 
 public:
-    Configure(Spotless *parent) : Widget(0) { setName("Configure"); spotless = parent; }
+    Configure(Spotless *spotless) : Widget(spotless) { setName("Configure"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
         Layout *rootsLayout = layout->createLabeledLayout("Source roots");
         listbrowser = rootsLayout->createListbrowser();

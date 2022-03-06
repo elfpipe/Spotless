@@ -14,8 +14,10 @@ private:
 
     bool showGlobals;
 public:
-    Context(Spotless *parent) : Widget((Widget *)parent), showGlobals(false) { setName("Variables"); spotless = parent; }
+    Context(Spotless *spotless) : Widget(spotless), showGlobals(false) { setName("Variables"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
+                layout->setParent(this);
+
         Layout *vertical = layout->createVerticalLayout();
         listbrowser = vertical->createListbrowser();
         listbrowser->setHierachical(true);

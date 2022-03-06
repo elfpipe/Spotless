@@ -40,6 +40,8 @@ public:
 	Layout(Widget *parent, string label);
 	~Layout();
 
+	void setParent(Widget *newParent) { parent = newParent; }
+	
 	void getDimensions(int *, int *, int *, int *);
 
 	Layout *createVerticalLayout (int weightedHeight = 100, int weightedWidth = 100);
@@ -53,11 +55,11 @@ public:
 	RButton *createButton (const char *text, const char *image = "");
 	RString *createString (const char *content);
 	Checkbox *createCheckbox (const char *text, bool checked = false);
-	
+
 	void addEmbeddedWidget(Widget *widget);
 	void addTabbedPanel(Panel *panel, int weight);
 	void addWeightBar();
-
+	
 public:
 	friend MainWindow;
 	friend Widget;

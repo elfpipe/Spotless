@@ -10,8 +10,10 @@ private:
     Listbrowser *listbrowser;
 
 public:
-    Stacktrace(Spotless *parent) : Widget((Widget *)parent) { setName("Stacktrace"); spotless = parent; }
+    Stacktrace(Spotless *spotless) : Widget(spotless) { setName("Stacktrace"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
+                layout->setParent(this);
+
         listbrowser = layout->createListbrowser();
         listbrowser->setStriping(true);
     }

@@ -10,11 +10,16 @@ private:
     static Listbrowser *listbrowser;
 
 public:
-    Console(Spotless *parent) : Widget(dynamic_cast<Widget *>(parent)) { setName("Console"); spotless = parent; }
+    Console(Spotless *spotless) : Widget(spotless) { setName("Console"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
+                layout->setParent(this);
+
         listbrowser = layout->createListbrowser();
     }
     static void write(PublicScreen::PenType pen, string text) {
+        static int n = 0;
+        if(n++ == 100) { clear()  ; n = 0; }
+
         if(listbrowser) {
             listbrowser->setPen(pen);
             listbrowser->detach();
@@ -22,7 +27,7 @@ public:
             listbrowser->attach();
         }
     }
-    void clear() {
+    static void clear() {
         listbrowser->clear();
     }
 };
