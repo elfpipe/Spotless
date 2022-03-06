@@ -49,6 +49,7 @@ void RString::setContent (const char *newContent)
 	// IIntuition->SetAttrs (rstring,
 	// 	STRINGA_TextVal,	newContent,
 	// TAG_DONE);
+	// cout << "windowPointer : " << (void *)parent->topLevelParent()->windowPointer() << "\n";
 	IIntuition->RefreshSetGadgetAttrs((struct Gadget *)rstring, parent->topLevelParent()->windowPointer(), 0,
 		STRINGA_TextVal,	newContent,
 	TAG_DONE);

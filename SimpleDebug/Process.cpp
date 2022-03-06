@@ -148,7 +148,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 	uint32 traptype = 0;
 
 	HookData *data = (HookData *)hook->h_Data;
-	bool sendSignal = false;
+	// bool sendSignal = false;
 
 	ULONG ret = 0;
 
@@ -227,7 +227,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 
 			IExec->PutMsg (port, (struct Message *)message);
 
-			sendSignal = true;
+			// sendSignal = true;
 
 			// running = false;
 
@@ -271,7 +271,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			break;
 	}
 
-	if(sendSignal) IExec->Signal(data->caller, 1 << data->signal);
+	// if(sendSignal) IExec->Signal(data->caller, 1 << data->signal);
 
 	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
 	return ret;
@@ -292,21 +292,19 @@ void AmigaProcess::hookOff(struct Task *task)
 	IDebug->AddDebugHook(task, 0);
 }
 
-void AmigaProcess::handleMessages() {
-	// bool exit = false;
+bool AmigaProcess::handleMessages() {
+	bool result = false;
 	DebugMessage *message = (DebugMessage *)IExec->GetMsg(port);
 	while(message) {
 		switch(message->type) {
 			case AmigaProcess::MSGTYPE_EXCEPTION:
-				// cout << "==EXCEPTION (ip = 0x" << (void *)ip() << ")\n";
-				break;
-
 			case AmigaProcess::MSGTYPE_TRAP:
-				// cout << "==TRAP (ip = 0x" << (void *)ip() << ")\n";
-				break;
-
 			case AmigaProcess::MSGTYPE_CRASH:
-				// cout << "==CRASH (ip = 0x" << (void *)ip() << ")\n";
+				if(message->task == (struct Task *)process) {
+					context = message->contextCopy;
+				}
+				running = false;
+				result = true;
 				break;
 
 			case AmigaProcess::MSGTYPE_OPENLIB:
@@ -347,7 +345,7 @@ void AmigaProcess::handleMessages() {
 		IExec->FreeSysObject(ASOT_MESSAGE, (APTR)message);
 		message = (struct AmigaProcess::DebugMessage *)IExec->GetMsg(port);
 	}
-	// return exit;
+	return result;
 }
 
 APTR AmigaProcess::attach(string name)
@@ -475,12 +473,13 @@ void AmigaProcess::go()
 
 void AmigaProcess::wait()
 {
-	IExec->Wait(1 << signal);
+	// IExec->Wait(1 << signal);
+	IExec->WaitPort(port);
 }
 
 void AmigaProcess::wakeUp()
 {
-	IExec->Signal((struct Task *)IExec->FindTask(0), 1 << signal);
+	// IExec->Signal((struct Task *)IExec->FindTask(0), 1 << signal);
 }
 
 void AmigaProcess::restartTask(struct Task *task)
@@ -545,6 +544,7 @@ bool AmigaProcess::lives() {
 	// return signals & SIGF_CHILD;
 }
 bool AmigaProcess::isRunning() {
+	cout << "isRunning() : " << ((exists && running) ? "true" : "false") << "\n";
 	return exists && running;
 }
 

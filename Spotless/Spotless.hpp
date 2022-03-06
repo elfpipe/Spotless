@@ -42,9 +42,9 @@ public:
     void create();
     int unfold();
 
-    static void trapHandler();
+    // static void trapHandler();
     static void portHandler();
-    static void pipeHandler();
+    // static void pipeHandler();
     static void deathHandler();
     bool handleEvent(Event *event);
     

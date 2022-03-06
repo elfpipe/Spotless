@@ -86,7 +86,7 @@ public:
 	AmigaProcess() { init(); }
 	~AmigaProcess() { cleanup(); }
 
-	static void handleMessages();
+	static bool handleMessages();
 
     void init();
     void cleanup();

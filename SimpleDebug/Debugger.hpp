@@ -78,8 +78,8 @@ public:
 	void detach() {
 		process.detach();
 	}
-	void handleMessages() {
-		process.handleMessages();
+	bool handleMessages() {
+		return process.handleMessages();
 	}
 	vector<string> sourceFiles() {
 		return binary ? binary->getSourceNames() : vector<string>();
@@ -191,7 +191,7 @@ public:
 			process.stepNoBranch();
 	}
 	void stepOver() {
-		if(!binary || !process.lives()) return;
+		if(!binary || !process.lives() || process.isRunning()) return;
 
 		if(!binary->getFunction(process.ip())) { //if not inside known code, just keep running
 			start();
@@ -209,6 +209,7 @@ public:
 		breaks.activate();
 		linebreaks.activate();
 
+		cout << "StepOver : go \n ";
 		process.go();
 		// process.wait();
 
@@ -216,7 +217,7 @@ public:
 		// breaks.deactivate();
 	}
 	void stepInto() {
-		if(!binary || !process.lives()) return;
+		if(!binary || !process.lives() || process.isRunning()) return;
 
 		if(!binary->getFunction(process.ip())) {
 			start();
@@ -239,7 +240,7 @@ public:
 		//process.wakeUp();
 	}
 	void stepOut() {
-		if (!binary || !process.lives()) return;
+		if (!binary || !process.lives() || process.isRunning()) return;
 
 		if(!binary->getFunction(process.ip())) {
 			start();
@@ -258,10 +259,10 @@ public:
 		process.go();
 		process.wait();
 
-		// if(process.lives()) {
+		if(process.lives()) {
 			outBreak.deactivate();
 			breaks.deactivate();
-		// }
+		}
 	}
 	vector<string> context() {
 		return binary ? binary->getContext(process.ip(), process.sp()) : vector<string>();
@@ -363,7 +364,7 @@ public:
 		return result;
 	}
 	vector<string> disassemble() {
-		vector<string> result = binary && binary->getFunction(process.ip()) ? disassembleFunction(process.ip()) : disassembleAddress(process.ip());
+		vector<string> result = (binary && binary->getFunction(process.ip())) ? disassembleFunction(process.ip()) : disassembleAddress(process.ip());
 		vector<AmigaProcess::TaskData *> tasks = process.getTasks();
 		for(int i = 0; i < tasks.size(); i++) {
 			result.push_back("");
@@ -459,6 +460,7 @@ public:
 	}
 	vector<string> disassembleSymbol(string symbolName) {
 		vector<string> result;
+		cout << "disassembleSymbol : " << process.lives() << " - " << process.isRunning() << "\n";
 		if(!process.lives() || process.isRunning()) return result;
 
 		uint32_t addressBegin = symbols.valueOf(symbolName);
@@ -472,6 +474,7 @@ public:
 			return result;
 		}
 		int entry = 1;
+		line = 0;
 		for(uint32_t offset = 0; offset < symbols.sizeOf(symbolName); offset += 4) {
 				uint32_t address = addressBegin + offset;
 
@@ -492,7 +495,7 @@ public:
 					result.push_back(printStringFormat("          0x%x : %s %s", address, opcode, operands) + symbolName);
 				}
 				//for hightlighting
-				if(address == getIp()) line = entry;
+				if(address == process.ip()) line = entry;
 				entry++;
 
 				// string op(opcode);

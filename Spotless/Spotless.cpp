@@ -50,7 +50,7 @@ void Spotless::create() {
     addBottomPanelWidget(console);
 
     addSignalHandler(deathHandler, SIGF_CHILD);
-    addSignalHandler(trapHandler, debugger.getTrapSignal());
+    // addSignalHandler(trapHandler, debugger.getTrapSignal());
     addSignalHandler(portHandler, debugger.getPortSignal());
     // addSignalHandler(pipeHandler, debugger.getPipeSignal());
 }
@@ -60,13 +60,13 @@ int Spotless::unfold() {
     return waitForClose();
 }
 
-void Spotless::trapHandler() {
-    if(spotless) {
-        spotless->debugger.suspendBreaks();
-        if(spotless) spotless->updateAll();
-        Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
-    }
-}
+// void Spotless::trapHandler() {
+//     if(spotless) {
+//         spotless->debugger.suspendBreaks();
+//         if(spotless) spotless->updateAll();
+//         Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
+//     }
+// }
 
 void Spotless::portHandler() {
     if(spotless) {
@@ -74,7 +74,11 @@ void Spotless::portHandler() {
         // for(int i = 0; i < messages.size(); i++)
         //     Console::write(PublicScreen::PENTYPE_INFO, messages[i]);
         // if(spotless->debugger.isDead()) 
-        spotless->debugger.handleMessages();
+        if(spotless->debugger.handleMessages()) { // if trap or exception
+                spotless->debugger.suspendBreaks();
+                spotless->updateAll();
+                Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
+        }
         // if(!spotless->debugger.lives()) {
         //     spotless->clearAll();
         //     spotless->childLives = false;
@@ -82,13 +86,13 @@ void Spotless::portHandler() {
     }
 }
 
-void Spotless::pipeHandler() {
-    if(spotless) {
-        vector<string> output = spotless->debugger.emptyPipe();
-        for(int i = 0; i < output.size(); i++)
-            Console::write(PublicScreen::PENTYPE_OUTPUT, "--] " + formatRawString(output[i]));
-    }
-}
+// void Spotless::pipeHandler() {
+//     if(spotless) {
+//         vector<string> output = spotless->debugger.emptyPipe();
+//         for(int i = 0; i < output.size(); i++)
+//             Console::write(PublicScreen::PENTYPE_OUTPUT, "--] " + formatRawString(output[i]));
+//     }
+// }
 
 void Spotless::deathHandler() {
     cout << "deathHandler()\n";
@@ -120,7 +124,7 @@ void Spotless::updateAll() {
     stacktrace->update();
     // console->clear();
     disassembler->update();
-    if(memorySurfer && memorySurfer->windowObject()) memorySurfer->updateDisassembly();
+    if(memorySurfer && memorySurfer->windowObject()) memorySurfer->update();
 }
 
 void Spotless::clearAll() {
