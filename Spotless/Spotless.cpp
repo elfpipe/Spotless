@@ -98,7 +98,6 @@ void Spotless::portHandler() {
 // }
 
 void Spotless::deathHandler() {
-    cout << "deathHandler()\n";
     if(spotless) {
         spotless->clearAll();
         spotless->childLives = false;
@@ -109,11 +108,12 @@ bool Spotless::handleEvent(Event *event) {
     if(event->eventClass() == Event::CLASS_KeyPress) {
         if(event->elementId() == RAWKEY_F1) {
                             debugger.justGo();
+        // actions->update();
 
         }
         if(event->elementId() == RAWKEY_F2) {
                             debugger.stop();
-
+            // actions->update();
         }
     }
     return false;

@@ -213,7 +213,6 @@ public:
 		breaks.activate();
 		linebreaks.activate();
 
-		cout << "StepOver : go \n ";
 		process.go();
 		// process.wait();
 
@@ -465,7 +464,6 @@ public:
 	}
 	vector<string> disassembleSymbol(string symbolName) {
 		vector<string> result;
-		cout << "disassembleSymbol : " << process.lives() << " - " << process.isRunning() << "\n";
 		if(!process.lives() || process.isRunning()) return result;
 
 		uint32_t addressBegin = symbols.valueOf(symbolName);

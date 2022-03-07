@@ -451,18 +451,6 @@ bool AmigaProcess::isReturn(uint32_t address)
 }
 // --------------------------------------------------------------------------- //
 
-void AmigaProcess::go()
-{
-	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
-    IExec->RestartTask((struct Task *)process, 0);
-	// if(tasks.size()) {
-	// 	for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) {
-	// 		IExec->RestartTask((*it)->task, 0);
-	// 	}
-	// }
-	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
-	running = true;
-}
 
 void AmigaProcess::waitTrace()
 {
@@ -483,8 +471,24 @@ void AmigaProcess::wakeUp()
 	// IExec->Signal((struct Task *)IExec->FindTask(0), 1 << signal);
 }
 
+void AmigaProcess::go()
+{
+	IExec->Disable();
+	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
+    IExec->RestartTask((struct Task *)process, 0);
+	// if(tasks.size()) {
+	// 	for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) {
+	// 		IExec->RestartTask((*it)->task, 0);
+	// 	}
+	// }
+	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
+	running = true;
+	IExec->Enable();
+}
+
 void AmigaProcess::restartTask(struct Task *task)
 {
+	IExec->Disable();
 	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
 	IExec->RestartTask((struct Task *)task, 0);
 	// if(tasks.size()) {
@@ -494,22 +498,28 @@ void AmigaProcess::restartTask(struct Task *task)
 	// }
 	// running = false;
 	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
+	IExec->Enable();
 }
 
 void AmigaProcess::restartAll()
 {
+	IExec->Disable();
 	for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) 
 		IExec->RestartTask((*it)->task, 0);
 	go();
+	IExec->Enable();
 }
 void AmigaProcess::suspendAll()
 {
+	IExec->Disable();
 	for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) 
 		IExec->SuspendTask((*it)->task, 0);
 	suspend();
+	IExec->Enable();
 }
 void AmigaProcess::suspend()
 {
+	IExec->Disable();
 	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
 	IExec->SuspendTask((struct Task *)process, 0);
 	// if(tasks.size()) {
@@ -519,11 +529,12 @@ void AmigaProcess::suspend()
 	// }
 	running = false;
 	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
-
+	IExec->Enable();
 }
 
 void AmigaProcess::suspendTask(struct Task *task)
 {
+	IExec->Disable();
 	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
 	IExec->SuspendTask((struct Task *)task, 0);
 	// if(tasks.size()) {
@@ -533,6 +544,7 @@ void AmigaProcess::suspendTask(struct Task *task)
 	// }
 	// running = false;
 	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
+	IExec->Enable();
 }
 
 bool AmigaProcess::lives() {
@@ -545,7 +557,6 @@ bool AmigaProcess::lives() {
 	// return signals & SIGF_CHILD;
 }
 bool AmigaProcess::isRunning() {
-	cout << "isRunning() : " << ((exists && running) ? "true" : "false") << "\n";
 	return exists && running;
 }
 

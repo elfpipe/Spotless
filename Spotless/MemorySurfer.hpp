@@ -117,13 +117,11 @@ public:
     void updateDisassembly() {
         disassembly->clear();
         string symbol = symbolName->getContent();
-        cout << "disassembleSymbol() " << symbol << "\n";
         vector<string> result = spotless->debugger.disassembleSymbol(symbol);
         if(result.size()) {
             uint32_t address = spotless->debugger.getSymbolValue(symbol);
             disassembly->detach();
             for(vector<string>::iterator it = result.begin(); it != result.end(); it++) {
-                cout << (void *)address << " : " << (*it) << "\n";
                 vector<string> data;
                 data.push_back("");
                 data.push_back(*it);

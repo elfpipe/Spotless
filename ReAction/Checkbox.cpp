@@ -44,7 +44,6 @@ bool Checkbox::getChecked()
 {
     ULONG checked;
     IIntuition->GetAttr (CHECKBOX_Checked, checkbox, &checked);
-    cout << "CHECKBOX_Checked : " << (checked ? "true" : "false") << "\n";
     return checked;
 }
 // void RButton::setText (const char *text)

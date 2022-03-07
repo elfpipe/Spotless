@@ -30,9 +30,8 @@ public:
         vector<string> sources = spotless->debugger.sourceFiles();
         listbrowser->clear();
         listbrowser->detach();
-        cout << "Sources : \n";
-        for(int i = 0; i < sources.size(); i++) {
-            listbrowser->addNode(sources[i]); cout << sources[i] << "\n"; }
+        for(int i = 0; i < sources.size(); i++)
+            listbrowser->addNode(sources[i]);
         listbrowser->attach();
     }
     void clear() {

@@ -17,7 +17,6 @@ void Tracer::activate(bool branching) {
     if(hasTraceBit() && branching) {
         setTraceBit();
     } else {
-		cout << "Tracer : context->ip = " << (void *)context->ip << "\n";
         breaks.insert(context->ip + 4);
         uint32_t baddr = branch();
         if(baddr && branching)
