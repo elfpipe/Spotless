@@ -25,7 +25,7 @@ class Debugger {
 private:
 	AmigaProcess process;
     ElfSymbols symbols;
-    Breaks breaks, linebreaks;
+    Breaks breaks, linebreaks, outbreak;
 
 	ElfHandle *handle;
 	Binary *binary;
@@ -121,15 +121,17 @@ public:
 	}
 	void suspendBreaks() {
 		if(process.lives()) { //necessary on 440ep
+			outbreak.deactivate(); //order of these essential!
 			linebreaks.deactivate();
 			breaks.deactivate();
-			linebreaks.clear();
 		}
+		linebreaks.clear();
+		outbreak.clear();
 	}
 	void start() {
 		if(!process.lives() || process.isRunning()) return;
 
-		if (!process.isRunning() && isLocation(process.ip())) {
+		if (!process.isRunning() /*&& isLocation(process.ip())*/) {
 			process.step();
 		}
 		breaks.activate();
@@ -181,18 +183,18 @@ public:
 	void asmStepInto() {
 		unsafeStep();
 	}
-	void asmStepOut() {
-		if(!lives()) return;
+	// void asmStepOut() {
+	// 	if(!lives()) return;
 
-		Breaks outBreak;
-		outBreak.insert(process.lr());
+	// 	// Breaks outBreak;
+	// 	outbreak.insert(process.lr());
+	// 	outbreak.activate();
 
-		outBreak.activate();
-		process.setTrace();
-		process.go();
-		process.waitTrace();
-		outBreak.deactivate();
-	}
+	// 	// process.setTrace();
+	// 	process.go();
+	// 	// process.waitTrace();
+	// 	// outBreak.deactivate();
+	// }
 	void safeStep() {
 		if(!lives() || !binary->getFunction(process.ip())) return;
 
@@ -252,28 +254,29 @@ public:
 	void stepOut() {
 		if (!binary || !process.lives() || process.isRunning()) return;
 
-		if(!binary->getFunction(process.ip())) {
-			start();
-			return;
-		}
+		// if(!binary->getFunction(process.ip())) {
+		// 	start();
+		// 	return;
+		// }
 
-		Breaks outBreak;
-		if(binary->getSourceFile(process.lr()).size() > 0)
-			outBreak.insert(process.lr());
+		// Breaks outBreak;
+		// if(binary->getSourceFile(process.lr()).size() > 0)
+			outbreak.insert(process.lr());
+		outbreak.activate();
+		start();
+		// process.step();
 
-		process.step();
+		// breaks.activate();
+		// outBreak.activate();
 
-		breaks.activate();
-		outBreak.activate();
+		// process.setTrace();
+		// process.go();
+		// process.waitTrace();
 
-		process.setTrace();
-		process.go();
-		process.waitTrace();
-
-		if(process.lives()) {
-			outBreak.deactivate();
-			breaks.deactivate();
-		}
+		// if(process.lives()) {
+		// 	outBreak.deactivate();
+		// 	breaks.deactivate();
+		// }
 	}
 	vector<string> context() {
 		return binary ? binary->getContext(process.ip(), process.sp()) : vector<string>();

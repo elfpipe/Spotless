@@ -93,7 +93,7 @@ public:
                 update();
             }
             if(event->elementId() == getStepOutId()) {
-                spotless->debugger.asmStepOut();
+                spotless->debugger.stepOut(); //just the same as stepOut
                 update();
             }
             if(event->elementId() == getAsmBackSkipId()) {
