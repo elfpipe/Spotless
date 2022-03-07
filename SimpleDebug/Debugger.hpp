@@ -107,6 +107,13 @@ public:
 		if(address)	set ? breaks.insert(address) : breaks.remove(address);
 		return address != 0;
 	}
+	bool breakpointAddress(uint32_t address, bool set) {
+		if(address) set ? breaks.insert(address) : breaks.remove(address);
+		return address != 0;
+	}
+	bool isBreak(uint32_t address) {
+		return breaks.isBreak(address);
+	}
 	void activateBreaks() { // only for blind running
 		if(process.lives()) { //necessary on 440ep
 			breaks.activate();

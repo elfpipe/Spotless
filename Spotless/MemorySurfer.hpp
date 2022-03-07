@@ -8,6 +8,9 @@
 #include "Spotless.hpp"
 #include "../SimpleDebug/Breaks.hpp"
 
+#include <list>
+using namespace std;
+
 class MemorySurfer : public Widget {
 private:
     Spotless *spotless;
@@ -17,7 +20,9 @@ private:
     RButton *clearBreaks;
     RButton *asmBackSkip, *asmStep, *asmSkip;
 
-    Breaks breaks;
+    // Breaks breaks;
+    list<uint32_t> breaks;
+    string lastSymbol;
 
     char buffer1[4096], buffer2[4096];
 
@@ -64,11 +69,11 @@ public:
 
         }
         if(event->eventClass() == Event::CLASS_CheckboxCheck) {
-            breaks.insert((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()));
+            spotless->debugger.breakpointAddress((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()), true);
             // updateDisassembly();
         }
         if(event->eventClass() == Event::CLASS_CheckboxUncheck) {
-            breaks.remove((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()));
+            spotless->debugger.breakpointAddress((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()), false);
             // updateDisassembly();
         }
         if(event->eventClass() == Event::CLASS_ButtonPress) {
@@ -115,8 +120,8 @@ public:
     }
 
     void updateDisassembly() {
-        disassembly->clear();
         string symbol = symbolName->getContent();
+        if(symbol.compare(lastSymbol)) disassembly->clear();
         vector<string> result = spotless->debugger.disassembleSymbol(symbol);
         if(result.size()) {
             uint32_t address = spotless->debugger.getSymbolValue(symbol);
@@ -125,7 +130,7 @@ public:
                 vector<string> data;
                 data.push_back("");
                 data.push_back(*it);
-                disassembly->addCheckboxNode(data, true, breaks.isBreak(address), (void *)address);
+                disassembly->addCheckboxNode(data, true, spotless->debugger.isBreak(address), (void *)address);
                 address += 4;
             }
             disassembly->attach();
@@ -144,13 +149,14 @@ public:
         hex->focus(spotless->debugger.getHexLine());
     }
     void blindRunner() {
-        breaks.activate();
-        spotless->debugger.setTrace();
-        spotless->debugger.justGo();
-        spotless->debugger.waitTrace();
-        breaks.deactivate();
+        spotless->debugger.start();
+        // breaks.activate();
+        // spotless->debugger.setTrace();
+        // spotless->debugger.justGo();
+        // spotless->debugger.waitTrace();
+        // breaks.deactivate();
 
-        spotless->updateAll();
+        // spotless->updateAll();
     }
     void update() {
         string breakpoint = spotless->debugger.getSymbolFromAddress(spotless->debugger.getIp());
@@ -197,6 +203,10 @@ public:
     }
     void clear() {
         //what to do?
+        for(list<uint32_t>::iterator it = breaks.begin(); it != breaks.end(); it++) {
+            spotless->debugger.breakpointAddress(*it, false);
+        }
+        breaks.clear();
     }
 };
 #endif
