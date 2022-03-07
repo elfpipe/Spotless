@@ -21,7 +21,7 @@ public:
     Tracer(Process *process, ExceptionContext *context);
     ~Tracer() { breaks.clear(); }
 
-    void activate(bool branching = true);
+    bool activate(bool branching = true);
     void suspend();
 
     uint32_t branch();

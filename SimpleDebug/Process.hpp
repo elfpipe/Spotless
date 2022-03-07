@@ -105,10 +105,10 @@ public:
 
 	void skip();
 	void backSkip();
-	void step();
+	bool step();
+	bool stepNoBranch();
 
 	bool isReturn(uint32_t address);
-	void stepNoBranch();
 	uint32_t branchAddress();
 
 	uint32_t ip () { if(!exists) return 0; readContext(); return context.ip; }

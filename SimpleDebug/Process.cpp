@@ -420,22 +420,28 @@ void AmigaProcess::backSkip() {
 	IDebug->WriteTaskContext((struct Task *)process, &context, RTCF_STATE);
 }
 
-void AmigaProcess::step() {
+bool AmigaProcess::step() {
 	Tracer tracer(process, &context);
-	tracer.activate();
-	tracing = true;
-	go();
-	waitTrace();
-	tracer.suspend();
+	if(tracer.activate()) {
+		tracing = true;
+		go();
+		waitTrace();
+		tracer.suspend();
+		return true;
+	}
+	return false;
 }
 
-void AmigaProcess::stepNoBranch() {
+bool AmigaProcess::stepNoBranch() {
 	Tracer tracer(process, &context);
-	tracer.activate(false);
-	tracing = true;
-	go();
-	waitTrace();
-	tracer.suspend();
+	if(tracer.activate(false)) {
+		tracing = true;
+		go();
+		waitTrace();
+		tracer.suspend();
+		return true;
+	}
+	return false;
 }
 
 uint32_t AmigaProcess::branchAddress() {

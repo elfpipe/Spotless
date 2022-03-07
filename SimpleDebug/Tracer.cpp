@@ -12,16 +12,18 @@ Tracer::Tracer(Process *process, ExceptionContext *context) {
     this->context = context;
 }
 
-void Tracer::activate(bool branching) {
+bool Tracer::activate(bool branching) {
 	isBranching = branching;
     if(hasTraceBit() && branching) {
         setTraceBit();
+		return true;
     } else {
-        breaks.insert(context->ip + 4);
+        if (!breaks.insert(context->ip + 4)) return false;
         uint32_t baddr = branch();
         if(baddr && branching)
             breaks.insert(baddr);
         breaks.activate();
+		return true;
     }
 }
 

@@ -31,14 +31,14 @@ public:
 	void activate();
 	void deactivate();
 
-	void insert(uint32_t address);
+	bool insert(uint32_t address);
 	void remove(uint32_t address);
 
 	void clear ();
 
 #ifdef __amigaos4__
-	static int memory_insert_break_instruction (uint32_t address, uint32_t *buffer);
-	static int memory_remove_break_instruction (uint32_t address, uint32_t *buffer);
+	static bool memory_insert_break_instruction (uint32_t address, uint32_t *buffer);
+	static bool memory_remove_break_instruction (uint32_t address, uint32_t *buffer);
 #endif
 };
 #endif

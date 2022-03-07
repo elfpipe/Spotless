@@ -93,22 +93,22 @@ public:
 	bool breakpoint(string file, int line, bool set) {
 		if(!binary) return false;
 		uint32_t address = binary->getLineAddress(file, line);
-		if(address)	set ? breaks.insert(address) : breaks.remove(address);
+		if(address)	set ? (void) breaks.insert(address) : breaks.remove(address);
 		return address != 0;
 	}
 	bool breakpoint(string function, bool set) {
 		if(!binary) return false;
 		uint32_t address = binary->getFunctionAddress(function);
-		if(address)	set ? breaks.insert(address) : breaks.remove(address);
+		if(address)	set ? (void) breaks.insert(address) : breaks.remove(address);
 		return address != 0;
 	}
 	bool breakpointSymbol(string symbolName, bool set) {
 		uint32_t address = symbols.valueOf(symbolName);
-		if(address)	set ? breaks.insert(address) : breaks.remove(address);
+		if(address)	set ? (void) breaks.insert(address) : breaks.remove(address);
 		return address != 0;
 	}
 	bool breakpointAddress(uint32_t address, bool set) {
-		if(address) set ? breaks.insert(address) : breaks.remove(address);
+		if(address) set ? (void) breaks.insert(address) : breaks.remove(address);
 		return address != 0;
 	}
 	bool isBreak(uint32_t address) {
@@ -245,9 +245,9 @@ public:
 				return;
 			}
 			if(binary->getSourceFile(process.branchAddress()).size() > 0)
-				process.step();
+				if(!process.step()) break;
 			else
-				process.stepNoBranch();
+				if(!process.stepNoBranch()) break;
 		} while(!binary->isLocation(process.ip()));
 		//process.wakeUp();
 	}
@@ -261,7 +261,7 @@ public:
 
 		// Breaks outBreak;
 		// if(binary->getSourceFile(process.lr()).size() > 0)
-			outbreak.insert(process.lr());
+			if(outbreak.insert(process.lr()))
 		outbreak.activate();
 		start();
 		// process.step();
