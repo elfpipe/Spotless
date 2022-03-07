@@ -120,7 +120,7 @@ public:
     void go();
 	void wakeUp();
 	void waitTrace();
-	void setTrace();
+	// void setTrace();
 
 	void restartAll();
 	void restartTask(struct Task *);

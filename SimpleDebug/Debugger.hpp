@@ -146,9 +146,9 @@ public:
 	void stop() {
 		if(process.isRunning()) process.suspendAll();
 	}
-	void setTrace() {
-		process.setTrace();
-	}
+	// void setTrace() {
+	// 	process.setTrace();
+	// }
 	void waitTrace() {
 		process.waitTrace();
 	}

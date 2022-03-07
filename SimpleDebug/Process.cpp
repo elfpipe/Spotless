@@ -467,10 +467,10 @@ void AmigaProcess::waitTrace()
 	// IExec->WaitPort(port);
 }
 
-void AmigaProcess::setTrace()
-{
-	tracing = true;
-}
+// void AmigaProcess::setTrace()
+// {
+// 	tracing = true;
+// }
 
 void AmigaProcess::wakeUp()
 {
