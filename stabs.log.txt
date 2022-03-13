@@ -1,0 +1,36 @@
+
+test:     file format elf32-big
+
+Contents of .stab section:
+
+Symnum n_type n_othr n_desc n_value  n_strx String
+
+-1     HdrSym 0      27     00000383 1     
+0      SO     0      2      0100025c 1      test.c
+1      OPT    0      0      00000000 8      gcc2_compiled.
+2      FUN    0      0      0100025c 23     trial:F(0,1)=(0,1)
+3      LSYM   0      0      00000000 42     void:t(0,1)
+4      PSYM   0      0      00000008 54     diprefs:p(0,2)=*(0,3)=xsDIPrefs:
+5      LSYM   0      0      00000000 87     DIPrefs:T(0,3)=s64pscr:(0,4)=*(0,5)=xsScreen:,0,32;pwin:(0,6)=*(0,7)=xsWindow:,32,32;wAppPort:(0,8)=*(0,9)=xsMsgPort:,64,32;dip_DIport:(0,8),96,32;myTT:(0,10)=xsmyToolTypes:,128,128;tb_borderless_toggled:(0,11)=(0,12)=r(0,12);-32768;32767;,256,16;dip_FTGroup:(0,13)=*(0,14)=xsFTGroup:,288,32;dip_MatchChooserList:(0,15)=*(0,16)=xsList:,320,32;dip_prot_selector:(0,17)=ar(0,18)=r(0,18);0;4294967295;;0;3;(0,19)=(0,20)=*(0,21)=r(0,21);0;255;,352,128;dip_inccodhook:(0,22)=*(0,23)=xsHook:,480,32;;
+6      LSYM   0      0      00000000 582    myToolTypes:T(0,10)=s16gui_images:(0,19),0,32;showhints:(0,11),32,16;tb_borderless:(0,24)=(0,25)=r(0,25);0;4294967295;,64,32;tb_style:(0,24),96,32;;
+7      LSYM   0      0      00000000 731    BOOL:t(0,11)
+8      LSYM   0      0      00000000 744    short int:t(0,12)
+9      LSYM   0      0      00000000 762    STRPTR:t(0,19)
+10     LSYM   0      0      00000000 777    char:t(0,21)
+11     LSYM   0      0      00000000 790    uint32:t(0,24)
+12     LSYM   0      0      00000000 805    long unsigned int:t(0,25)
+13     SLINE  0      4      00000000 0      
+14     SLINE  0      5      00000010 0      
+15     SLINE  0      6      00000014 0      
+16     FUN    0      0      01000280 831    main:F(0,26)=r(0,26);-2147483648;2147483647;
+17     LSYM   0      0      00000000 876    int:t(0,26)
+18     SLINE  0      28     00000000 0      
+19     SLINE  0      29     00000014 0      
+20     SLINE  0      31     00000020 0      
+21     SLINE  0      32     0000002c 0      
+22     SLINE  0      33     00000030 0      
+23     LSYM   0      0      00000008 888    test:(0,3)
+24     LBRAC  0      0      00000000 0      
+25     RBRAC  0      0      0000004c 0      
+26     SO     0      0      010002cc 0      
+

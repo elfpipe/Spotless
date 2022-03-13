@@ -131,7 +131,7 @@ public:
 	void start() {
 		if(!process.lives() || process.isRunning()) return;
 
-		if (!process.isRunning() /*&& isLocation(process.ip())*/) {
+		if (!process.isRunning() && isLocation(process.ip())) {
 			process.step();
 		}
 		breaks.activate();
@@ -541,9 +541,9 @@ public:
 		return hexLine;
 	}
 
-	// uint32_t getTrapSignal() {
-	// 	return process.getTrapSignal();
-	// }
+	uint32_t getTrapSignal() {
+		return process.getTrapSignal();
+	}
 	uint32_t getPortSignal() {
 		return process.getPortSignal();
 	}

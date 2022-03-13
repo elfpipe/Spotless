@@ -68,9 +68,9 @@ void AmigaProcess::clear()
 	running = false;
 	attached = false;
 
-	// for (auto t : tasks) { delete t; } tasks.clear();
+	//for (auto t : tasks) { cout << "delete task : " << (void *)t << "\n"; delete t; } tasks.clear();
 
-	resetSignals();
+	//resetTrapSignal();
 }
 
 APTR AmigaProcess::load(string path, string file, string arguments)
@@ -224,6 +224,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 
 			IExec->PutMsg (port, (struct Message *)message);
 
+			// IExec->Signal(data->caller, 1 << data->signal);
 			// sendSignal = true;
 
 			// running = false;
@@ -479,7 +480,7 @@ void AmigaProcess::wakeUp()
 
 void AmigaProcess::go()
 {
-	IExec->Disable();
+	// IExec->Disable();
 	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
     IExec->RestartTask((struct Task *)process, 0);
 	// if(tasks.size()) {
@@ -489,12 +490,12 @@ void AmigaProcess::go()
 	// }
 	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
 	running = true;
-	IExec->Enable();
+	// IExec->Enable();
 }
 
 void AmigaProcess::restartTask(struct Task *task)
 {
-	IExec->Disable();
+	// IExec->Disable();
 	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
 	IExec->RestartTask((struct Task *)task, 0);
 	// if(tasks.size()) {
@@ -504,28 +505,28 @@ void AmigaProcess::restartTask(struct Task *task)
 	// }
 	// running = false;
 	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
-	IExec->Enable();
+	// IExec->Enable();
 }
 
 void AmigaProcess::restartAll()
 {
-	IExec->Disable();
+	// IExec->Disable();
 	for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) 
 		IExec->RestartTask((*it)->task, 0);
 	go();
-	IExec->Enable();
+	// IExec->Enable();
 }
 void AmigaProcess::suspendAll()
 {
-	IExec->Disable();
+	// IExec->Disable();
 	for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) 
 		IExec->SuspendTask((*it)->task, 0);
 	suspend();
-	IExec->Enable();
+	// IExec->Enable();
 }
 void AmigaProcess::suspend()
 {
-	IExec->Disable();
+	// IExec->Disable();
 	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
 	IExec->SuspendTask((struct Task *)process, 0);
 	// if(tasks.size()) {
@@ -535,12 +536,12 @@ void AmigaProcess::suspend()
 	// }
 	running = false;
 	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
-	IExec->Enable();
+	// IExec->Enable();
 }
 
 void AmigaProcess::suspendTask(struct Task *task)
 {
-	IExec->Disable();
+	// IExec->Disable();
 	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
 	IExec->SuspendTask((struct Task *)task, 0);
 	// if(tasks.size()) {
@@ -550,7 +551,7 @@ void AmigaProcess::suspendTask(struct Task *task)
 	// }
 	// running = false;
 	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
-	IExec->Enable();
+	// IExec->Enable();
 }
 
 bool AmigaProcess::lives() {
@@ -566,9 +567,9 @@ bool AmigaProcess::isRunning() {
 	return exists && running;
 }
 
-void AmigaProcess::resetSignals() {
+void AmigaProcess::resetTrapSignal() {
 	uint32_t signals = IExec->SetSignal(0, 0);
-	if(signals) IExec->Wait(signals);
+	if(signals & (1 << signal)) IExec->Wait(1 << signal);
 }
 
 vector<AmigaProcess::TaskData *> AmigaProcess::getTasks()

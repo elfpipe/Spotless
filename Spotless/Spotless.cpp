@@ -49,7 +49,7 @@ void Spotless::create() {
     addBottomPanelWidget(disassembler);
     addBottomPanelWidget(console);
 
-    addSignalHandler(deathHandler, SIGF_CHILD);
+    // addSignalHandler(deathHandler, SIGF_CHILD);
     // addSignalHandler(trapHandler, debugger.getTrapSignal());
     addSignalHandler(portHandler, debugger.getPortSignal());
     // addSignalHandler(pipeHandler, debugger.getPipeSignal());
@@ -63,7 +63,7 @@ int Spotless::unfold() {
 // void Spotless::trapHandler() {
 //     if(spotless) {
 //         spotless->debugger.suspendBreaks();
-//         if(spotless) spotless->updateAll();
+//         spotless->updateAll();
 //         Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
 //     }
 // }
@@ -74,14 +74,14 @@ void Spotless::portHandler() {
         // for(int i = 0; i < messages.size(); i++)
         //     Console::write(PublicScreen::PENTYPE_INFO, messages[i]);
         // if(spotless->debugger.isDead()) 
-        if(spotless->debugger.handleMessages()) { // if trap or exception
+        /*if(*/spotless->debugger.handleMessages();/*) {*/ // if trap or exception
                 spotless->debugger.suspendBreaks();
                 if(spotless->debugger.lives())
                     spotless->updateAll();
                 else
                     spotless->clearAll();
                 Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
-        }
+        /*}*/
         // if(!spotless->debugger.lives()) {
         //     spotless->clearAll();
         //     spotless->childLives = false;
@@ -131,6 +131,7 @@ void Spotless::updateAll() {
 }
 
 void Spotless::clearAll() {
+    cout << "clearAll()\n";
     actions->clear();
     code->clear();
     context->clear();
