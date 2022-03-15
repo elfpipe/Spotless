@@ -347,8 +347,7 @@ public:
 	vector<string> functionSource(uint32_t address) {
 		vector<string> result;
 		string source = binary->getSourceFile(address);
-		// cout << "Source file : " << source << "\n"; 
-		// cout << "ip : " << (void *)process.ip();
+		
 		if(source.size() == 0) return result;
 		string fullPath = roots.search(source);
 		if(fullPath.size() == 0) return result;

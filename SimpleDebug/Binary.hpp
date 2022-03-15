@@ -247,7 +247,6 @@ public:
         return result; // + patch::toString((unsigned int)byteSize());
     }
     vector<string> values(Scope *scope, uint32_t base) {
-        //cout << "base: 0x" << (void *)base;
         vector<string> result;
         if(!is_readable_address(base)) {
             result.push_back("<no access>");
@@ -493,6 +492,9 @@ public:
     }
     vector<string> values(Scope *scope, uint32_t base) {
         vector<string> result;
+        result.push_back(toString());
+        return result;
+
         uint32_t address = 0x0;
         if(base && is_readable_address(base)) address = *(uint32_t *)base;
         vector<string> v;
@@ -512,10 +514,12 @@ public:
     ConformantArray(SourceObject *o, Type::TypeNo no, astream &str)
     : Type(T_ConformantArray, no), object(o)
     {
-        str.peekSkip('x');
+        str.skip('x');
         char c = str.get();
         switch(c) {
-            case 's': {
+            case 's':
+            case 'u':
+            case 'e': {
                 name = str.get(':');
                 char c = str.get();
                 break;
@@ -584,10 +588,6 @@ public:
     }
     vector<string> values(Scope *scope, uint32_t base) {
         vector<string> result;
-        if(symType == S_Typedef) {
-            result.push_back("<typedef>");
-            return result;
-        }
         vector<string> v;
         if(type) v = type->values(scope, base + address);
         if(v.size() == 1)
@@ -676,7 +676,7 @@ public:
 public:
     Type *findType(Type::TypeNo &no) {
         for(int i = 0; i < types.size(); i++)
-            if(types[i]->no.equals(no)) {
+            if(types[i]->no.equals(no) && types[i]->typeClass != Type::T_ConformantArray) {
                 return types[i];
             }
         return 0;

@@ -59,11 +59,11 @@ Pointer::Pointer(SourceObject *object, Type::TypeNo no, astream &str)
 : Type(T_Pointer, no),
 pointsTo(0)
 {
-    str.skip();
+    str.skip(); // '*'
     Type::TypeNo pNo(str);
     pointsTo = object->findType(pNo);
     if(!pointsTo)
-        pointsTo = object->interpretType(no, str);
+        pointsTo = object->interpretType(pNo, str);
 }
 Type *SourceObject::interpretType(Type::TypeNo no, astream &str) {
     Type *type = 0;
@@ -111,13 +111,16 @@ Type *SourceObject::interpretType(Type::TypeNo no, astream &str) {
         addType(type);
     return type;
 }
-Symbol *SourceObject::interpretSymbol(astream &str, uint64_t address) {
+Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address) {
     Symbol *result = 0;
     string name = str.get(':');
     char c = str.peek();
     if(c != '(') str.skip(); 
     Type::TypeNo no(str);
     Type *type = findType(no);
+    if(type->typeClass == Type::T_ConformantArray) {
+        type = 0;
+    }
     if(!type) 
         type = interpretType(no, str);    
     switch(c) {
@@ -141,10 +144,15 @@ Symbol *SourceObject::interpretSymbol(astream &str, uint64_t address) {
     return result;
 }
 vector<string> ConformantArray::values(Scope *scope, uint32_t base) {
-    Symbol *found = object->findSymbolByName(scope, name);
-    if(found && found->symType == Symbol::S_Typedef) return found->values(scope, base);
+    // Symbol *found = object->findSymbolByName(scope, name);
     vector<string> result;
-    result.push_back("<unknown type : " + name + ">");
+    Type *type = object->findType(no);
+    if(type) return type->values(scope, base);    
+    // if(found && found->symType == Symbol::S_Typedef) {
+    //     result.push_back(found->toString()); //found->values(scope, base);
+    //     return result;
+    // }
+    // result.push_back("<unknown type : " + name + ">");
     return result;
 }
 
@@ -195,11 +203,14 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
                 source = string(stabstr + sym->n_strx);
                 break;
 			case N_LSYM: {
-                Symbol *symbol = interpretSymbol(str, sym->n_value);
-                if(function)
+                if(function) {
+                    Symbol *symbol = interpretSymbol(str, sym->n_value);
                     symbols.push_back(symbol);
-                else
+                }
+                else {
+                    Symbol *symbol = interpretSymbol(str, sym->n_value);
                     locals.push_back(symbol);
+                }
                 break;
             }
 			case N_GSYM: {
@@ -266,15 +277,10 @@ string SourceObject::toString() {
     return result + "}\n";
 }
 Symbol *SourceObject::findSymbolByName(Scope *scope, string name) {
-    cout << "Search : [" << name << "]\n";
-    cout << "Locals :\n";
     while(scope) {
-        for(vector<Symbol*>::iterator it = scope->symbols.begin(); it != scope->symbols.end(); it++) {
-            cout << "name : [" << (*it)->name << "]\n";
-            if((*it)->symType == Symbol::S_Typedef) {
-                if(!name.compare((*it)->name))
-                    return *it;
-            }
+        for(vector<Symbol *>::iterator it = scope->symbols.begin(); it != scope->symbols.end(); it++) {
+            if(!name.compare((*it)->name))
+                return *it;
         }
         scope = scope->parent;
     }
@@ -285,14 +291,12 @@ Symbol *SourceObject::findSymbolByName(Scope *scope, string name) {
     //             return *it;
     //     }
     // }
-    cout << "Globals :\n";
-    for(vector<Symbol*>::iterator it = globals.begin(); it != globals.end(); it++) {
-        cout << "name : [" << (*it)->name << "]\n";
-        if((*it)->symType == Symbol::S_Typedef) {
-            if(!name.compare((*it)->name))
-                return *it;
-        }
-    }
+    // for(vector<Symbol*>::iterator it = globals.begin(); it != globals.end(); it++) {
+    //     if((*it)->symType == Symbol::S_Typedef) {
+    //         if(!name.compare((*it)->name))
+    //             return *it;
+    //     }
+    // }
     return 0;
 }
 
@@ -432,10 +436,8 @@ vector<string> Binary::getContext(uint32_t ip, uint32_t sp) {
     /* locals */
     Scope *scope = function->locals[0];
     if(scope) scope = scope->getScope(ip);
-    cout << "Scope : " << (void *)scope << "\n";
     while(scope) {
         for(int j = 0; j < scope->symbols.size(); j++) {
-            cout << "Symbol : " << scope->symbols[j]->name << "\n";
             vector<string> values = scope->symbols[j]->values(scope, sp);
             result.insert(result.end(), values.begin(), values.end());
         }
