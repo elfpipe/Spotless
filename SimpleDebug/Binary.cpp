@@ -143,16 +143,10 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address) {
     }
     return result;
 }
-vector<string> ConformantArray::values(Scope *scope, uint32_t base) {
-    // Symbol *found = object->findSymbolByName(scope, name);
+vector<string> ConformantArray::values(uint32_t base) {
     vector<string> result;
     Type *type = object->findType(no);
-    if(type) return type->values(scope, base);    
-    // if(found && found->symType == Symbol::S_Typedef) {
-    //     result.push_back(found->toString()); //found->values(scope, base);
-    //     return result;
-    // }
-    // result.push_back("<unknown type : " + name + ">");
+    if(type) return type->values(base);    
     return result;
 }
 
@@ -276,30 +270,6 @@ string SourceObject::toString() {
         result += (*it)->toString() + "\n";
     return result + "}\n";
 }
-Symbol *SourceObject::findSymbolByName(Scope *scope, string name) {
-    while(scope) {
-        for(vector<Symbol *>::iterator it = scope->symbols.begin(); it != scope->symbols.end(); it++) {
-            if(!name.compare((*it)->name))
-                return *it;
-        }
-        scope = scope->parent;
-    }
-    // for(vector<Symbol*>::iterator it = locals.begin(); it != locals.end(); it++) {
-    //     cout << "name : [" << (*it)->name << "]\n";
-    //     if((*it)->symType == Symbol::S_Typedef) {
-    //         if(!name.compare((*it)->name))
-    //             return *it;
-    //     }
-    // }
-    // for(vector<Symbol*>::iterator it = globals.begin(); it != globals.end(); it++) {
-    //     if((*it)->symType == Symbol::S_Typedef) {
-    //         if(!name.compare((*it)->name))
-    //             return *it;
-    //     }
-    // }
-    return 0;
-}
-
 Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
     this->name = name;
     this->stab = stab;
@@ -426,7 +396,7 @@ vector<string> Binary::getContext(uint32_t ip, uint32_t sp) {
     /* parameters */
     for(int i = 0; i < function->params.size(); i++) {
         if (function->params[i]) {
-            vector<string> values = function->params[i]->values(0, sp);
+            vector<string> values = function->params[i]->values(sp);
             result.insert(result.end(), values.begin(), values.end());
         } else {
             result.push_back("<no symbol info>");
@@ -438,7 +408,7 @@ vector<string> Binary::getContext(uint32_t ip, uint32_t sp) {
     if(scope) scope = scope->getScope(ip);
     while(scope) {
         for(int j = 0; j < scope->symbols.size(); j++) {
-            vector<string> values = scope->symbols[j]->values(scope, sp);
+            vector<string> values = scope->symbols[j]->values(sp);
             result.insert(result.end(), values.begin(), values.end());
         }
         scope = scope->parent;
@@ -452,7 +422,7 @@ vector<string> Binary::getGlobals(ElfSymbols &symbols) {
         for(int j = 0; j < object->globals.size(); j++) {
             Symbol *symbol = object->globals[j];
             if(symbol->symType == Symbol::S_Global) {
-                vector<string> values = symbol->values(0, symbols.valueOf(symbol->name));
+                vector<string> values = symbol->values(symbols.valueOf(symbol->name));
                 result.insert(result.begin(), values.begin(), values.end());
             }
         }
