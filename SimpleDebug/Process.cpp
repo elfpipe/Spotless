@@ -70,7 +70,7 @@ void AmigaProcess::clear()
 
 	//for (auto t : tasks) { cout << "delete task : " << (void *)t << "\n"; delete t; } tasks.clear();
 
-	//resetTrapSignal();
+	resetTrapSignal();
 }
 
 APTR AmigaProcess::load(string path, string file, string arguments)
@@ -89,6 +89,8 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 		return 0;
 	}
 
+cout << "Forbid()\n";
+IDOS->Delay(1);
 	IExec->Forbid(); //can we avoid this
 
     process = IDOS->CreateNewProcTags(
@@ -125,7 +127,8 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 		readContext();
 		IExec->Permit();
 	}
-
+cout << "Permit()\n";
+IDOS->Delay(1);
 	APTR handle;
 	
 	IDOS->GetSegListInfoTags (seglist, 
@@ -423,23 +426,34 @@ void AmigaProcess::backSkip() {
 
 bool AmigaProcess::step() {
 	Tracer tracer(process, &context);
+	cout << "step()\n";
 	if(tracer.activate()) {
+		cout << "tracer.activate()\n";
 		tracing = true;
 		go();
+		cout << "go()\n";
 		waitTrace();
+		cout << "waitTrace()\n";
 		tracer.suspend();
+		cout << "tracer.suspend()\n";
 		return true;
 	}
+	cout << "Failed to activate tracer.\n";
 	return false;
 }
 
 bool AmigaProcess::stepNoBranch() {
 	Tracer tracer(process, &context);
+	cout << "step()\n";
 	if(tracer.activate(false)) {
+		cout << "tracer.activate()\n";
 		tracing = true;
 		go();
+		cout << "go()\n";
 		waitTrace();
+		cout << "waitTrace()\n";
 		tracer.suspend();
+		cout << "tracer.suspend()\n";
 		return true;
 	}
 	return false;

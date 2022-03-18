@@ -705,6 +705,7 @@ public:
     Function *getFunction(uint32_t address);
     Function::SLine *getLocation(uint32_t address);
     bool isLocation(uint32_t address);
+    bool isBinary(uint32_t address);
     bool isFunction(uint32_t address);
     string getFunctionName(uint32_t address);
     string getSourceFile(uint32_t address);

@@ -347,6 +347,12 @@ bool Binary::isLocation(uint32_t address) {
     }
     return false;
 }
+bool Binary::isBinary(uint32_t address) {
+    for(vector<SourceObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
+        if(address >= (*it)->start && address <= (*it)->end) return true;
+    }
+    return false;
+}
 bool Binary::isFunction(uint32_t address) {
     Function *function = getFunction(address);
     if(function) {

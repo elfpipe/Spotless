@@ -131,7 +131,7 @@ public:
 	void start() {
 		if(!process.lives() || process.isRunning()) return;
 
-		if (!process.isRunning() && isLocation(process.ip())) {
+		if (!process.isRunning() && binary->isBinary(process.ip())) {
 			process.step();
 		}
 		breaks.activate();
@@ -229,8 +229,10 @@ public:
 		// breaks.deactivate();
 	}
 	void stepInto() {
+		cout << "stepInto()\n";
 		if(!binary || !process.lives() || process.isRunning()) return;
 
+		cout << "binary->getFunction()\n";
 		if(!binary->getFunction(process.ip())) {
 			start();
 			return;
@@ -239,17 +241,26 @@ public:
 		// 	start();
 		// 	return;
 		// }
+		cout << "loop :\n";
 		do {
+			cout << "if(isReturn())\n";
 			if(process.isReturn(process.ip())) { //if we are returning from the function, we need to let go and run normally
 				start();
 				return;
 			}
-			if(binary->getSourceFile(process.branchAddress()).size() > 0)
+			cout << "step()\n";
+			if(binary->getSourceFile(process.branchAddress()).size() > 0) {
+				cout << "StepInto : process.step()\n";
 				if(!process.step()) break;
-			else
+			}
+			else {
+				cout << "StepInto : process.stepNoBranch()\n";
 				if(!process.stepNoBranch()) break;
+			}
+			cout << "end loop.\n";
 		} while(!binary->isLocation(process.ip()));
 		//process.wakeUp();
+		cout << "End stepInto()\n";
 	}
 	void stepOut() {
 		if (!binary || !process.lives() || process.isRunning()) return;

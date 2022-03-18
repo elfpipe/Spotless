@@ -43,8 +43,10 @@ void Breaks::deactivate()
 
 bool Breaks::insert(uint32_t address)
 {
-	if (isBreak(address))
+	if (isBreak(address)) {
+		cout << "Failed to set break. address = " << (void *)address << "\n";
 		return false;
+	}
 	// if(!is_writable_address(address)) return false;
 
 	breaks.push_back(new Break(address));
