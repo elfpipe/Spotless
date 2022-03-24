@@ -45,6 +45,7 @@ void AmigaProcess::init()
 	if(!port)
 		port = (struct MsgPort *)IExec->AllocSysObject(ASOT_PORT, TAG_DONE);
 	signal = IExec->AllocSignal(-1);
+	seglist = 0;
 }
 
 void AmigaProcess::cleanup ()
@@ -59,6 +60,8 @@ void AmigaProcess::cleanup ()
 
 	if(port) IExec->FreeSysObject(ASOT_PORT, port);
 	IExec->FreeSignal(signal);
+
+	clear();
 }
 
 void AmigaProcess::clear()
@@ -68,9 +71,13 @@ void AmigaProcess::clear()
 	running = false;
 	attached = false;
 
-	//for (auto t : tasks) { cout << "delete task : " << (void *)t << "\n"; delete t; } tasks.clear();
+	// hookOff((struct Task *)process);
+	// for (auto t : tasks) { delete t; } tasks.clear();
 
-	resetTrapSignal();
+	// resetTrapSignal();
+	// if(seglist) IDOS->UnLoadSeg(seglist);
+	// seglist = 0;
+
 }
 
 APTR AmigaProcess::load(string path, string file, string arguments)
@@ -82,16 +89,17 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 	BPTR homelock = IDOS->DupLock (lock);
 
 	string command = Roots::append(path, file);
-	BPTR seglist = IDOS->LoadSeg (command.c_str());
+	seglist = IDOS->LoadSeg (command.c_str());
 	
 	if (!seglist) {
 		IDOS->UnLock(lock);
 		return 0;
 	}
 
-cout << "Forbid()\n";
-IDOS->Delay(1);
-	IExec->Forbid(); //can we avoid this
+	cout << "Calling Forbid()...\n";
+	IDOS->Delay(10);
+
+	// IExec->Forbid(); //can we avoid this
 
     process = IDOS->CreateNewProcTags(
 		NP_Seglist,					seglist,
@@ -115,7 +123,7 @@ IDOS->Delay(1);
 	);
 
 	if (!process) {
-		IExec->Permit();
+		// IExec->Permit();
 		return 0;
 	} else {
 		IExec->SuspendTask ((struct Task *)process, 0L);		
@@ -125,10 +133,11 @@ IDOS->Delay(1);
 
 		hookOn((struct Task *)process);
 		readContext();
-		IExec->Permit();
+		// IExec->Permit();
 	}
-cout << "Permit()\n";
-IDOS->Delay(1);
+	cout << "Back from Permit().\n";
+	IDOS->Delay(10);
+
 	APTR handle;
 	
 	IDOS->GetSegListInfoTags (seglist, 
@@ -195,7 +204,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			// sendSignal = true;  //if process has ended, we must signal caller
 			IExec->PutMsg (port, (struct Message *)message);
 
-			ret = 1;
+			ret = 0; //1?
 			break;
 		}
 		case DBHMT_EXCEPTION: {
@@ -334,7 +343,7 @@ bool AmigaProcess::handleMessages() {
 					}
 				}
 				// restart task to let it exit
-				restartTask(message->task);
+				// restartTask(message->task);
 
 				// exit = true;
 				break;
@@ -426,34 +435,23 @@ void AmigaProcess::backSkip() {
 
 bool AmigaProcess::step() {
 	Tracer tracer(process, &context);
-	cout << "step()\n";
 	if(tracer.activate()) {
-		cout << "tracer.activate()\n";
 		tracing = true;
 		go();
-		cout << "go()\n";
 		waitTrace();
-		cout << "waitTrace()\n";
 		tracer.suspend();
-		cout << "tracer.suspend()\n";
 		return true;
 	}
-	cout << "Failed to activate tracer.\n";
 	return false;
 }
 
 bool AmigaProcess::stepNoBranch() {
 	Tracer tracer(process, &context);
-	cout << "step()\n";
 	if(tracer.activate(false)) {
-		cout << "tracer.activate()\n";
 		tracing = true;
 		go();
-		cout << "go()\n";
 		waitTrace();
-		cout << "waitTrace()\n";
 		tracer.suspend();
-		cout << "tracer.suspend()\n";
 		return true;
 	}
 	return false;
@@ -525,16 +523,16 @@ void AmigaProcess::restartTask(struct Task *task)
 void AmigaProcess::restartAll()
 {
 	// IExec->Disable();
-	for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) 
-		IExec->RestartTask((*it)->task, 0);
+	// for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) 
+	// 	IExec->RestartTask((*it)->task, 0);
 	go();
 	// IExec->Enable();
 }
 void AmigaProcess::suspendAll()
 {
 	// IExec->Disable();
-	for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) 
-		IExec->SuspendTask((*it)->task, 0);
+	// for(vector<TaskData *>::iterator it = tasks.begin(); it != tasks.end(); it++) 
+	// 	IExec->SuspendTask((*it)->task, 0);
 	suspend();
 	// IExec->Enable();
 }

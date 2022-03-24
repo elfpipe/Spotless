@@ -63,7 +63,8 @@ public:
 
 private:
     static struct Process *process;
-
+	BPTR seglist;
+	
 	vector<struct TaskData *> tasks;
 
 	static struct Hook hook;

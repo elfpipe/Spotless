@@ -67,11 +67,11 @@ void Breaks::clear()
 	deactivate();
 	while(!breaks.empty()) delete breaks.front(), breaks.pop_front();
 
-	// breaks.clear();
 	// for (list<Break *>::iterator it = breaks.begin(); it != breaks.end(); it++) {
+	// 	cout << "delete break : " << (void *)(*it)->address << "\n";
 	// 	delete *it;
-	// 	it = breaks.erase(it);
 	// }
+	// breaks.clear();
 }
 
 // ------------------------------------------------------------------- //
@@ -133,7 +133,7 @@ extern "C" uint32_t setbreak(uint32_t, uint32_t); //uint32_t, uint32_t);
 
 bool Breaks::memory_insert_break_instruction (uint32_t address, uint32_t *buffer)
 {
-	// cout << "memory_insert_break_instruction : " << (void *)address << "\n";
+	cout << "memory_insert_break_instruction : " << (void *)address << "\n";
 	// if(!is_writable_address(address)) return false;
 
 	/* Go supervisor */
@@ -169,7 +169,7 @@ bool Breaks::memory_insert_break_instruction (uint32_t address, uint32_t *buffer
 
 bool Breaks::memory_remove_break_instruction (uint32_t address, uint32_t *buffer)
 {
-	// cout << "memory_remove_break_instruction : " << (void *)address << "\n";
+	cout << "memory_remove_break_instruction : " << (void *)address << "\n";
 	// if(!is_writable_address(address)) return false;
 
 	/* Go supervisor */

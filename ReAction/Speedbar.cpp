@@ -40,6 +40,20 @@ void Speedbar::init()
 	parent->topLevelParent()->addChild(speedbar);
 }
 
+// void Speedbar::attach ()
+// {
+// 	IIntuition->RefreshSetGadgetAttrs((struct Gadget *)speedbar, parent->topLevelParent()->windowPointer(), 0,
+// 		SPEEDBAR_Buttons,		&buttonList,
+// 	TAG_DONE);
+// }
+
+// void Speedbar::detach ()
+// {
+// 	IIntuition->SetAttrs(speedbar,
+// 		SPEEDBAR_Buttons,		~0,
+// 	TAG_DONE);
+// }
+
 void Speedbar::clear()
 {
 	struct Node *node, *nextnode;
@@ -55,7 +69,9 @@ void Speedbar::clear()
 
 void Speedbar::addNode (struct Node *node)
 {
+	detach();
 	IExec->AddTail (&buttonList, node);
+	attach();
 }
 
 void Speedbar::addButton (int buttonId, string buttonText, string iconName)

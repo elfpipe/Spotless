@@ -34,6 +34,7 @@ private:
 
 	int line, hexLine;
 
+	bool firstRun;
 	// string entryPoint;
 
 public:
@@ -50,6 +51,7 @@ public:
 
 		if(handle->performRelocation())
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
+		firstRun = true;
 	}
 	bool load(string path, string file, string args) {
 		APTR handle = process.load(path, file, args);
@@ -131,15 +133,17 @@ public:
 	void start() {
 		if(!process.lives() || process.isRunning()) return;
 
-		if (!process.isRunning() && binary->isBinary(process.ip())) {
+		if (is_writable_address(process.ip() + 4) && !firstRun && !process.isRunning() && binary->isBinary(process.ip())) {
 			process.step();
 		}
+		firstRun = false;
 		breaks.activate();
 		process.restartAll();
 		// process.wait();
 		// breaks.deactivate(); //do the last bit in trap handler
 	}
 	void justGo() {
+		firstRun = false;
 		if(process.lives() || !process.isRunning())
 			process.restartAll();
 	}
@@ -229,10 +233,8 @@ public:
 		// breaks.deactivate();
 	}
 	void stepInto() {
-		cout << "stepInto()\n";
 		if(!binary || !process.lives() || process.isRunning()) return;
 
-		cout << "binary->getFunction()\n";
 		if(!binary->getFunction(process.ip())) {
 			start();
 			return;
@@ -241,26 +243,19 @@ public:
 		// 	start();
 		// 	return;
 		// }
-		cout << "loop :\n";
 		do {
-			cout << "if(isReturn())\n";
 			if(process.isReturn(process.ip())) { //if we are returning from the function, we need to let go and run normally
 				start();
 				return;
 			}
-			cout << "step()\n";
 			if(binary->getSourceFile(process.branchAddress()).size() > 0) {
-				cout << "StepInto : process.step()\n";
 				if(!process.step()) break;
 			}
 			else {
-				cout << "StepInto : process.stepNoBranch()\n";
 				if(!process.stepNoBranch()) break;
 			}
-			cout << "end loop.\n";
 		} while(!binary->isLocation(process.ip()));
 		//process.wakeUp();
-		cout << "End stepInto()\n";
 	}
 	void stepOut() {
 		if (!binary || !process.lives() || process.isRunning()) return;
@@ -564,6 +559,7 @@ public:
 	// 	return process.getMessages();
 	// }
     void clear() {
+		cout << "debugger.clear()\n";
 		linebreaks.clear();
 		breaks.clear();
 		if(handle) delete handle;

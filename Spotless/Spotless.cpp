@@ -74,18 +74,20 @@ void Spotless::portHandler() {
         // for(int i = 0; i < messages.size(); i++)
         //     Console::write(PublicScreen::PENTYPE_INFO, messages[i]);
         // if(spotless->debugger.isDead()) 
-        /*if(*/spotless->debugger.handleMessages();/*) {*/ // if trap or exception
+        if(spotless->debugger.handleMessages()) { // if trap or exception
                 spotless->debugger.suspendBreaks();
-                if(spotless->debugger.lives())
-                    spotless->updateAll();
-                else
-                    spotless->clearAll();
                 Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
-        /*}*/
+        }
         // if(!spotless->debugger.lives()) {
         //     spotless->clearAll();
         //     spotless->childLives = false;
         // }
+        if(!spotless->debugger.lives()) {
+            spotless->clearAll();
+            spotless->childLives = false;
+        }
+        // if(spotless->debugger.lives())
+            spotless->updateAll();
     }
 }
 
@@ -97,12 +99,12 @@ void Spotless::portHandler() {
 //     }
 // }
 
-void Spotless::deathHandler() {
-    if(spotless) {
-        spotless->clearAll();
-        spotless->childLives = false;
-    }
-}
+// void Spotless::deathHandler() {
+//     if(spotless) {
+//         spotless->clearAll();
+//         spotless->childLives = false;
+//     }
+// }
 
 bool Spotless::handleEvent(Event *event) {
     if(event->eventClass() == Event::CLASS_KeyPress) {

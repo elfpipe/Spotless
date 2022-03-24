@@ -287,7 +287,6 @@ Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t sta
         sym++;
     }
     string result = toString();
-    cout << "result :" << result << "\n";
 }
 vector<string> Binary::getSourceNames() {
     vector<string> result;
