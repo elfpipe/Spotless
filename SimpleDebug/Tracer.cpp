@@ -62,7 +62,7 @@ bool Tracer::isBranchToLink(uint32_t address)
 {
 	int32 dummy;
 	// simply continue, if we have reached the end of the function
-	if(PPC_DisassembleBranchInstr(*(uint32 *)address, &dummy) == PPC_BRANCHTOLINK) {
+	if(is_readable_address(address) && PPC_DisassembleBranchInstr(*(uint32 *)address, &dummy) == PPC_BRANCHTOLINK) {
 		return true;
 	}
 	return false;

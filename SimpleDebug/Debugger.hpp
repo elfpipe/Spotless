@@ -244,6 +244,7 @@ public:
 		// 	return;
 		// }
 		do {
+			cout << "stepInto()\n";
 			if(process.isReturn(process.ip())) { //if we are returning from the function, we need to let go and run normally
 				start();
 				return;
