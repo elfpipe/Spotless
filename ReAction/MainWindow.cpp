@@ -7,6 +7,8 @@
 #include "Layout.hpp"
 #include "Menubar.hpp"
 
+#include <iostream>
+using namespace std;
 /* ----------------------------------------------------- */
 
 MainWindow::MainWindow()

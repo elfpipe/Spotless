@@ -28,13 +28,14 @@ public:
                 Requesters::showAboutWindow();
                 break;
             case 2: //switch public screen
-                spotless->closeWindow();
-                if (!PublicScreen::usingPublicScreen())
-                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alpha Kilimanjaro");
-                else
-                    PublicScreen::instance()->closePublicScreen();
-                spotless->openWindow();
-                spotless->updateAll();
+                // spotless->closeAllWindows();
+                // if (!PublicScreen::usingPublicScreen())
+                //     PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alpha Kilimanjaro");
+                // else
+                //     PublicScreen::instance()->closePublicScreen();
+                // spotless->openWindow();
+                // spotless->updateAll();
+                this->doScreenSwitch = true;
                 break;
             case 3: {
                 if(spotless->configure) {

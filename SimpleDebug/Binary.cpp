@@ -1,4 +1,5 @@
 #include "Binary.hpp"
+#include "../ReAction/Progress.hpp"
 #include "symtabs.h"
 #include <vector>
 Type::~Type(){}
@@ -271,12 +272,16 @@ string SourceObject::toString() {
     return result + "}\n";
 }
 Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
+    ProgressWindow progress;
+    progress.open("Loading stabs...", (unsigned int)stabsize, 0);
     this->name = name;
     this->stab = stab;
     this->stabstr = stabstr;
     this->stabsize = stabsize;
 	SymtabEntry *sym = stab;
 	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
+        // cout << "SO: " << string(stabstr + sym->n_strx) << "\n";
+        progress.updateLevel((uint32_t)sym - (uint32_t)stab);
 		switch (sym->n_type) {
             case N_SO:
                 objects.push_back(new SourceObject(&sym, stab, stabstr, stabsize));
@@ -286,6 +291,7 @@ Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t sta
         }
         sym++;
     }
+    progress.close();
     string result = toString();
 }
 vector<string> Binary::getSourceNames() {

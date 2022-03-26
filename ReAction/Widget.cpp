@@ -93,6 +93,7 @@ void Widget::closeWindow ()
 	parentLayout = 0;
 
 	children.clear();
+	openedWindows.remove(this);
 }
 
 void Widget::closeNewWindow(Widget *widget)
@@ -137,7 +138,6 @@ int Widget::waitForClose()
 		}
 
 		for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
-
 			bool close = false;
 			Widget *target = (*it);
 			if(!target) continue;
@@ -199,6 +199,15 @@ int Widget::waitForClose()
 				}
 			}
 			if(close && target != this) { closeNewWindow(target); result = 0x0; break; } close = false;
+		}
+		if(mainMenu->switchScreen()) {
+			closeAllWindows();
+			if (!PublicScreen::usingPublicScreen())
+				PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alpha Kilimanjaro");
+			else
+				PublicScreen::instance()->closePublicScreen();
+			openWindow();
+			mainMenu->doScreenSwitch = false;
 		}
 	}
 	// closeWindow ();

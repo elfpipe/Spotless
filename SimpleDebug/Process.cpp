@@ -46,6 +46,10 @@ void AmigaProcess::init()
 		port = (struct MsgPort *)IExec->AllocSysObject(ASOT_PORT, TAG_DONE);
 	signal = IExec->AllocSignal(-1);
 	seglist = 0;
+
+	exists = false;
+	running = false;
+	attached = false;
 }
 
 void AmigaProcess::cleanup ()
@@ -538,9 +542,7 @@ void AmigaProcess::suspendTask(struct Task *task)
 }
 
 bool AmigaProcess::lives() {
-	// if(tasksMutex) IExec->MutexObtain(tasksMutex);
 	bool result = exists;
-	// if(tasksMutex) IExec->MutexRelease(tasksMutex);
 	return result;
 
 	// uint32_t signals = IExec->SetSignal(0, 0);
