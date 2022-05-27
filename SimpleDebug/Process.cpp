@@ -100,10 +100,7 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 		return 0;
 	}
 
-	cout << "Calling Forbid()...\n";
-	IDOS->Delay(10);
-
-	// IExec->Forbid(); //can we avoid this
+	IExec->Disable(); //can we avoid this
 
     process = IDOS->CreateNewProcTags(
 		NP_Seglist,					seglist,
@@ -127,7 +124,7 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 	);
 
 	if (!process) {
-		// IExec->Permit();
+		IExec->Enable();
 		return 0;
 	} else {
 		IExec->SuspendTask ((struct Task *)process, 0L);		
@@ -137,10 +134,8 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 
 		hookOn((struct Task *)process);
 		readContext();
-		// IExec->Permit();
+		IExec->Enable();
 	}
-	cout << "Back from Permit().\n";
-	IDOS->Delay(10);
 
 	APTR handle;
 	
@@ -214,7 +209,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 		case DBHMT_EXCEPTION: {
 			traptype = dbgmsg->message.context->Traptype;
 
-			if (tracing && traptype == 0x700 || traptype == 0xd00) {
+			if (tracing) { // && traptype == 0x700 || traptype == 0xd00) {
 				IExec->Signal(data->caller, 1 << data->signal);
 				return 1;
 			}
@@ -252,32 +247,35 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 		case DBHMT_OPENLIB: {
 			//IDOS->Printf("OPENLIB\n");
 
-			struct DebugMessage *message = (struct DebugMessage *)IExec->AllocSysObjectTags (ASOT_MESSAGE,
-				ASOMSG_Size, sizeof(struct DebugMessage),
-				TAG_DONE
-			);
-			message->type = MSGTYPE_OPENLIB;
-			message->library = dbgmsg->message.library;
-			message->task = currentTask;
-			message->contextCopy = *dbgmsg->message.context;
+			// struct DebugMessage *message = (struct DebugMessage *)IExec->AllocSysObjectTags (ASOT_MESSAGE,
+			// 	ASOMSG_Size, sizeof(struct DebugMessage),
+			// 	TAG_DONE
+			// );
+			// message->type = MSGTYPE_OPENLIB;
+			// message->library = dbgmsg->message.library;
+			// message->task = currentTask;
+			// message->contextCopy = *dbgmsg->message.context;
 				
-			IExec->PutMsg(port, (struct Message *)message);			
+			// IExec->PutMsg(port, (struct Message *)message);			
+
+			ret = 0;
 		}
 		break;
 
 		case DBHMT_CLOSELIB: {
 			// IDOS->Printf("CLOSELIB\n");
 
-			struct DebugMessage *message = (struct DebugMessage *)IExec->AllocSysObjectTags(ASOT_MESSAGE,
-				ASOMSG_Size, sizeof(struct DebugMessage),
-				TAG_DONE
-			);
-			message->type = MSGTYPE_CLOSELIB;
-			message->library = dbgmsg->message.library;
-			message->task = currentTask;
-			message->contextCopy = *dbgmsg->message.context;
+			// struct DebugMessage *message = (struct DebugMessage *)IExec->AllocSysObjectTags(ASOT_MESSAGE,
+			// 	ASOMSG_Size, sizeof(struct DebugMessage),
+			// 	TAG_DONE
+			// );
+			// message->type = MSGTYPE_CLOSELIB;
+			// message->library = dbgmsg->message.library;
+			// message->task = currentTask;
+			// message->contextCopy = *dbgmsg->message.context;
 				
-			IExec->PutMsg(port, (struct Message *)message);
+			// IExec->PutMsg(port, (struct Message *)message);
+			ret = 0;
 		}
 		break;
 
@@ -326,7 +324,7 @@ bool AmigaProcess::handleMessages() {
 				break;
 
 			case AmigaProcess::MSGTYPE_ADDTASK:
-				// cout << "A task has been added.\n";
+				// cout << "MSGTYPE_ADDTASK.\n";
 				if((struct Task *)process != message->task) {
 					struct TaskData *data = new TaskData(message->task, &message->contextCopy);
 					tasks.push_back(data);
@@ -417,11 +415,13 @@ void AmigaProcess::detach()
 
 void AmigaProcess::readContext ()
 {
+	if(!exists || running) return;
 	IDebug->ReadTaskContext  ((struct Task *)process, &context, RTCF_SPECIAL|RTCF_STATE|RTCF_VECTOR|RTCF_FPU);
 }
 
 void AmigaProcess::writeContext ()
 {
+	if(!exists || running) return;
 	IDebug->WriteTaskContext ((struct Task *)process, &context, RTCF_SPECIAL|RTCF_STATE|RTCF_VECTOR|RTCF_FPU);
 }
 
@@ -442,6 +442,7 @@ bool AmigaProcess::step() {
 	Tracer tracer(process, &context);
 	if(tracer.activate()) {
 		tracing = true;
+		resetTrapSignal();
 		go();
 		waitTrace();
 		tracer.suspend();
@@ -456,6 +457,7 @@ bool AmigaProcess::stepNoBranch() {
 	Tracer tracer(process, &context);
 	if(tracer.activate(false)) {
 		tracing = true;
+		resetTrapSignal();
 		go();
 		waitTrace();
 		tracer.suspend();
@@ -494,7 +496,6 @@ void AmigaProcess::wakeUp()
 
 void AmigaProcess::go()
 {
-	cout << "go()\n";
     IExec->RestartTask((struct Task *)process, 0);
 	running = true;
 }

@@ -15,7 +15,7 @@ private:
     Object *menu;
     Widget *parent;
 
-    bool doScreenSwitch;
+    // bool doScreenSwitch;
 
     void attach();
     void detach();
@@ -36,9 +36,9 @@ public:
 
     virtual void createMenu() = 0;
 
-    virtual bool handleMenuPick(int id) { return false; }
+    virtual bool handleMenuPick(int id, bool *closeAll) { *closeAll = false; return false; }
 
-    bool switchScreen() { return doScreenSwitch; }
+    // bool switchScreen() { return doScreenSwitch; }
 
     friend class Widget;
     friend class MainWindow;

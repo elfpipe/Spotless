@@ -14,6 +14,7 @@ class Console;
 class Disassembler;
 class MemorySurfer;
 class Configure;
+class Registers;
 class Spotless : public MainWindow {
 private:
     MainMenu *menu;
@@ -26,6 +27,7 @@ private:
     Disassembler *disassembler;
     MemorySurfer *memorySurfer;
     Configure *configure;
+    Registers *registers;
 
 public:
     Debugger debugger;

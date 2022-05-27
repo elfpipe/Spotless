@@ -66,7 +66,7 @@ public:
     virtual ~Type();
     virtual string toString() = 0;
     virtual uint32_t byteSize() = 0;
-    virtual vector<string> values(uint32_t base) = 0;
+    virtual vector<string> values(uint32_t base, int generation, int maxGeneration) = 0;
 };
 class Ref : public Type {
 public:
@@ -83,8 +83,8 @@ public:
     uint32_t byteSize() {
         return ref->byteSize();
     }
-    vector<string> values(uint32_t base) {
-        return ref->values(base);
+    vector<string> values(uint32_t base, int generation, int maxGeneration) {
+        return ref ? ref->values(base, generation, maxGeneration) : vector<string>();
     };
 };
 class Void : public Type {
@@ -99,7 +99,7 @@ public:
     uint32_t byteSize() {
         return 0;
     }
-    vector<string> values(uint32_t base) {
+    vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
         result.push_back("<void>");
         return result;
@@ -246,7 +246,7 @@ public:
         }
         return result; // + patch::toString((unsigned int)byteSize());
     }
-    vector<string> values(uint32_t base) {
+    vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
         if(!is_readable_address(base)) {
             result.push_back("<no access>");
@@ -351,7 +351,7 @@ public:
     uint32_t byteSize() {
         return type->byteSize() * (upper - lower);
     }
-    vector<string> values(uint32_t base) {
+    vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
 
         uint32_t address = base;
@@ -362,10 +362,12 @@ public:
             return result;
         }
         while(place <= upper) {
-            vector<string> v = type->values(address);
-            result.insert(result.end(), v.begin(), v.end());
-            address += type->byteSize();
-            place++;
+            if(generation <= maxGeneration) {
+                vector<string> v = type->values(address, generation+1, maxGeneration);
+                result.insert(result.end(), v.begin(), v.end());
+                address += type->byteSize();
+                place++;
+            }
         }
         return result;
     }
@@ -402,18 +404,20 @@ public:
     uint32_t byteSize() {
         return size;
     }
-    vector<string> values(uint32_t base) {
+    vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
-        for(int i = 0; i < entries.size(); i++) {
-            uint32_t offset = entries[i]->bitOffset / 8;
-            vector<string> v;
-            if(entries[i]->type) v = entries[i]->type->values(base + offset);
-            if(v.size() == 1)
-                result.push_back(entries[i]->name + " : " + v[0]);
-            else {
-                result.push_back(entries[i]->name + " : {");
-                result.insert(result.end(), v.begin(), v.end());
-                result.push_back("}");
+        if(generation <= maxGeneration) {
+            for(int i = 0; i < entries.size(); i++) {
+                uint32_t offset = entries[i]->bitOffset / 8;
+                vector<string> v;
+                if(entries[i]->type) v = entries[i]->type->values(base + offset, generation + 1, maxGeneration);
+                if(v.size() == 1)
+                    result.push_back(entries[i]->name + " : " + v[0]);
+                else {
+                    result.push_back(entries[i]->name + " : {");
+                    result.insert(result.end(), v.begin(), v.end());
+                    result.push_back("}");
+                }
             }
         }
         return result;
@@ -464,7 +468,7 @@ public:
     uint32_t byteSize() {
         return 4; //is this coherent?
     }
-    vector<string> values(uint32_t base) {
+    vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
         if(is_readable_address(base)) {
             int value = *(int *)base;
@@ -490,19 +494,22 @@ public:
     uint32_t byteSize() {
         return sizeof(void*);
     }
-    vector<string> values(uint32_t base) {
+    vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
-        result.push_back(toString());
-        return result;
+        // result.push_back(toString());
+        // return result;
 
         uint32_t address = 0x0;
         if(base && is_readable_address(base)) address = *(uint32_t *)base;
+        // result.push_back(printStringFormat("(*) (0x%x) %s", address, pointsTo->toString()));
         vector<string> v;
-        if(pointsTo && address) v = pointsTo->values(address);
-        if(v.size() == 1)
-            result.push_back(printStringFormat("(*) (0x%x) %s", address, v[0]));
-        else
-            result.insert(result.end(), v.begin(), v.end());
+        if (generation <= maxGeneration) {
+            if(pointsTo && address) v = pointsTo->values(address, generation + 1, maxGeneration);
+            if(v.size() == 1)
+                result.push_back(printStringFormat("(*) (0x%x) %s", address, v[0]));
+            else
+                result.insert(result.end(), v.begin(), v.end());
+        }
         return result;
     }
 };
@@ -533,7 +540,7 @@ public:
     uint32_t byteSize() {
         return 0;
     }
-    vector<string> values(uint32_t base); // defined in Binary.cpp
+    vector<string> values(uint32_t base, int generation, int maxGeneration); // defined in Binary.cpp
 };
 class FunctionType : public Type {
 public:
@@ -542,7 +549,7 @@ public:
     { }
     string toString() { return "f" + no.toString(); }
     uint32_t byteSize() { return sizeof(void *); }
-    vector<string> values(uint32_t base) {
+    vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
         result.push_back("<function>");
         return result;
@@ -588,8 +595,9 @@ public:
     }
     vector<string> values(uint32_t base) {
         vector<string> result;
+        if(symType == S_Typedef) return result; 
         vector<string> v;
-        if(type) v = type->values(base + address);
+        if(type) v = type->values(base + address, 1, 10);
         if(v.size() == 1)
             result.push_back(name + " " + typeString() + " : " + v[0]);
         else {

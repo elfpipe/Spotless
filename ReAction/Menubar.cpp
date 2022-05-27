@@ -10,7 +10,7 @@ Menubar::Menubar(Widget *parent)
 {
     this->parent = parent;
     createMenuStrip();
-    this->doScreenSwitch = false;
+    // this->doScreenSwitch = false;
 }
 
 Menubar::~Menubar()

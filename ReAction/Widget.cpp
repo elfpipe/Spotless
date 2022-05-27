@@ -163,11 +163,10 @@ int Widget::waitForClose()
 						case WMHI_MENUPICK: {
 							uint32 id = NO_MENU_ID;
 							while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID)
-							close = mainMenu->handleMenuPick(id);
-							done = close;
-							closeAll = (close && target==this);
-						}
+							bool closeAll = false;
+							done = mainMenu->handleMenuPick(id, &closeAll);
 							break;
+						}
 
 						case WMHI_ICONIFY : {
 							if(!appPort) break;
@@ -200,15 +199,15 @@ int Widget::waitForClose()
 			}
 			if(close && target != this) { closeNewWindow(target); result = 0x0; break; } close = false;
 		}
-		if(mainMenu->switchScreen()) {
-			closeAllWindows();
-			if (!PublicScreen::usingPublicScreen())
-				PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alpha Kilimanjaro");
-			else
-				PublicScreen::instance()->closePublicScreen();
-			openWindow();
-			mainMenu->doScreenSwitch = false;
-		}
+		// if(mainMenu->switchScreen()) {
+		// 	closeAllWindows();
+		// 	if (!PublicScreen::usingPublicScreen())
+		// 		PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alfkil Thorbjørn Wennermark");
+		// 	else
+		// 		PublicScreen::instance()->closePublicScreen();
+		// 	openWindow();
+		// 	mainMenu->doScreenSwitch = false;
+		// }
 	}
 	// closeWindow ();
 	closeAllWindows();

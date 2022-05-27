@@ -8,6 +8,7 @@
 #include "Disassembler.hpp"
 #include "Spotless.hpp"
 #include "MemorySurfer.hpp"
+#include "Registers.hpp"
 
 #include <libraries/keymap.h>
 
@@ -36,6 +37,7 @@ void Spotless::create() {
     code = new Code(spotless);
     console = new Console(spotless);
     disassembler = new Disassembler(spotless);
+    registers = new Registers(spotless);
 
     memorySurfer = new MemorySurfer(spotless);
     configure = new Configure(spotless);
@@ -47,6 +49,7 @@ void Spotless::create() {
     addLeftPanelWidget(context);
     addLeftPanelWidget(stacktrace);
     addBottomPanelWidget(disassembler);
+    addBottomPanelWidget(registers);
     addBottomPanelWidget(console);
 
     // addSignalHandler(deathHandler, SIGF_CHILD);
@@ -129,11 +132,12 @@ void Spotless::updateAll() {
     stacktrace->update();
     // console->clear();
     disassembler->update();
+    registers->update();
     if(memorySurfer && memorySurfer->windowObject()) memorySurfer->update();
 }
 
 void Spotless::clearAll() {
-    cout << "clearAll()\n";
+    // cout << "clearAll()\n";
     actions->clear();
     code->clear();
     context->clear();

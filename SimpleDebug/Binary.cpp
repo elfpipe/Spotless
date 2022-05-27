@@ -27,8 +27,10 @@ Array::Array(SourceObject *object, TypeNo no, astream &str)
         if(str.peek() == '(') {
             TypeNo tNo(str);
             type = object->findType(tNo);
-            if(!type)
+            if(!type) {
                 type = object->interpretType(tNo, str);
+                if(type) object->addType(type);
+            }
         } else type = 0;
     }
 }
@@ -42,8 +44,10 @@ Struct::Struct(SourceObject *object, Type::TypeNo no, astream &str)
         string name = str.get(':');
         Type::TypeNo no(str);
         Type *type = object->findType(no);
-        if(!type)
+        if(!type) {
             type = object->interpretType(no, str);
+            if(type) object->addType(type);
+        }
         str.peekSkip(',');
         uint64_t bitOffset = str.getInt();
         str.peekSkip(',');
@@ -63,8 +67,10 @@ pointsTo(0)
     str.skip(); // '*'
     Type::TypeNo pNo(str);
     pointsTo = object->findType(pNo);
-    if(!pointsTo)
+    if(!pointsTo) {
         pointsTo = object->interpretType(pNo, str);
+        if(pointsTo) object->addType(pointsTo);
+    }
 }
 Type *SourceObject::interpretType(Type::TypeNo no, astream &str) {
     Type *type = 0;
@@ -99,8 +105,10 @@ Type *SourceObject::interpretType(Type::TypeNo no, astream &str) {
                 type = new Void(no);
             } else {
                 Type *iType = findType(iNo);
-                if(!iType)
+                if(!iType) {
                     iType = interpretType(iNo, str);
+                    if(iType) addType(iType);
+                }
                 type = new Ref(no, iType);
             }
             break;
@@ -122,8 +130,10 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address) {
     if(type->typeClass == Type::T_ConformantArray) {
         type = 0;
     }
-    if(!type) 
-        type = interpretType(no, str);    
+    if(!type) {
+        type = interpretType(no, str);
+        if(type) addType(type);
+    }
     switch(c) {
         case 't':
         case 'T':
@@ -144,10 +154,10 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address) {
     }
     return result;
 }
-vector<string> ConformantArray::values(uint32_t base) {
+vector<string> ConformantArray::values(uint32_t base, int generation, int maxGeneration) {
     vector<string> result;
     Type *type = object->findType(no);
-    if(type) return type->values(base);    
+    if(type) return type->values(base, generation, maxGeneration);
     return result;
 }
 

@@ -116,6 +116,9 @@ public:
 	uint32_t sp () { if(!exists) return 0; readContext(); /*return context.gpr[1]; }*/ return (uint32_t)process->pr_Task.tc_SPReg; }
 	uint32_t lr () { if(!exists) return 0; readContext(); return context.lr; }
 
+	struct ExceptionContext *getContext() {
+		return &context;
+	}
 	vector<TaskData *> getTasks();
 
     void go();

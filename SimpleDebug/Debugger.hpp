@@ -15,6 +15,8 @@
 #include <string>
 #include <vector>
 
+#include <inttypes.h>
+
 extern struct DebugIFace *IDebug;
 
 using namespace std;
@@ -187,18 +189,18 @@ public:
 	void asmStepInto() {
 		unsafeStep();
 	}
-	// void asmStepOut() {
-	// 	if(!lives()) return;
+	void asmStepOut() {
+		if(!lives()) return;
 
-	// 	// Breaks outBreak;
-	// 	outbreak.insert(process.lr());
-	// 	outbreak.activate();
+		// Breaks outBreak;
+		outbreak.insert(process.lr());
+		outbreak.activate();
 
-	// 	// process.setTrace();
-	// 	process.go();
-	// 	// process.waitTrace();
-	// 	// outBreak.deactivate();
-	// }
+		// process.setTrace();
+		process.go();
+		// process.waitTrace();
+		// outBreak.deactivate();
+	}
 	void safeStep() {
 		if(!lives() || !binary->getFunction(process.ip())) return;
 
@@ -244,13 +246,12 @@ public:
 		// 	return;
 		// }
 		do {
-			cout << "stepInto()\n";
 			if(process.isReturn(process.ip())) { //if we are returning from the function, we need to let go and run normally
 				start();
 				return;
 			}
 			if(binary->getSourceFile(process.branchAddress()).size() > 0) {
-				if(!process.step()) break;
+				if(!process.step()) break; 
 			}
 			else {
 				if(!process.stepNoBranch()) break;
@@ -261,17 +262,10 @@ public:
 	void stepOut() {
 		if (!binary || !process.lives() || process.isRunning()) return;
 
-		// if(!binary->getFunction(process.ip())) {
-		// 	start();
-		// 	return;
-		// }
-
-		// Breaks outBreak;
-		// if(binary->getSourceFile(process.lr()).size() > 0)
-			if(outbreak.insert(process.lr()))
-		outbreak.activate();
+		if(binary->isFunction(process.lr()) && outbreak.insert(process.lr()))
+			outbreak.activate();
 		start();
-		// process.step();
+		// process.go();
 
 		// breaks.activate();
 		// outBreak.activate();
@@ -547,6 +541,32 @@ public:
 		return hexLine;
 	}
 
+	vector<string> registersDump() {
+		struct ExceptionContext *context = process.getContext();
+		vector<string> result;
+		result.push_back(printStringFormat("Flags : %0x%x", context->Flags));    /* Flags, describing the context (READ-ONLY)*/
+		result.push_back(printStringFormat("msr : 0x%x", context->msr));
+		result.push_back(printStringFormat("ip : 0x%x", context->ip));
+		for(int i = 0; i < 32; i++) {
+			result.push_back(printStringFormat("gpr[%d] : 0x%x (%d)", i, context->gpr[i], context->gpr[i]));
+		}
+		result.push_back(printStringFormat("cr : 0x%x", context->cr));
+		result.push_back(printStringFormat("xer : 0x%x", context->xer));
+		result.push_back(printStringFormat("ctr : 0x%x", context->ctr));
+		result.push_back(printStringFormat("lr : 0x%x", context->lr));
+		result.push_back(printStringFormat("dsisr : 0x%x", context->dsisr));
+		result.push_back(printStringFormat("dar : 0x%x", context->dar));
+		for(int i = 0; i < 32; i++) {
+			result.push_back(printStringFormat("fpr[%d] : %.6f", i, context->fpr[i]));
+		}
+		result.push_back(printStringFormat("fpscr : 0x%llx (%llu)\n", (uint64_t)context->fpscr));
+		/* The following are only used on AltiVec */
+		// uint8   vscr[16]; /* AltiVec vector status and control register */
+		// uint8   vr[512];  /* AltiVec vector register storage */
+		// uint32  vrsave;   /* AltiVec VRSAVE register */
+		return result;
+
+	}
 	uint32_t getTrapSignal() {
 		return process.getTrapSignal();
 	}
@@ -560,7 +580,7 @@ public:
 	// 	return process.getMessages();
 	// }
     void clear() {
-		cout << "debugger.clear()\n";
+		// cout << "debugger.clear()\n";
 		linebreaks.clear();
 		breaks.clear();
 		if(handle) delete handle;
@@ -571,6 +591,7 @@ public:
 		process.clear(); //resetSignals();
     }
 	bool hasFunction() {
+		if(!process.lives() || process.isRunning()) return false;
 		return binary ? binary->getFunction(getIp()) != 0 : false;
 	}
 	bool isFunction(uint32_t address) {

@@ -13,6 +13,9 @@ public:
     TextFile(string file) {
         is.open(file);
     }
+    ~TextFile() {
+        is.close();
+    }
     void findLine(int line) {
         is.seekg(0, is.beg);
         string dummy;

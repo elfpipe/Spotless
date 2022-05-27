@@ -1,6 +1,6 @@
 #include "Stacktracer.hpp"
 #include "Strings.hpp"
-
+#include "LowLevel.hpp"
 vector<string> Stacktracer::trace;
 
 extern struct DebugIFace *IDebug;
@@ -9,7 +9,7 @@ int32 Stacktracer::stacktrace_callback(struct Hook *hook, struct Task *task, str
 	string entry;
 	switch (frame->State) {
 		case STACK_FRAME_DECODED: {
-			struct DebugSymbol *symbol = IDebug->ObtainDebugSymbol(frame->MemoryAddress, NULL);
+			struct DebugSymbol *symbol = is_readable_address((uint32_t)frame->MemoryAddress) ? IDebug->ObtainDebugSymbol(frame->MemoryAddress, NULL) : 0;
 
 			if(symbol) {
 				if(symbol->Type == DEBUG_SYMBOL_MODULE_STABS && symbol->SourceFileName)
