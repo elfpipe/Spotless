@@ -42,9 +42,6 @@ public:
     }
     void globals() {
         showGlobals = globalsCheckbox->getChecked();
-        // cout << "showGlobals : " << (showGlobals ? "true" : "false") << "\n";
-        // listbrowser->addNode("Globals", 0, true, 1);
-        // add(spotless->debugger.globals(), 2);
         update();
     }
     void clear() {
@@ -52,6 +49,13 @@ public:
     }
     unsigned int getGlobalsId() {
         return globalsCheckbox->getId();
+    }
+    bool handleEvent(Event *event) {
+        if(event->eventClass() == Event::CLASS_CheckboxPress) {
+            // cout << "CLASS_CheckboxPress called...\n";
+            globals();
+        }
+        return false;
     }
 };
 #endif

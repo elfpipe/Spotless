@@ -253,16 +253,12 @@ public:
             return result;
         }
         switch(rangeType) {
-            case R_Int64: { // TODO : Fix toString incompatibility with long long
-                //result.push_back(patch::toString(*(unsigned long long *)base)); //crashes
-                int value = *(long long *)base;
-                result.push_back(patch::toString(value));
+            case R_Int64: {
+		        result.push_back(printStringFormat("%lld", *(uint64_t *)base));
                 break;
             }
             case R_UInt64: {
-                //result.push_back(patch::toString(*(unsigned long long *)base)); //crashes
-                unsigned int value = *(unsigned long long *)base;
-                result.push_back(patch::toString(value));
+		        result.push_back(printStringFormat("%llu", *(uint64_t *)base));
                 break;
             }
             case R_Float32:
@@ -299,9 +295,7 @@ public:
                             result.push_back(patch::toString(*(unsigned int *)base));
                             break;
                         case 8: {
-                            // result.push_back(patch::toString(*(unsigned long long *)base));
-                            unsigned int value = *(unsigned long long *)base;
-                            result.push_back(patch::toString(value));
+            		        result.push_back(printStringFormat("%llu", *(uint64_t *)base));
                             break;
                         }
                         default:
@@ -320,9 +314,7 @@ public:
                             result.push_back(patch::toString(*(int *)base));
                             break;
                         case 8: {
-                            // result.push_back(patch::toString(*(long long *)base));
-                            int value = *(long long *)base;
-                            result.push_back(patch::toString(value));
+            		        result.push_back(printStringFormat("%lld", *(uint64_t *)base));
                             break;
                         }
                         default:

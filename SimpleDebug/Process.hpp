@@ -70,9 +70,9 @@ private:
 	static struct Hook hook;
 	static ExceptionContext context;
 
-	bool exists;
-	bool running;
-	bool attached;
+	static bool exists;
+	static bool running;
+	static bool attached;
 
 	static struct MsgPort *port;
 	static bool tracing;

@@ -557,9 +557,14 @@ public:
 		result.push_back(printStringFormat("dsisr : 0x%x", context->dsisr));
 		result.push_back(printStringFormat("dar : 0x%x", context->dar));
 		for(int i = 0; i < 32; i++) {
-			result.push_back(printStringFormat("fpr[%d] : %.6f", i, context->fpr[i]));
+			stringstream fstream;
+			fstream.precision(5);
+			fstream << context->fpr[i];
+			string fpr;
+			fstream >> fpr; 
+			result.push_back(printStringFormat("fpr[%d] : %s", i, fpr.c_str()));
 		}
-		result.push_back(printStringFormat("fpscr : 0x%llx (%llu)\n", (uint64_t)context->fpscr));
+		result.push_back(printStringFormat("fpscr : 0x%llx (%llu)", (uint64_t)context->fpscr, (uint64_t)context->fpscr));
 		/* The following are only used on AltiVec */
 		// uint8   vscr[16]; /* AltiVec vector status and control register */
 		// uint8   vr[512];  /* AltiVec vector register storage */

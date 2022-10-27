@@ -21,9 +21,9 @@ uint8_t AmigaProcess::signal = 0x0;
 struct DebugIFace *IDebug = 0;
 struct MMUIFace *IMMU = 0;
 
-// bool AmigaProcess::exists = false;
-// bool AmigaProcess::running = false;
-// bool AmigaProcess::attached = false;
+bool AmigaProcess::exists = false;
+bool AmigaProcess::running = false;
+bool AmigaProcess::attached = false;
 
 struct Process *AmigaProcess::process = 0;
 // vector<AmigaProcess::TaskData *> AmigaProcess::tasks;
@@ -105,13 +105,13 @@ APTR AmigaProcess::load(string path, string file, string arguments)
     process = IDOS->CreateNewProcTags(
 		NP_Seglist,					seglist,
 //		NP_Entry,					foo,
-		NP_FreeSeglist,				false,
+		NP_FreeSeglist,				false, //important
 		NP_Name,					strdup(command.c_str()),
 		// NP_CurrentDir,				lock,
 		// NP_ProgramDir,				homelock,
 		// NP_StackSize,				2000000,
 		NP_Cli,						true,
-		NP_Child,					false,
+		NP_Child,					false, //important
 		NP_Arguments,				arguments.c_str(),
 		NP_Input,					IDOS->Input(),
 		NP_CloseInput,				false,
