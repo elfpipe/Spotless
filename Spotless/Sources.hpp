@@ -39,6 +39,7 @@ public:
     }
     bool handleEvent(Event *event) {
         if(event->eventClass() == Event::CLASS_SelectNode) {
+            cout << "CLASS_SelectNode\n";
             string file = spotless->sources->getSelectedElement();
             spotless->console->write(PublicScreen::PENTYPE_EVENT, "Source file selected : " + file);
             string fullPath = spotless->debugger.searchSourcePath(file);

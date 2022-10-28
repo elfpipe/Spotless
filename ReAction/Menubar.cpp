@@ -51,10 +51,10 @@ Object *Menubar::addCreateMenu (string label) {
 void Menubar::addCreateMenuItem (Object *panel, string label, string shortCut, int itemId) {
     detach();
     Object *item = IIntuition->NewObject(NULL, "menuclass",
-        MA_ID,			itemId,
-        MA_Type, 		T_ITEM,
-        MA_Label,		strdup(label.c_str()),
-        MA_Key,			strdup(shortCut.c_str()),
+        MA_ID,			                            itemId,
+        MA_Type, 		                            T_ITEM,
+        MA_Label,		                            strdup(label.c_str()),
+        shortCut.length() ? MA_Key : TAG_IGNORE,    strdup(shortCut.c_str()),
         TAG_END);
 
     if (item) IIntuition->SetAttrs (panel, MA_AddChild, item, TAG_END);

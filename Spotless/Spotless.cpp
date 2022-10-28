@@ -58,6 +58,22 @@ void Spotless::create() {
     // addSignalHandler(pipeHandler, debugger.getPipeSignal());
 }
 
+void Spotless::destroy() {
+
+    delete menu;
+    delete actions;
+    delete sources;
+    delete context;
+    delete stacktrace;
+    delete code;
+    delete console;
+    delete disassembler;
+    delete registers;
+
+    delete memorySurfer;
+    delete configure;
+}
+
 int Spotless::unfold() {
     openWindow();
     return waitForClose();
@@ -127,7 +143,7 @@ bool Spotless::handleEvent(Event *event) {
 void Spotless::updateAll() {
     actions->update();
     code->update();
-    //sources->update();
+    sources->update();
     context->update();
     stacktrace->update();
     // console->clear();

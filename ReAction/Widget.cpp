@@ -107,6 +107,7 @@ void Widget::closeAllWindows()
 	list<Widget *> opened(openedWindows);
 	for (list<Widget *>::iterator it = opened.begin(); it != opened.end(); it++)
 		closeNewWindow(*it);
+	openedWindows.clear();
 }
 
 void Widget::closeAllExceptThis()
@@ -162,9 +163,11 @@ int Widget::waitForClose()
 
 						case WMHI_MENUPICK: {
 							uint32 id = NO_MENU_ID;
-							while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID)
-							bool closeAll = false;
-							done = mainMenu->handleMenuPick(id, &closeAll);
+							while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID) {
+								done = mainMenu->handleMenuPick(id, &closeAll);
+								if(closeAll) { done = true; break; }
+								if(done) break;
+							}
 							break;
 						}
 
@@ -198,16 +201,8 @@ int Widget::waitForClose()
 				}
 			}
 			if(close && target != this) { closeNewWindow(target); result = 0x0; break; } close = false;
+			if(done) { break; }
 		}
-		// if(mainMenu->switchScreen()) {
-		// 	closeAllWindows();
-		// 	if (!PublicScreen::usingPublicScreen())
-		// 		PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alfkil Thorbjørn Wennermark");
-		// 	else
-		// 		PublicScreen::instance()->closePublicScreen();
-		// 	openWindow();
-		// 	mainMenu->doScreenSwitch = false;
-		// }
 	}
 	// closeWindow ();
 	closeAllWindows();

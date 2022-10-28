@@ -42,6 +42,7 @@ public:
     ~Spotless() {}
 
     void create();
+    void destroy();
     int unfold();
 
     // static void trapHandler();

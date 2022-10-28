@@ -31,14 +31,15 @@ public:
                 break;
             case 2: //switch public screen
                 spotless->closeAllWindows();
+                // spotless->destroy();
                 if (!PublicScreen::usingPublicScreen())
                     PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alpha Kilimanjaro");
                 else
                     PublicScreen::instance()->closePublicScreen();
+                // spotless->create();
                 spotless->openWindow();
                 spotless->updateAll();
                 done = true;
-                // this->doScreenSwitch = true;
                 break;
             case 3:
                 *closeAll = true;
