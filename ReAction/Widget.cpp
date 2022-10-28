@@ -25,6 +25,7 @@ Widget::Widget(Widget *parentWidget)
 Widget::~Widget()
 {
     if(window) closeWindow();
+	destroyContent();
 	handlers.clear();
 }
 
@@ -76,6 +77,11 @@ Object *Widget::createContent()
 	return parentLayout->systemObject();
 }
 
+void Widget::destroyContent()
+{
+	delete parentLayout;
+}
+
 void Widget::setMenubar(Menubar *menu)
 {
 	mainMenu = menu;
@@ -92,6 +98,7 @@ void Widget::closeWindow ()
 	if (parentLayout) delete parentLayout;
 	parentLayout = 0;
 
+	destroyContent();
 	children.clear();
 	openedWindows.remove(this);
 }
@@ -100,14 +107,17 @@ void Widget::closeNewWindow(Widget *widget)
 {
 	widget->closeWindow();
 	openedWindows.remove(widget);
-
 }
+
 void Widget::closeAllWindows()
 {
 	list<Widget *> opened(openedWindows);
 	for (list<Widget *>::iterator it = opened.begin(); it != opened.end(); it++)
-		closeNewWindow(*it);
+		if(*it != this) closeNewWindow(*it);
+	destroyContent();
+	closeWindow();
 	openedWindows.clear();
+	children.clear();
 }
 
 void Widget::closeAllExceptThis()
@@ -141,8 +151,8 @@ int Widget::waitForClose()
 		for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
 			bool close = false;
 			Widget *target = (*it);
-			if(!target) continue;
-			if(!target->windowPointer()) continue;
+			if(!target) { cout << "target==0\n"; continue; }
+			if(!target->windowPointer()) { cout << "target->windowPointer() == 0\n"; continue; }
 			Object *object = target->windowObject();
 
 			bool done = false;
@@ -165,8 +175,7 @@ int Widget::waitForClose()
 							uint32 id = NO_MENU_ID;
 							while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID) {
 								done = mainMenu->handleMenuPick(id, &closeAll);
-								if(closeAll) { done = true; break; }
-								if(done) break;
+								if(closeAll) { done = true; }
 							}
 							break;
 						}

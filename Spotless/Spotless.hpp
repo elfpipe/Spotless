@@ -39,7 +39,7 @@ private:
     
 public:
     Spotless () : MainWindow() { create(); }
-    ~Spotless() {}
+    ~Spotless() { destroy(); }
 
     void create();
     void destroy();

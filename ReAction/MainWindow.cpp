@@ -72,7 +72,7 @@ EndWindow;
 }
 
 Object *MainWindow::createContent() {
-    Layout *mainLayout = new Layout(this, Layout::LAYOUT_Vertical);
+    mainLayout = new Layout(this, Layout::LAYOUT_Vertical);
 
     if(topBar) {
         mainLayout->addEmbeddedWidget(topBar);
@@ -103,7 +103,12 @@ Object *MainWindow::createContent() {
     }
 
     return mainLayout->systemObject();
- }
+}
+
+void MainWindow::destroyContent()
+{
+    delete mainLayout;
+}
 
 void MainWindow::setMainView(Widget *view)
 {

@@ -29,7 +29,8 @@ private:
 	list<Widget *> openedWindows;
 
 	Object *createContent();
-
+	void destroyContent();
+	
 	uint32 windowSignalMask();
 	uint32 openedWindowsSignalMask();
 

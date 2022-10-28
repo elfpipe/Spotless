@@ -20,8 +20,11 @@ private:
     Panel *bottomPanel;
     Panel *rightPanel;
     
+    Layout *mainLayout;
+    
 private:
     Object *createContent();
+    void destroyContent();
 
 public:
     MainWindow();
