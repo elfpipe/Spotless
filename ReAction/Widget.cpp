@@ -134,13 +134,15 @@ extern struct MsgPort *AppPort;
 
 int Widget::waitForClose()
 {
+	bool exit = false;
 	bool closeAll = false;
-	
-	while (!closeAll) {
+
+	while (!exit) {
+		closeAll = false;
 		uint32 result = IExec->Wait (handlerSignals() | openedWindowsSignalMask() | SIGBREAKF_CTRL_C );
 
 		if (result & SIGBREAKF_CTRL_C) {
-			closeAll = true;
+			exit = true;
 		}
 
 		for(int i = 0; i < handlers.size(); i++) {
@@ -156,7 +158,7 @@ int Widget::waitForClose()
 			Object *object = target->windowObject();
 
 			bool done = false;
-			while(!done) {
+			while(!exit && !closeAll && !done) {
 
 				uint32 Class;
 				uint16 Code;
@@ -168,14 +170,14 @@ int Widget::waitForClose()
 						case WMHI_CLOSEWINDOW:
 							done = true;
 							close = true;
-							if(target == this) closeAll = true;
+							if(target == this) { closeAll = true; exit = true; }
 							break;
 
 						case WMHI_MENUPICK: {
 							uint32 id = NO_MENU_ID;
 							while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID) {
-								done = mainMenu->handleMenuPick(id, &closeAll);
-								if(closeAll) { done = true; }
+								done = mainMenu->handleMenuPick(id, &closeAll, &exit);
+								if(closeAll) { break; }
 							}
 							break;
 						}
@@ -194,22 +196,25 @@ int Widget::waitForClose()
 						}
 
 						case WMHI_RAWKEY :
-							if ((Code & WMHI_KEYMASK) == RAWKEY_ESC && target != this)
-								close = true;
-							else {
+							if ((Code & WMHI_KEYMASK) == RAWKEY_ESC) {
+								closeAll = true;
+								exit = true;
+								done = true;
+							} else {
 								target->processEvent(Class, Code);
 							}
 							break;
 
 						default:
 							close = target->processEvent(Class, Code);
-							done = close;
-							closeAll = (close && target==this);
+							exit = (close && target==this);
+							closeAll = exit;
 							break;
 					}
 				}
 			}
 			if(close && target != this) { closeNewWindow(target); result = 0x0; break; } close = false;
+			if(closeAll) break;
 		}
 	}
 	// closeWindow ();

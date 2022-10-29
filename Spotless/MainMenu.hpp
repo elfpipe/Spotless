@@ -23,7 +23,7 @@ public:
 
         addCreateMenuItem (panel2, "Configure ...", "", 4);
     }
-    bool handleMenuPick(int id, bool *closeAll) {
+    bool handleMenuPick(int id, bool *closeAll, bool *exit) {
         bool done = false;
         switch(id) {
             case 1: //show about
@@ -37,10 +37,11 @@ public:
                     PublicScreen::instance()->closePublicScreen();
                 spotless->openWindow();
                 spotless->updateAll();
-                done = true;
+                *closeAll = true;
                 break;
             case 3:
                 *closeAll = true;
+                *exit = true;
                 break;
             case 4: {
                 if(spotless->configure) {
