@@ -6,6 +6,7 @@
 #include "../ReAction/classes.h"
 #include "../SimpleDebug/Strings.hpp"
 #include "Spotless.hpp"
+#include "MemorySurfer.hpp"
 
 class Disassembler : public Widget {
 private:
@@ -73,6 +74,7 @@ public:
             if(event->elementId() == spotless->disassembler->getMemSurfId()) {
                 if(spotless->memorySurfer) {
                     spotless->openNewWindow((Widget *)spotless->memorySurfer);
+                    spotless->memorySurfer->update();
                 }
             }
         }

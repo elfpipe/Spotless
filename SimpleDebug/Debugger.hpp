@@ -473,6 +473,7 @@ public:
 		return result;
 	}
 	vector<string> disassembleSymbol(string symbolName) {
+
 		vector<string> result;
 		if(!process.lives() || process.isRunning()) return result;
 
@@ -482,10 +483,11 @@ public:
 			result.push_back("<No such address>");
 			return result;
 		}
-		if(!is_readable_address(addressBegin)) {
-			result.push_back("<not a readable address>");
-			return result;
-		}
+		// FIX THIS:
+		// if(!is_readable_address(addressBegin)) {
+		// 	result.push_back("<not a readable address>");
+		// 	return result;
+		// }
 		int entry = 1;
 		line = 0;
 		for(uint32_t offset = 0; offset < symbols.sizeOf(symbolName); offset += 4) {

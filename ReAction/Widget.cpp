@@ -210,7 +210,6 @@ int Widget::waitForClose()
 				}
 			}
 			if(close && target != this) { closeNewWindow(target); result = 0x0; break; } close = false;
-			if(done) { break; }
 		}
 	}
 	// closeWindow ();

@@ -3,11 +3,13 @@
 
 extern struct MMUIFace *IMMU;
 
+//Thanks to Colin Wenzel for fixing this!
+
 bool is_readable_address (uint32_t addr)
 {
     uint32 attr, masked;
     APTR stack;
-    BOOL ret = FALSE;
+    bool ret = true;
 
       /* Go supervisor */
     stack = IExec->SuperState();
@@ -18,9 +20,11 @@ bool is_readable_address (uint32_t addr)
     if (stack)
         IExec->UserState(stack);
 
-    masked = attr & MEMATTRF_RW_MASK;
-    if(masked)
-        ret = TRUE;
+	if((attr & (MEMATTRF_NOT_MAPPED | MEMATTRF_RW_MASK)) != MEMATTRF_SUPER_RW_USER_RW)
+		ret = false;
+    // masked = attr & MEMATTRF_RW_MASK;
+    // if(masked)
+    //     ret = TRUE;
 
     return ret;
 }
