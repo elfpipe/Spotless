@@ -32,7 +32,7 @@ SimpleDebug/TextFile.cpp
 SimpleDebug/Tracer.cpp
 )
 
-set(SPOTLESS_SOURCES main.cpp Spotless/Spotless.cpp Spotless/Code.cpp)
+set(SPOTLESS_SOURCES main.cpp version.c Spotless/Spotless.cpp Spotless/Code.cpp)
 set(SOURCES ${SPOTLESS_SOURCES} ${REACTION_SOURCES} ${SIMPLEDEBUG_SOURCES})
 
 add_executable(Spotless ${SOURCES})
