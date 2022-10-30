@@ -50,7 +50,7 @@ public:
     unsigned int getGlobalsId() {
         return globalsCheckbox->getId();
     }
-    bool handleEvent(Event *event) {
+    bool handleEvent(Event *event, bool *exit) {
         if(event->eventClass() == Event::CLASS_CheckboxPress) {
             // cout << "CLASS_CheckboxPress called...\n";
             globals();

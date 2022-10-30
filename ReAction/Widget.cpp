@@ -202,13 +202,13 @@ int Widget::waitForClose()
 								exit = true;
 								// done = true;
 							} else {
-								target->processEvent(Class, Code);
+								target->processEvent(Class, Code, &exit);
 							}
 							break;
 
 						default:
-							openClose = target->processEvent(Class, Code);
-							exit = (openClose && target==this);
+							openClose = target->processEvent(Class, Code, &exit);
+							// exit = (openClose && target==this);
 							break;
 					}
 				}
@@ -315,7 +315,7 @@ Widget *Widget::findOpenedWindowWidget(uint32 mask) {
 	return 0x0;
 }
 
-bool Widget::processEvent (uint32 Class, uint16 Code)
+bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 {
 	if(!window) return false; // if iconified
 
@@ -407,7 +407,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code)
 	}
 	bool result = false;
 	if (event) {
-		result = parent ? parent->handleEvent(event) : handleEvent(event);
+		result = parent ? parent->handleEvent(event, exit) : handleEvent(event, exit);
 		delete event;
 	}
 	return result;

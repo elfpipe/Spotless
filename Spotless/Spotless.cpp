@@ -125,7 +125,7 @@ void Spotless::portHandler() {
 //     }
 // }
 
-bool Spotless::handleEvent(Event *event) {
+bool Spotless::handleEvent(Event *event, bool *exit) {
     if(event->eventClass() == Event::CLASS_KeyPress) {
         if(event->elementId() == RAWKEY_F1) {
                             debugger.justGo();

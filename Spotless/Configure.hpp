@@ -27,7 +27,7 @@ public:
         // entryLayout->createString(spotless->debugger.getEntryPoint().c_str());
         update();
     }
-    bool handleEvent (Event *event) {
+    bool handleEvent (Event *event, bool *exit) {
         if(event->eventClass() == Event::CLASS_ButtonPress) {
             if(event->elementId() == getAddId()) {
                 string newRoot = Requesters::path(Requesters::REQUESTER_MODULE, "Choose path to add to list of source code roots...");
@@ -40,7 +40,7 @@ public:
                 update();
             }
             if(event->elementId() == getDoneId()) {                
-                return true;
+                *exit = true;
             }
         }
         return false;

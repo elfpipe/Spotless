@@ -34,7 +34,7 @@ private:
 	uint32 windowSignalMask();
 	uint32 openedWindowsSignalMask();
 
-	bool processEvent (uint32 Class, uint16 Code);
+	bool processEvent (uint32 Class, uint16 Code, bool *exit);
 
 	struct Window *windowPointer() { return window; }
 	Object *windowObject() { return object; }
@@ -107,7 +107,7 @@ public:
 
 	virtual void createGuiObject (Layout *layout) = 0;
 
-	virtual bool handleEvent (Event *event) { return false; };
+	virtual bool handleEvent (Event *event, bool *exit) { return false; };
 
 public:
 	friend MainWindow;

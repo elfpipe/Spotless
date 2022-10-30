@@ -56,7 +56,7 @@ public:
 
         done = layout->createButton("Done");
     }
-    bool handleEvent (Event *event) {
+    bool handleEvent (Event *event, bool *exit) {
         bool result = false;
 
         if (event->eventClass() == Event::CLASS_StringEntry) {

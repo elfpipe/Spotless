@@ -37,7 +37,7 @@ public:
     void clear() {
         listbrowser->clear();
     }
-    bool handleEvent(Event *event) {
+    bool handleEvent(Event *event, bool *exit) {
         if(event->eventClass() == Event::CLASS_SelectNode) {
             string file = spotless->sources->getSelectedElement();
             spotless->console->write(PublicScreen::PENTYPE_EVENT, "Source file selected : " + file);

@@ -1,7 +1,7 @@
 #include "Sources.hpp"
 #include "Code.hpp"
 
-    bool Code::handleEvent(Event *event) {
+    bool Code::handleEvent(Event *event, bool *exit) {
         if(event->eventClass() == Event::CLASS_CheckboxCheck) {
             checkboxSelected(spotless->sources->getSelectedElement(), true);
         }

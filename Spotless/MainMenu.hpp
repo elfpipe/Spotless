@@ -17,14 +17,17 @@ public:
 
         addCreateMenuItem (panel1, "About", "", 1);
         addCreateMenuItem (panel1, "Switch public screen", "", 2);
-        addCreateMenuItem (panel1, "Switch split window mode", "", 5);
         addCreateMenuItem (panel1, "Exit", "", 3);
 
         MenuReference panel2 = addCreateMenu("Project");
 
         addCreateMenuItem (panel2, "Configure ...", "", 4);
+
+        MenuReference panel3 = addCreateMenu("Fun and games");
+        addCreateMenuItem (panel3, "Switch split window mode", "", 5);
+
     }
-    bool handleMenuPick(int id, bool *closeAll, bool *exit) {
+    bool handleMenuPick(int id, bool *openClose, bool *exit) {
         bool done = false;
         switch(id) {
             case 1: //show about
@@ -38,10 +41,10 @@ public:
                     PublicScreen::instance()->closePublicScreen();
                 spotless->openWindow();
                 spotless->updateAll();
-                *closeAll = true;
+                *openClose = true;
                 break;
             case 3:
-                *closeAll = true;
+                *openClose = true;
                 *exit = true;
                 break;
             case 4: {
@@ -55,7 +58,7 @@ public:
                 } else {
                     spotless->showSplit();
                 }
-                *closeAll = true;
+                *openClose = true;
                 break;
         }
         return done;

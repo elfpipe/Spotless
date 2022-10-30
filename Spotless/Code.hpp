@@ -87,7 +87,7 @@ public:
     void clear() {
         listbrowser->clear();
     }
-    bool handleEvent(Event *event);
+    bool handleEvent(Event *event, bool *exit);
 
 };
 #endif

@@ -52,7 +52,7 @@ public:
         return memSurf->getId();
     }
 
-    bool handleEvent(Event *event) {
+    bool handleEvent(Event *event, bool *exit) {
 
         if(event->eventClass() == Event::CLASS_ButtonPress) {
             if(event->elementId() == spotless->disassembler->getAsmBackSkipId()) {

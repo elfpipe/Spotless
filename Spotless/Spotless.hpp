@@ -49,7 +49,7 @@ public:
     static void portHandler();
     // static void pipeHandler();
     static void deathHandler();
-    bool handleEvent(Event *event);
+    bool handleEvent(Event *event, bool *exit);
     
     void updateAll();
     void clearAll();

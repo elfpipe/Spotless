@@ -77,7 +77,7 @@ public:
         actions->enableButton(7, true);
     }
 
-    bool handleEvent(Event *event) {
+    bool handleEvent(Event *event, bool *exit) {
         if(event->eventClass() == Event::CLASS_ActionButtonPress) {
             switch(event->elementId()) {
                 case Actions::Load: {
@@ -115,7 +115,7 @@ public:
                     spotless->updateAll();
                     break;
                 case Actions::Quit:
-                    return true;
+                    *exit = true;
                     break;
             }
             update();
