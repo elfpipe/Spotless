@@ -135,10 +135,8 @@ extern struct MsgPort *AppPort;
 int Widget::waitForClose()
 {
 	bool exit = false;
-	bool closeAll = false;
 
 	while (!exit) {
-		closeAll = false;
 		uint32 result = IExec->Wait (handlerSignals() | openedWindowsSignalMask() | SIGBREAKF_CTRL_C );
 
 		if (result & SIGBREAKF_CTRL_C) {
@@ -151,14 +149,16 @@ int Widget::waitForClose()
 		}
 
 		for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
-			bool close = false;
+			// if we open or close windows, we need to break out of the above loop
+			bool openClose = false;
+
 			Widget *target = (*it);
 			if(!target) { cout << "target==0\n"; continue; }
 			if(!target->windowPointer()) { cout << "target->windowPointer() == 0\n"; continue; }
 			Object *object = target->windowObject();
 
 			bool done = false;
-			while(!exit && !closeAll && !done) {
+			while(!exit && !openClose && !done) {
 
 				uint32 Class;
 				uint16 Code;
@@ -169,15 +169,16 @@ int Widget::waitForClose()
 					switch (Class & WMHI_CLASSMASK) {
 						case WMHI_CLOSEWINDOW:
 							done = true;
-							close = true;
-							if(target == this) { closeAll = true; exit = true; }
+							openClose = true;
+							if(target == this) { exit = true; }
+							if(target != this) { closeNewWindow(target); }
 							break;
 
 						case WMHI_MENUPICK: {
 							uint32 id = NO_MENU_ID;
 							while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID) {
-								done = mainMenu->handleMenuPick(id, &closeAll, &exit);
-								if(closeAll) { break; }
+								mainMenu->handleMenuPick(id, &openClose, &exit);
+								if(openClose) { break; }
 							}
 							break;
 						}
@@ -197,24 +198,23 @@ int Widget::waitForClose()
 
 						case WMHI_RAWKEY :
 							if ((Code & WMHI_KEYMASK) == RAWKEY_ESC) {
-								closeAll = true;
+								openClose = true;
 								exit = true;
-								done = true;
+								// done = true;
 							} else {
 								target->processEvent(Class, Code);
 							}
 							break;
 
 						default:
-							close = target->processEvent(Class, Code);
-							exit = (close && target==this);
-							closeAll = exit;
+							openClose = target->processEvent(Class, Code);
+							exit = (openClose && target==this);
 							break;
 					}
 				}
 			}
-			if(close && target != this) { closeNewWindow(target); result = 0x0; break; } close = false;
-			if(closeAll) break;
+			// here is the break
+			if(openClose) break;
 		}
 	}
 	// closeWindow ();
