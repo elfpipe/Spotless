@@ -22,6 +22,8 @@ private:
     
     Layout *mainLayout;
     
+    bool split;
+
 private:
     Object *createContent();
     void destroyContent();
@@ -31,7 +33,9 @@ public:
     ~MainWindow();
 
     bool openWindow();
-    
+    void showSplit();
+    bool isSplit() { return split; }
+
     void setMainView(Widget *view);
     void setTopBar(Widget *top);
 

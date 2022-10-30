@@ -25,7 +25,7 @@ Widget::Widget(Widget *parentWidget)
 Widget::~Widget()
 {
     if(window) closeWindow();
-	destroyContent();
+	// destroyContent();
 	handlers.clear();
 }
 
@@ -63,7 +63,7 @@ bool Widget::openWindow()
 bool Widget::openNewWindow(Widget *widget)
 {
 	if(widget->openWindow()) {
-		//widget->setMenubar(mainMenu);
+		widget->setMenubar(mainMenu);
 		openedWindows.push_back(widget);
 		return true;
 	}

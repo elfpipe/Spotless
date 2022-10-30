@@ -33,5 +33,7 @@ public:
     Widget *getWidget(int index) { return widgets.at(index); }
 
     Object *createGuiObject();
+
+    friend class MainWindow;
 };
 #endif

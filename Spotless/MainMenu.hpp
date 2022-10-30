@@ -17,6 +17,7 @@ public:
 
         addCreateMenuItem (panel1, "About", "", 1);
         addCreateMenuItem (panel1, "Switch public screen", "", 2);
+        addCreateMenuItem (panel1, "Switch split window mode", "", 5);
         addCreateMenuItem (panel1, "Exit", "", 3);
 
         MenuReference panel2 = addCreateMenu("Project");
@@ -48,6 +49,14 @@ public:
                     spotless->openNewWindow((Widget *)spotless->configure);
                 }
             } break;
+            case 5:
+                if(spotless->isSplit()) {
+                    spotless->openWindow();
+                } else {
+                    spotless->showSplit();
+                }
+                *closeAll = true;
+                break;
         }
         return done;
     }
