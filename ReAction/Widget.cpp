@@ -63,7 +63,7 @@ bool Widget::openWindow()
 bool Widget::openNewWindow(Widget *widget)
 {
 	if(widget->openWindow()) {
-		widget->setMenubar(mainMenu);
+		// widget->setMenubar(mainMenu);
 		openedWindows.push_back(widget);
 		return true;
 	}
@@ -192,7 +192,7 @@ int Widget::waitForClose()
 
 							uint32 newResult = IExec->Wait (1L << appPort->mp_SigBit);
 							uniconify();
-							done = true;
+							openClose = true;
 							break;
 						}
 

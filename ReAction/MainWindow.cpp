@@ -49,8 +49,8 @@ bool MainWindow::openWindow() {
 		WA_DragBar,			    true,
 		WA_CloseGadget,			true,
         
-		WA_Backdrop,            backdropWindow,
-		WA_Borderless,          backdropWindow,
+		// WA_Backdrop,            backdropWindow,
+		// WA_Borderless,          backdropWindow,
 		WA_Activate,			TRUE,
 		WA_ReportMouse,			TRUE,
 				        
