@@ -146,6 +146,7 @@ void Spotless::updateAll() {
     sources->update();
     context->update();
     stacktrace->update();
+
     // console->clear();
     disassembler->update();
     registers->update();

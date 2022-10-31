@@ -26,6 +26,13 @@ This is the only way, that Spotless can identify symbols in the executable.
 
 == History:
 
+2.2.0 : Fix menus further.
+        Fix stacktrace.
+        Fix iconify.
+        Enable split windows (experimental).
+        Fix copyright symbol in about (c).
+        Remove stray debug output when doing iconify.
+
 2.1.0 : Fix menus.
         Fix public screen.
         Fix cleanup proceedure.

@@ -331,8 +331,9 @@ public:
 		return process.emptyPipe();
 	}
 	vector<string> stacktrace() {
+		cout << "Stacktrace: " << process.lives() << "\n";
 		Stacktracer stacktracer;
-		return !process.lives() || process.isRunning() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), getSp());
+		return !process.lives() || process.isRunning() || process.isTracing() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), getSp());
 	}
 	vector<string> functionSource() {
 		vector<string> result = functionSource(process.ip());
@@ -483,7 +484,7 @@ public:
 			result.push_back("<No such address>");
 			return result;
 		}
-		// FIX THIS:
+		// This is taken care of by the system functions
 		// if(!is_readable_address(addressBegin)) {
 		// 	result.push_back("<not a readable address>");
 		// 	return result;

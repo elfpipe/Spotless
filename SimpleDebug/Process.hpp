@@ -126,6 +126,8 @@ public:
 	void waitTrace();
 	// void setTrace();
 
+	bool isTracing() { return tracing; }
+
 	void restartAll();
 	void restartTask(struct Task *);
 

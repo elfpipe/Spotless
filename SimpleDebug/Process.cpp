@@ -200,6 +200,15 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			// IDOS->Printf("[HOOK] ip = 0x%x\n", context.ip);
 			// IDOS->Printf("[HOOK} trap = 0x%x\n", context.Traptype);
 
+				if(currentTask == (struct Task *)process) { // if this is main process
+					process = 0;
+					// cout << "exists == false\n";
+					exists = false;
+					running = false;
+					attached = false;
+					// clear();
+				}
+
 			// sendSignal = true;  //if process has ended, we must signal caller
 			IExec->PutMsg (port, (struct Message *)message);
 
@@ -226,8 +235,10 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			
 			if (traptype == 0x700 || traptype == 0xd00) {
 				message->type = MSGTYPE_TRAP;
+				ret = 1;
 			} else {
 				message->type = MSGTYPE_EXCEPTION;
+				ret = 0;
 				// sendSignal = true;
 			}
 			message->task = currentTask;
@@ -241,7 +252,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			// running = false;
 
 			// returning 1 will suspend the task
-			ret = 1;
+			// ret = 0;
 			break;
 		}
 		case DBHMT_OPENLIB: {
@@ -306,6 +317,8 @@ bool AmigaProcess::handleMessages() {
 	while(message) {
 		switch(message->type) {
 			case AmigaProcess::MSGTYPE_EXCEPTION:
+				cout << "EXCEPTION\n";
+
 			case AmigaProcess::MSGTYPE_TRAP:
 			case AmigaProcess::MSGTYPE_CRASH:
 				if(message->task == (struct Task *)process) {
@@ -333,8 +346,10 @@ bool AmigaProcess::handleMessages() {
 				// hookOn();
 				break;
 			case AmigaProcess::MSGTYPE_REMTASK:
+				cout << "REMTASK\n";
 				if(message->task == (struct Task *)process) { // if this is main process
 					process = 0;
+					cout << "exists == false\n";
 					exists = false;
 					running = false;
 					attached = false;
@@ -496,6 +511,7 @@ void AmigaProcess::wakeUp()
 
 void AmigaProcess::go()
 {
+	cout << "GO\n";
     IExec->RestartTask((struct Task *)process, 0);
 	running = true;
 }

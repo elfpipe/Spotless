@@ -9,7 +9,8 @@ int32 Stacktracer::stacktrace_callback(struct Hook *hook, struct Task *task, str
 	string entry;
 	switch (frame->State) {
 		case STACK_FRAME_DECODED: {
-			struct DebugSymbol *symbol = is_readable_address((uint32_t)frame->MemoryAddress) ? IDebug->ObtainDebugSymbol(frame->MemoryAddress, NULL) : 0;
+			struct DebugSymbol *symbol = is_readable_address_st((uint32_t)frame->MemoryAddress) ? IDebug->ObtainDebugSymbol(frame->MemoryAddress, NULL) : 0;
+			// struct DebugSymbol *symbol = IDebug->ObtainDebugSymbol(frame->MemoryAddress, NULL);
 
 			if(symbol) {
 				if(symbol->Type == DEBUG_SYMBOL_MODULE_STABS && symbol->SourceFileName)
@@ -41,10 +42,12 @@ int32 Stacktracer::stacktrace_callback(struct Hook *hook, struct Task *task, str
 			break;
 	}
 	trace.push_back(entry);
-	return 0;  // Continue tracing.
+	return 0;  // Continue symbol update.
 }
 
 vector<string> Stacktracer::stacktrace(Task *task, uint32_t sp) {
+	cout << "Stacktracer::stacktrace()\n";
+
 	trace.clear();
 	if(!task) return trace;
 	
@@ -53,7 +56,7 @@ vector<string> Stacktracer::stacktrace(Task *task, uint32_t sp) {
 		ASOHOOK_Entry, stacktrace_callback,
 		TAG_END);
 
-	trace.clear();
+	// trace.clear();
 
 	if (hook) {
 		IDebug->StackTrace(task, hook);

@@ -259,7 +259,7 @@ void Widget::iconify()
 {
 	if(object) {
 		RA_Iconify(object);
-		cout << "RA_Iconify.\n";
+		// cout << "RA_Iconify.\n";
 		window = 0;
 	}
 }

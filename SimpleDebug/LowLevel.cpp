@@ -3,13 +3,47 @@
 
 extern struct MMUIFace *IMMU;
 
-//Thanks to Colin Wenzel for fixing this!
 
-bool is_readable_address (uint32_t addr)
+static bool Memory_Readable(APTR suspect)
 {
+	bool result = false;
+	uint32 aflags, tflags;
+	APTR   stack;
+
+	do
+	{
+		/*
+		**  We must be in superstate for this call.
+		*/
+		stack  = IExec->SuperState();
+		aflags = IMMU->GetMemoryAttrs(suspect,0);
+
+		if (stack)
+		{
+			IExec->UserState(stack);
+		}
+
+		tflags = IExec->TypeOfMem(suspect);
+
+
+		if( tflags )
+		{
+			result = true;
+		}
+	}
+	while(0);
+
+
+	return( result );
+}
+
+bool is_readable_address_st (uint32_t addr)
+{
+	// return Memory_Readable((APTR)addr);
+
     uint32 attr, masked;
     APTR stack;
-    bool ret = true;
+    bool result = true;
 
       /* Go supervisor */
     stack = IExec->SuperState();
@@ -20,13 +54,43 @@ bool is_readable_address (uint32_t addr)
     if (stack)
         IExec->UserState(stack);
 
-	if((attr & (MEMATTRF_NOT_MAPPED | MEMATTRF_RW_MASK)) != MEMATTRF_SUPER_RW_USER_RW)
-		ret = false;
-    // masked = attr & MEMATTRF_RW_MASK;
+	masked = attr & (MEMATTRF_NOT_MAPPED | MEMATTRF_RW_MASK);
+	if(masked != MEMATTRF_SUPER_RW_USER_RW
+	&& masked != MEMATTRF_SUPER_RW_USER_RO
+	&& masked != MEMATTRF_SUPER_RO_USER_RO
+	)
+		result = false;
+	// masked = attr & MEMATTRF_NOT_MAPPED;
     // if(masked)
-    //     ret = TRUE;
+    //     result = false;
 
-    return ret;
+    return result;
+}
+
+bool is_readable_address (uint32_t addr)
+{
+	return Memory_Readable((APTR)addr);
+
+    // uint32 attr, masked;
+    // APTR stack;
+    // bool result = true;
+
+    //   /* Go supervisor */
+    // stack = IExec->SuperState();
+    
+	// attr = IMMU->GetMemoryAttrs((APTR)addr, 0);
+
+    // /* Return to old state */
+    // if (stack)
+    //     IExec->UserState(stack);
+
+	// if((attr & (MEMATTRF_NOT_MAPPED | MEMATTRF_RW_MASK)) != MEMATTRF_SUPER_RW_USER_RW)
+	// 	result = false;
+    // // masked = attr & MEMATTRF_RW_MASK;
+    // // if(masked)
+    // //     ret = TRUE;
+
+    // return result;
 }
 
 bool is_writable_address (uint32_t addr)

@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 bool is_readable_address (uint32_t addr);
+bool is_readable_address_st (uint32_t addr);
 bool is_writable_address (uint32_t addr);
 
 typedef enum
