@@ -48,12 +48,16 @@ public:
 	}
 	void open(APTR _handle, string name) {
 		handle = new ElfHandle(_handle, name);
+		handle->open();
 
 		symbols.readAll(handle);
 
 		if(handle->performRelocation())
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
 		firstRun = true;
+
+		handle->close();
+		delete handle; handle = 0;
 	}
 	bool load(string path, string file, string args) {
 		APTR handle = process.load(path, file, args);

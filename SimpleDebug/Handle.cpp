@@ -5,8 +5,8 @@ ElfHandle::ElfHandle (APTR handle, string name, bool isOpen) {
     this->handle = handle;
     this->isOpen = isOpen;
 
-	if (!isOpen)
-		open();
+	// if (!isOpen)
+	// 	open();
     //    lock();
 }
 

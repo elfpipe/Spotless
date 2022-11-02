@@ -78,7 +78,7 @@ private:
 	static bool tracing;
 	static uint8_t signal;
 
-	Pipe pipe;
+	// Pipe pipe;
 
 private:
 	static ULONG amigaos_debug_callback (struct Hook *hook, struct Task *currentTask, struct KernelDebugMessage *dbgmsg);
