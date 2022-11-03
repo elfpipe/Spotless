@@ -233,6 +233,20 @@ bool Listbrowser::checkboxChecked()
 	return false;
 }
 
+void Listbrowser::showSelected(string text)
+{
+	int line = 0;
+	struct Node *node = IExec->GetHead(&labels);
+	while(node) {
+		line++;
+		const char *str;
+		IListBrowser->GetListBrowserNodeAttrs(node, LBNCA_Text, &str, TAG_DONE);
+		string current(str);
+		if(!current.compare(text))
+			focus(line);
+		node = IExec->GetSucc(node);
+	}
+}
 unsigned int Listbrowser::getId()
 {
 	unsigned int id;

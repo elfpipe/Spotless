@@ -306,7 +306,12 @@ Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t sta
 }
 vector<string> Binary::getSourceNames() {
     vector<string> result;
+    ProgressWindow progress;
+    progress.open("Fetching sources...", (unsigned int)objects.size(), 0);
+    uint32_t p = 0;
     for(vector<SourceObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
+        progress.updateLevel(p++);
+
         result.push_back((*it)->name);
         for(vector<Function *>::iterator itf = (*it)->functions.begin(); itf != (*it)->functions.end(); itf++) {
             for(vector<Function::SLine *>::iterator its = (*itf)->lines.begin(); its != (*itf)->lines.end(); its++)
@@ -314,6 +319,7 @@ vector<string> Binary::getSourceNames() {
                     result.push_back((*its)->source);
         }
     }
+    progress.close();
     return result;
 }
 uint32_t Binary::getLineAddress(string file, int line) {

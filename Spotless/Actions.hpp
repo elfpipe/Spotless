@@ -90,6 +90,7 @@ public:
                     if(spotless->childLives) {
                         spotless->updateAll();
                         spotless->sources->update();
+                        spotless->sources->showCurrent();
                     } else {
                         spotless->console->write(PublicScreen::PENTYPE_CRITICAL, "Failed to load selected file.");
                     }

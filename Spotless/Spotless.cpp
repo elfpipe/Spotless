@@ -143,7 +143,8 @@ bool Spotless::handleEvent(Event *event, bool *exit) {
 void Spotless::updateAll() {
     actions->update();
     code->update();
-    sources->update();
+    // sources->update(); /* this is done in Actions.hpp */
+    sources->showCurrent();
     context->update();
     stacktrace->update();
 

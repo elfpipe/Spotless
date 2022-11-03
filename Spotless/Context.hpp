@@ -52,8 +52,9 @@ public:
     }
     bool handleEvent(Event *event, bool *exit) {
         if(event->eventClass() == Event::CLASS_CheckboxPress) {
-            // cout << "CLASS_CheckboxPress called...\n";
-            globals();
+            if(event->elementId() == getGlobalsId()) {
+                globals();
+            }
         }
         return false;
     }

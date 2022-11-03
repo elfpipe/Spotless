@@ -17,7 +17,7 @@ private:
 public:
     Sources(Spotless *spotless) : Widget(spotless) { setName("Source files"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
-                layout->setParent(this);
+        layout->setParent(this);
 
         Layout *vl = layout->createVerticalLayout();
         // vl->createButton("Source roots -->");
@@ -34,6 +34,10 @@ public:
             listbrowser->addNode(sources[i]);
         listbrowser->attach();
     }
+    void showCurrent() {
+        string current = spotless->debugger.getSourceFile();
+        if(current.size()) listbrowser->showSelected(current);
+    }
     void clear() {
         listbrowser->clear();
     }
@@ -43,11 +47,6 @@ public:
             spotless->console->write(PublicScreen::PENTYPE_EVENT, "Source file selected : " + file);
             string fullPath = spotless->debugger.searchSourcePath(file);
             spotless->code->show(file, fullPath);
-        }
-        if(event->eventClass() == Event::CLASS_CheckboxPress) {
-            if(event->elementId() == spotless->context->getGlobalsId()) {
-                spotless->context->globals();
-            }
         }
         return false;
     }

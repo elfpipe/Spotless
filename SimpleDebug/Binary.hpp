@@ -470,7 +470,7 @@ public:
                     break;
                 }
         } else {
-            result.push_back("<no access");
+            result.push_back("<no access>");
         }
         return result;
     }
