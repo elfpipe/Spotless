@@ -242,8 +242,10 @@ void Listbrowser::showSelected(string text)
 		const char *str;
 		IListBrowser->GetListBrowserNodeAttrs(node, LBNCA_Text, &str, TAG_DONE);
 		string current(str);
-		if(!current.compare(text))
+		if(!current.compare(text)) {
 			focus(line);
+			break;
+		}
 		node = IExec->GetSucc(node);
 	}
 }
