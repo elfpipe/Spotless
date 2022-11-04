@@ -86,8 +86,7 @@ public:
                     string file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
                     string unixPath = Requesters::convertToUnixRelative(path);
                     spotless->debugger.addSourceRoot(unixPath);
-                    spotless->childLives = spotless->debugger.load(path, file, ""); //Use amigaos path for LoadSeg
-                    if(spotless->childLives) {
+                    if(spotless->debugger.load(path, file, "")) { //Use amigaos path for LoadSeg
                         spotless->updateAll();
                         spotless->sources->update();
                         spotless->sources->showCurrent();

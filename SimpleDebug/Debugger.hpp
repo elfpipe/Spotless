@@ -345,7 +345,7 @@ public:
 		for(int i = 0; i < tasks.size(); i++) {
 			result.push_back("");
 			result.push_back(printStringFormat("Sub-Task %d : (0x%x)", i+1, (void *)tasks[i]->task));
-			vector<string> taskResults = functionSource(tasks[i]->contextCopy.ip);
+			vector<string> taskResults = functionSource(tasks[i]->ip());
             result.insert(result.end(), taskResults.begin(), taskResults.end());
 		}
 		return result;
@@ -388,7 +388,7 @@ public:
 		for(int i = 0; i < tasks.size(); i++) {
 			result.push_back("");
 			result.push_back(printStringFormat("Sub-Task %d : (0x%x)", i+1, (void *)tasks[i]->task));
-			vector<string> taskResults = binary && binary->getFunction(tasks[i]->contextCopy.ip) ? disassembleFunction(tasks[i]->contextCopy.ip) : disassembleAddress(tasks[i]->contextCopy.ip);
+			vector<string> taskResults = binary && binary->getFunction(tasks[i]->ip()) ? disassembleFunction(tasks[i]->ip()) : disassembleAddress(tasks[i]->ip());
             result.insert(result.end(), taskResults.begin(), taskResults.end());
 		}
 		return result;

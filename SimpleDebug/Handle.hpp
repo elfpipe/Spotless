@@ -34,7 +34,7 @@ public:
 		return isOpen;
 	}
 	void close () {
-		if(isOpen) IElf->CloseElfTags ((Elf32_Handle)handle, CET_ReClose, TRUE, TAG_DONE);
+		// if(isOpen) IElf->CloseElfTags ((Elf32_Handle)handle, CET_ReClose, TRUE, TAG_DONE);
 		isOpen = false;
 	}
 	

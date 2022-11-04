@@ -35,7 +35,7 @@ public:
 private:
     static Spotless *spotless;
     
-    bool childLives = false;
+    // bool childLives = false;
     
 public:
     Spotless () : MainWindow() { create(); }
@@ -48,7 +48,7 @@ public:
     // static void trapHandler();
     static void portHandler();
     // static void pipeHandler();
-    static void deathHandler();
+    // static void deathHandler();
     bool handleEvent(Event *event, bool *exit);
     
     void updateAll();

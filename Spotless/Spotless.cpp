@@ -16,12 +16,12 @@
 
 #include "../SimpleDebug/Strings.hpp"
 
-string vectorToString(vector<string> v) {
-	string result;
-	for(int i = 0; i < v.size(); i++)
-		result += v[i] + "\n";
-	return result;
-}
+// string vectorToString(vector<string> v) {
+// 	string result;
+// 	for(int i = 0; i < v.size(); i++)
+// 		result += v[i] + "\n";
+// 	return result;
+// }
 
 Listbrowser *Console::listbrowser = 0;
 Spotless *Spotless::spotless = 0;
@@ -103,7 +103,7 @@ void Spotless::portHandler() {
         // }
         if(!spotless->debugger.lives()) {
             spotless->clearAll();
-            spotless->childLives = false;
+            // spotless->childLives = false;
         }
         // if(spotless->debugger.lives())
             spotless->updateAll();

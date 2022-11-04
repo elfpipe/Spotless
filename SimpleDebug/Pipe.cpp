@@ -23,7 +23,7 @@ void Pipe::init() {
 	fd[0] = 0;
 	fd[1] = 0;
 
-	fd[1] = IDOS->Open ("PIPE:/UNIQUE/NOBLOCK", MODE_NEWFILE);
+	fd[1] = IDOS->Open (/*"dummy.txt"*/ "PIPE:/UNIQUE/NOBLOCK", MODE_NEWFILE);
 	if (fd[1] == 0) return;
 
 	data = IDOS->ExamineObjectTags(EX_FileHandleInput, fd[1], TAG_END);

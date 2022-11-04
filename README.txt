@@ -33,7 +33,8 @@ This is the only way, that Spotless can identify symbols in the executable.
         Fix copyright symbol in about (c).
         Remove stray debug output when doing iconify.
         Refix ability to run self (and db101).
-
+        Highlight source file name in Sources upon breaks.
+        
 2.1.0 : Fix menus.
         Fix public screen.
         Fix cleanup proceedure.

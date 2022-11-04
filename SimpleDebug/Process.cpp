@@ -12,8 +12,8 @@
 #include <iostream>
 
 using namespace std;
-
-ExceptionContext AmigaProcess::context;
+ExceptionContext AmigaProcess::contextCopy;
+// ExceptionContext *AmigaProcess::context;
 struct MsgPort *AmigaProcess::port = 0;
 bool AmigaProcess::tracing = false;
 uint8_t AmigaProcess::signal = 0x0;
@@ -112,7 +112,7 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 		// NP_StackSize,				2000000,
 		NP_Cli,						true,
 		NP_Child,					false, //important
-		NP_Arguments,				arguments.c_str(),
+		NP_Arguments,				strdup(arguments.c_str()),
 		NP_Input,					IDOS->Input(),
 		NP_CloseInput,				false,
 		NP_Output,					IDOS->Output(), //pipe.getWrite(),
@@ -147,6 +147,31 @@ APTR AmigaProcess::load(string path, string file, string arguments)
     return handle;
 }
 
+// void copy_exception_context(ExceptionContext *contextCopy, ExceptionContext *context)
+// {
+// 		contextCopy->Flags = context->Flags;
+// 		contextCopy->msr = context->msr;
+// 		contextCopy->ip = context->ip;
+// 		for(int i = 0; i < 32; i++) {
+// 			contextCopy->gpr[i] = context->gpr[i];
+// 		}
+// 		contextCopy->cr = context->cr;
+// 		contextCopy->xer = context->xer;
+// 		contextCopy->ctr = context->ctr;
+// 		contextCopy->lr = context->lr;
+// 		contextCopy->dsisr = context->dsisr;
+// 		contextCopy->dar = context->dar;
+// 		for(int i = 0; i < 32; i++) {
+// 			contextCopy->fpr[i] = context->fpr[i];
+// 		}
+// 		contextCopy->fpscr = context->fpscr;
+// 		/* The following are only used on AltiVec */
+// 		// uint8   vscr[16]; /* AltiVec vector status and control register */
+// 		// uint8   vr[512];  /* AltiVec vector register storage */
+// 		// uint32  vrsave;   /* AltiVec VRSAVE register */
+
+// }
+
 ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *currentTask, struct KernelDebugMessage *dbgmsg)
 {
     struct ExecIFace *IExec = (struct ExecIFace *)((struct ExecBase *)SysBase)->MainInterface;
@@ -170,7 +195,8 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 
 			message->type = MSGTYPE_ADDTASK;
 			message->task = currentTask;
-			message->contextCopy = *dbgmsg->message.context;
+			// message->context = dbgmsg->message.context;
+			// copy_exception_context(&message->contextCopy, dbgmsg->message.context);
 
 			// if((struct Task *)process != currentTask) {
 			// 	struct TaskData *data = new TaskData(message->task, &message->contextCopy);
@@ -194,20 +220,21 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			);
 			message->type = MSGTYPE_REMTASK;
 			message->task = currentTask;
-			message->contextCopy = *dbgmsg->message.context;
+			// message->context = dbgmsg->message.context;
+			// copy_exception_context(&message->contextCopy, dbgmsg->message.context);
 
 			// IDOS->Printf("REMTASK\n");
 			// IDOS->Printf("[HOOK] ip = 0x%x\n", context.ip);
 			// IDOS->Printf("[HOOK} trap = 0x%x\n", context.Traptype);
 
-				if(currentTask == (struct Task *)process) { // if this is main process
-					process = 0;
-					// cout << "exists == false\n";
-					exists = false;
-					running = false;
-					attached = false;
-					// clear();
-				}
+				// if(currentTask == (struct Task *)process) { // if this is main process
+				// 	process = 0;
+				// 	// cout << "exists == false\n";
+				// 	exists = false;
+				// 	running = false;
+				// 	attached = false;
+				// 	// clear();
+				// }
 
 			// sendSignal = true;  //if process has ended, we must signal caller
 			IExec->PutMsg (port, (struct Message *)message);
@@ -222,7 +249,6 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 				IExec->Signal(data->caller, 1 << data->signal);
 				return 1;
 			}
-			// memcpy (&context, dbgmsg->message.context, sizeof(struct ExceptionContext));
 			
 			// IDOS->Printf("EXCEPTION\n");
 			// IDOS->Printf("[HOOK] ip = 0x%x\n", context.ip);
@@ -242,7 +268,8 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 				// sendSignal = true;
 			}
 			message->task = currentTask;
-			message->contextCopy = *dbgmsg->message.context;
+			// message->context = dbgmsg->message.context;
+			// copy_exception_context(&message->contextCopy, dbgmsg->message.context);
 
 			IExec->PutMsg (port, (struct Message *)message);
 
@@ -318,9 +345,9 @@ bool AmigaProcess::handleMessages() {
 
 			case AmigaProcess::MSGTYPE_TRAP:
 			case AmigaProcess::MSGTYPE_CRASH:
-				if(message->task == (struct Task *)process) {
-					context = message->contextCopy;
-				}
+				// if(message->task == (struct Task *)process) {
+				// 	context = message->context;
+				// }
 				running = false;
 				result = true;
 				break;
@@ -336,7 +363,7 @@ bool AmigaProcess::handleMessages() {
 			case AmigaProcess::MSGTYPE_ADDTASK:
 				// cout << "MSGTYPE_ADDTASK.\n";
 				if((struct Task *)process != message->task) {
-					struct TaskData *data = new TaskData(message->task, &message->contextCopy);
+					struct TaskData *data = new TaskData(message->task /*, message->context*/);
 					tasks.push_back(data);
 				}
 				if(running) restartTask(message->task);
@@ -428,30 +455,44 @@ void AmigaProcess::detach()
 void AmigaProcess::readContext ()
 {
 	if(!exists || running) return;
-	IDebug->ReadTaskContext  ((struct Task *)process, &context, RTCF_SPECIAL|RTCF_STATE|RTCF_VECTOR|RTCF_FPU);
+	IDebug->ReadTaskContext  ((struct Task *)process, &contextCopy, RTCF_SPECIAL|RTCF_GENERAL|RTCF_STATE|RTCF_VECTOR|RTCF_FPU);
 }
 
 void AmigaProcess::writeContext ()
 {
 	if(!exists || running) return;
-	IDebug->WriteTaskContext ((struct Task *)process, &context, RTCF_SPECIAL|RTCF_STATE|RTCF_VECTOR|RTCF_FPU);
+	IDebug->WriteTaskContext ((struct Task *)process, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
+}
+
+void AmigaProcess::TaskData::readContext ()
+{
+	// if(!exists || running) return;
+	IDebug->ReadTaskContext  (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
+}
+
+void AmigaProcess::TaskData::writeContext ()
+{
+	// if(!exists || running) return;
+	IDebug->WriteTaskContext (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
 }
 
 // ------------------------------------------------------------------ //
 
 void AmigaProcess::skip() {
-	context.ip += 4;
-	IDebug->WriteTaskContext((struct Task *)process, &context, RTCF_STATE);
+	readContext();
+	contextCopy.ip += 4;
+	IDebug->WriteTaskContext((struct Task *)process, &contextCopy, RTCF_STATE);
 }
 
 void AmigaProcess::backSkip() {
-	context.ip -= 4;
-	IDebug->WriteTaskContext((struct Task *)process, &context, RTCF_STATE);
+	readContext();
+	contextCopy.ip -= 4;
+	IDebug->WriteTaskContext((struct Task *)process, &contextCopy, RTCF_STATE);
 }
 
 bool AmigaProcess::step() {
 	readContext();
-	Tracer tracer(process, &context);
+	Tracer tracer(process, &contextCopy);
 	if(tracer.activate()) {
 		tracing = true;
 		resetTrapSignal();
@@ -466,7 +507,7 @@ bool AmigaProcess::step() {
 
 bool AmigaProcess::stepNoBranch() {
 	readContext();
-	Tracer tracer(process, &context);
+	Tracer tracer(process, &contextCopy);
 	if(tracer.activate(false)) {
 		tracing = true;
 		resetTrapSignal();
@@ -480,7 +521,7 @@ bool AmigaProcess::stepNoBranch() {
 }
 
 uint32_t AmigaProcess::branchAddress() {
-	Tracer tracer(process, &context);
+	Tracer tracer(process, &contextCopy);
 	// uint32_t result = tracer.branch();
 	// cout << "branch: " << (void *)result << "\n";
 	return tracer.branch();

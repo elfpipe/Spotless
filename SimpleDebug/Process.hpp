@@ -40,14 +40,22 @@ public:
 		DebugMessageType type;
 		struct Library *library;
 		struct Task *task;
-	    struct ExceptionContext contextCopy;
+	    // struct ExceptionContext *context;
 	};
 
 	struct TaskData {
-		TaskData(struct Task *task, struct ExceptionContext *context) {
+		TaskData(struct Task *task /*, struct ExceptionContext *context*/) {
 			this->task = task;
-			this->contextCopy = *context;
+			readContext();
+			// this->context = context;
 		}
+		void readContext ();
+		void writeContext ();
+
+		uint32_t ip () { if(!exists) return 0; readContext(); return contextCopy.ip; }
+		uint32_t sp () { if(!exists) return 0; readContext(); return contextCopy.gpr[1]; } //return (uint32_t)process->pr_Task.tc_SPReg; }
+		uint32_t lr () { if(!exists) return 0; readContext(); return contextCopy.lr; }
+
 		struct Task *task;
 	    struct ExceptionContext contextCopy;
 	};
@@ -68,7 +76,8 @@ private:
 	vector<struct TaskData *> tasks;
 
 	static struct Hook hook;
-	static ExceptionContext context;
+	// static ExceptionContext *context;
+	static ExceptionContext contextCopy;
 
 	static bool exists;
 	static bool running;
@@ -78,7 +87,7 @@ private:
 	static bool tracing;
 	static uint8_t signal;
 
-	// Pipe pipe;
+	Pipe pipe;
 
 private:
 	static ULONG amigaos_debug_callback (struct Hook *hook, struct Task *currentTask, struct KernelDebugMessage *dbgmsg);
@@ -112,12 +121,13 @@ public:
 	bool isReturn(uint32_t address);
 	uint32_t branchAddress();
 
-	uint32_t ip () { if(!exists) return 0; readContext(); return context.ip; }
-	uint32_t sp () { if(!exists) return 0; readContext(); /*return context.gpr[1]; }*/ return (uint32_t)process->pr_Task.tc_SPReg; }
-	uint32_t lr () { if(!exists) return 0; readContext(); return context.lr; }
+	uint32_t ip () { if(!exists) return 0; readContext(); return contextCopy.ip; }
+	uint32_t sp () { if(!exists) return 0; readContext(); return contextCopy.gpr[1]; } //return (uint32_t)process->pr_Task.tc_SPReg; }
+	uint32_t lr () { if(!exists) return 0; readContext(); return contextCopy.lr; }
 
 	struct ExceptionContext *getContext() {
-		return &context;
+		readContext();
+		return &contextCopy;
 	}
 	vector<TaskData *> getTasks();
 
