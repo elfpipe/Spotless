@@ -454,13 +454,13 @@ void AmigaProcess::detach()
 
 void AmigaProcess::readContext ()
 {
-	if(!exists || running) return;
+	if(!exists) return;
 	IDebug->ReadTaskContext  ((struct Task *)process, &contextCopy, RTCF_SPECIAL|RTCF_GENERAL|RTCF_STATE|RTCF_VECTOR|RTCF_FPU);
 }
 
 void AmigaProcess::writeContext ()
 {
-	if(!exists || running) return;
+	if(!exists) return;
 	IDebug->WriteTaskContext ((struct Task *)process, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
 }
 
@@ -481,13 +481,13 @@ void AmigaProcess::TaskData::writeContext ()
 void AmigaProcess::skip() {
 	readContext();
 	contextCopy.ip += 4;
-	IDebug->WriteTaskContext((struct Task *)process, &contextCopy, RTCF_STATE);
+	writeContext(); //IDebug->WriteTaskContext((struct Task *)process, &contextCopy, RTCF_STATE);
 }
 
 void AmigaProcess::backSkip() {
 	readContext();
 	contextCopy.ip -= 4;
-	IDebug->WriteTaskContext((struct Task *)process, &contextCopy, RTCF_STATE);
+	writeContext(); //IDebug->WriteTaskContext((struct Task *)process, &contextCopy, RTCF_STATE);
 }
 
 bool AmigaProcess::step() {

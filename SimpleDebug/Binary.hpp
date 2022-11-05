@@ -248,7 +248,7 @@ public:
     }
     vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
-        if(!is_readable_address(base)) {
+        if(!base || !is_readable_address(base)) {
             result.push_back("<no access>");
             return result;
         }

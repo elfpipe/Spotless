@@ -69,28 +69,28 @@ bool is_readable_address_st (uint32_t addr)
 
 bool is_readable_address (uint32_t addr)
 {
-	return Memory_Readable((APTR)addr);
+	// return Memory_Readable((APTR)addr);
 
-    // uint32 attr, masked;
-    // APTR stack;
-    // bool result = true;
+    uint32 attr, masked;
+    APTR stack;
+    bool result = true;
 
-    //   /* Go supervisor */
-    // stack = IExec->SuperState();
+      /* Go supervisor */
+    stack = IExec->SuperState();
     
-	// attr = IMMU->GetMemoryAttrs((APTR)addr, 0);
+	attr = IMMU->GetMemoryAttrs((APTR)addr, 0);
 
-    // /* Return to old state */
-    // if (stack)
-    //     IExec->UserState(stack);
+    /* Return to old state */
+    if (stack)
+        IExec->UserState(stack);
 
-	// if((attr & (MEMATTRF_NOT_MAPPED | MEMATTRF_RW_MASK)) != MEMATTRF_SUPER_RW_USER_RW)
-	// 	result = false;
+	if((attr & (MEMATTRF_NOT_MAPPED | MEMATTRF_RW_MASK)) != MEMATTRF_SUPER_RW_USER_RW)
+		result = false;
     // // masked = attr & MEMATTRF_RW_MASK;
     // // if(masked)
     // //     ret = TRUE;
 
-    // return result;
+    return result;
 }
 
 bool is_writable_address (uint32_t addr)

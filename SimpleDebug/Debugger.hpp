@@ -549,8 +549,9 @@ public:
 	}
 
 	vector<string> registersDump() {
-		struct ExceptionContext *context = process.getContext();
 		vector<string> result;
+		if(!process.lives()) return result;
+		struct ExceptionContext *context = process.getContext();
 		result.push_back(printStringFormat("Flags : %0x%x", context->Flags));    /* Flags, describing the context (READ-ONLY)*/
 		result.push_back(printStringFormat("msr : 0x%x", context->msr));
 		result.push_back(printStringFormat("ip : 0x%x", context->ip));
