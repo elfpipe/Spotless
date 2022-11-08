@@ -454,27 +454,32 @@ void AmigaProcess::detach()
 
 void AmigaProcess::readContext ()
 {
-	if(!exists) return;
-	IDebug->ReadTaskContext  ((struct Task *)process, &contextCopy, RTCF_SPECIAL|RTCF_GENERAL|RTCF_STATE|RTCF_VECTOR|RTCF_FPU);
+	if(exists)
+		IDebug->ReadTaskContext  ((struct Task *)process, &contextCopy, RTCF_SPECIAL|RTCF_GENERAL|RTCF_STATE|RTCF_VECTOR|RTCF_FPU);
 }
 
 void AmigaProcess::writeContext ()
 {
-	if(!exists) return;
-	IDebug->WriteTaskContext ((struct Task *)process, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
+	if(exists)
+		IDebug->WriteTaskContext  ((struct Task *)process, &contextCopy, RTCF_SPECIAL|RTCF_GENERAL|RTCF_STATE|RTCF_VECTOR|RTCF_FPU);
 }
 
 void AmigaProcess::TaskData::readContext ()
 {
 	// if(!exists || running) return;
-	IDebug->ReadTaskContext  (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
+	if(task) IDebug->ReadTaskContext  (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
 }
 
 void AmigaProcess::TaskData::writeContext ()
 {
 	// if(!exists || running) return;
-	IDebug->WriteTaskContext (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
+	if(task) IDebug->WriteTaskContext (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
 }
+
+// void AmigaProcess::handleDeath()
+// {
+// 	exists = false;
+// }
 
 // ------------------------------------------------------------------ //
 

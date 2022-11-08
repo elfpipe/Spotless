@@ -8,14 +8,16 @@ class Stacktrace : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
+    RButton *button;
 
 public:
     Stacktrace(Spotless *spotless) : Widget(spotless) { setName("Stacktrace"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
                 layout->setParent(this);
-
-        listbrowser = layout->createListbrowser();
+        Layout *vLayout = layout->createVerticalLayout();
+        listbrowser = vLayout->createListbrowser();
         listbrowser->setStriping(true);
+        button = vLayout->createButton("Generate stacktrace...");
     }
     void update() {
         clear();
@@ -28,6 +30,18 @@ public:
     }
     void clear() {
         listbrowser->clear();
+    }
+    unsigned int getButtonId() {
+        return button->getId();
+    }
+    bool handleEvent(Event *event, bool *exit) {
+
+        if(event->eventClass() == Event::CLASS_ButtonPress) {
+            if(event->elementId() == getButtonId()) {
+                update();
+            }
+        }
+        return false;
     }
 };
 #endif

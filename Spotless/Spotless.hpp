@@ -45,10 +45,10 @@ public:
     void destroy();
     int unfold();
 
+    // static void deathHandler();
     // static void trapHandler();
     static void portHandler();
     // static void pipeHandler();
-    // static void deathHandler();
     bool handleEvent(Event *event, bool *exit);
     
     void updateAll();

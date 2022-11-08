@@ -46,6 +46,7 @@ public:
 	struct TaskData {
 		TaskData(struct Task *task /*, struct ExceptionContext *context*/) {
 			this->task = task;
+			this->exists = true;
 			readContext();
 			// this->context = context;
 		}
@@ -58,6 +59,7 @@ public:
 
 		struct Task *task;
 	    struct ExceptionContext contextCopy;
+		bool exists;
 	};
 
 	struct HookData {

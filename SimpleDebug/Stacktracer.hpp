@@ -6,6 +6,9 @@
 #include <string>
 #include <stdint.h>
 
+#include "Handle.hpp"
+class Debugger;
+
 using namespace std;
 
 class Stacktracer {
@@ -14,6 +17,6 @@ private:
 private:
     static int32 stacktrace_callback(struct Hook *hook, struct Task *task, struct StackFrameMsg *frame);
 public:
-    vector<string> stacktrace(Task *task, uint32_t sp);
+    vector<string> stacktrace(Task *task, Debugger *debugger, uint32_t sp);
 };
 #endif

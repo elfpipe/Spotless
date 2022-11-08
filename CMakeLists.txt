@@ -41,5 +41,5 @@ target_link_libraries(Spotless -lunix -lauto)
 add_executable(ReActionTests ReAction/Tests/test.cpp ${REACTION_SOURCES})
 target_link_libraries(ReActionTests -lauto)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -athread=native -gstabs")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gstabs")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mcrt=newlib -athread=native -gstabs")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcrt=newlib -gstabs")

@@ -120,8 +120,8 @@ void Spotless::portHandler() {
 
 // void Spotless::deathHandler() {
 //     if(spotless) {
-//         spotless->clearAll();
-//         spotless->childLives = false;
+//         spotless->debugger.handleDeath();
+//         spotless->updateAll();
 //     }
 // }
 
@@ -146,7 +146,8 @@ void Spotless::updateAll() {
     // sources->update(); /* this is done in Actions.hpp */
     sources->showCurrent();
     context->update();
-    stacktrace->update();
+    // stacktrace->update();
+    stacktrace->clear();
 
     // console->clear();
     disassembler->update();

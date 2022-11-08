@@ -1,3 +1,6 @@
+#ifndef SPOTLESS_DEBUGGER_HPP
+#define SPOTLESS_DEBUGGER_HPP
+
 //#include "Symbols.hpp"
 #include "Process.hpp"
 #include "Breaks.hpp"
@@ -56,8 +59,8 @@ public:
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
 		firstRun = true;
 
-		handle->close();
-		delete handle; handle = 0;
+		// handle->close();
+		// delete handle; handle = 0;
 	}
 	bool load(string path, string file, string args) {
 		APTR handle = process.load(path, file, args);
@@ -78,6 +81,9 @@ public:
 		// return success
 		return handle != 0;
 	}
+	// void handleDeath() {
+	// 	process.handleDeath();
+	// }
 	bool attach(string name) {
 		APTR handle = process.attach(name);
 		if(handle) open(handle, name);
@@ -86,6 +92,7 @@ public:
 	void detach() {
 		process.detach();
 	}
+	ElfHandle *getElfHandle() { return handle; }
 	bool handleMessages() {
 		return process.handleMessages();
 	}
@@ -307,6 +314,12 @@ public:
 	int getSourceLine() {
 		return binary ? binary->getSourceLine(process.ip()) : 0;
 	}
+	string getSourceFile(uint32 address) {
+		return binary ? binary->getSourceFile(address) : string();
+	}
+	int getSourceLine(uint32 address) {
+		return binary ? binary->getSourceLine(address) : 0;
+	}
 	int getSourceLine(uint32_t address) {
 		return binary ? binary->getSourceLine(address) : 0;
 	}
@@ -337,7 +350,7 @@ public:
 	vector<string> stacktrace() {
 		cout << "Stacktrace: " << process.lives() << "\n";
 		Stacktracer stacktracer;
-		return !process.lives() || process.isRunning() || process.isTracing() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), getSp());
+		return !process.lives() || process.isRunning() || process.isTracing() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), this, getSp());
 	}
 	vector<string> functionSource() {
 		vector<string> result = functionSource(process.ip());
@@ -384,13 +397,14 @@ public:
 	}
 	vector<string> disassemble() {
 		vector<string> result = (binary && binary->getFunction(process.ip())) ? disassembleFunction(process.ip()) : disassembleAddress(process.ip());
-		vector<AmigaProcess::TaskData *> tasks = process.getTasks();
-		for(int i = 0; i < tasks.size(); i++) {
-			result.push_back("");
-			result.push_back(printStringFormat("Sub-Task %d : (0x%x)", i+1, (void *)tasks[i]->task));
-			vector<string> taskResults = binary && binary->getFunction(tasks[i]->ip()) ? disassembleFunction(tasks[i]->ip()) : disassembleAddress(tasks[i]->ip());
-            result.insert(result.end(), taskResults.begin(), taskResults.end());
-		}
+		// This below is useful but unsafe :
+		// vector<AmigaProcess::TaskData *> tasks = process.getTasks();
+		// for(int i = 0; i < tasks.size(); i++) {
+		// 	result.push_back("");
+		// 	result.push_back(printStringFormat("Sub-Task %d : (0x%x)", i+1, (void *)tasks[i]->task));
+		// 	vector<string> taskResults = binary && binary->getFunction(tasks[i]->ip()) ? disassembleFunction(tasks[i]->ip()) : disassembleAddress(tasks[i]->ip());
+        //     result.insert(result.end(), taskResults.begin(), taskResults.end());
+		// }
 		return result;
 	}
 	vector<string> disassembleAddress(uint32_t start) {
@@ -842,4 +856,5 @@ int main(int argc, char *argv[])
 	cout << "Farewell.\n";
     return 0;
 }
+#endif
 #endif
