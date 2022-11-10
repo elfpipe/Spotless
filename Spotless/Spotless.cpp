@@ -146,8 +146,8 @@ void Spotless::updateAll() {
     // sources->update(); /* this is done in Actions.hpp */
     sources->showCurrent();
     context->update();
-    // stacktrace->update();
-    stacktrace->clear();
+    stacktrace->update();
+    // stacktrace->clear();
 
     // console->clear();
     disassembler->update();

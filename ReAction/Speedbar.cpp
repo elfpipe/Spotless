@@ -18,6 +18,8 @@
 
 using namespace std;
 
+list<Object *> Speedbar::speedbars;
+
 Speedbar::Speedbar(Widget *parent) {
 	this->parent = parent;
 	init();
@@ -37,6 +39,8 @@ void Speedbar::init()
 		SPEEDBAR_Buttons,		&buttonList,
     	EndMember;
 	
+	speedbars.push_back(speedbar);
+
 	parent->topLevelParent()->addChild(speedbar);
 }
 
@@ -65,6 +69,9 @@ void Speedbar::clear()
 		node = nextnode;
 	}
 	IExec->NewList (&buttonList);
+
+	speedbars.remove(speedbar);
+	speedbar = 0;
 }
 
 void Speedbar::addNode (struct Node *node)
@@ -165,6 +172,8 @@ void Speedbar::setButtonText (int id, string text)
 
 bool Speedbar::isSpeedbar(Object *o)
 {
-	uint32 dummy;
-	return IIntuition->GetAttr(SPEEDBAR_Buttons, o, &dummy) ? true : false;
+	for(list<Object *>::iterator it = speedbars.begin(); it != speedbars.end(); it++) {
+		if((*it) == o) return true;
+	}
+	return false;
 }

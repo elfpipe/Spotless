@@ -78,9 +78,12 @@ public:
     }
 
     bool handleEvent(Event *event, bool *exit) {
+        cout << "Action.\n";
         if(event->eventClass() == Event::CLASS_ActionButtonPress) {
+            cout << "Event::CLASS_ActionButtonPress.\n";
             switch(event->elementId()) {
                 case Actions::Load: {
+                    cout << "Load.\n";
                     spotless->debugger.clearRoots();
                     string path;
                     string file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");

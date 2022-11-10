@@ -6,6 +6,7 @@
 #include "Screen.hpp"
 #include "Layout.hpp"
 #include "Menubar.hpp"
+#include "Config.hpp"
 
 #include <iostream>
 using namespace std;
@@ -36,13 +37,22 @@ bool MainWindow::openWindow() {
 
 	bool backdropWindow = PublicScreen::usingPublicScreen();
 
+	Config config("config.prefs");
+    setName("Spotless");
+
 	object = WindowObject,
 		WA_ScreenTitle,         "Spotless",
 		WA_Title,              	"Spotless",
 		WA_PubScreen,           PublicScreen::instance()->screenPointer(),
-		WA_Top,					PublicScreen::instance()->screenBarHeight(),
-		WA_Width,               windowWidth,
-		WA_Height,              windowHeight,
+
+		WA_Top,				config.getValue(widgetName, "Top", PublicScreen::instance()->screenBarHeight()),
+		WA_Left,			config.getValue(widgetName, "Left", 0),
+		WA_Width,			config.getValue(widgetName, "Width", windowWidth),
+		WA_Height,			config.getValue(widgetName, "Height", windowHeight),
+
+		// WA_Top,				    PublicScreen::instance()->screenBarHeight(),
+		// WA_Width,			    windowWidth,
+		// WA_Height,			    windowHeight,
 
         WA_DepthGadget,		    true,
 		WA_SizeGadget,		    true,
@@ -88,13 +98,25 @@ void MainWindow::showSplit()
         mainLayout->addEmbeddedWidget(mainView);
     }
 
+    Config config("config.prefs");
+    setName("SpotlessMini");
+
+    int windowWidth = PublicScreen::instance()->screenWidth();
+    int windowHeight = PublicScreen::instance()->screenHeight() - PublicScreen::instance()->screenBarHeight();
+
 	object = WindowObject,
 		WA_ScreenTitle,         "Spotless",
 		WA_Title,              	"Spotless",
 		WA_PubScreen,           PublicScreen::instance()->screenPointer(),
-		WA_Top,					PublicScreen::instance()->screenBarHeight(),
-		// WA_Width,               windowWidth,
-		// WA_Height,              windowHeight,
+
+		WA_Top,				config.getValue(widgetName, "Top", PublicScreen::instance()->screenBarHeight()),
+		WA_Left,			config.getValue(widgetName, "Left", 0),
+		WA_Width,			config.getValue(widgetName, "Width", windowWidth),
+		WA_Height,			config.getValue(widgetName, "Height", windowHeight),
+
+		// WA_Top,				    PublicScreen::instance()->screenBarHeight(),
+		// WA_Width,			    windowWidth,
+		// WA_Height,			    windowHeight,
 
         WA_DepthGadget,		    true,
 		WA_SizeGadget,		    true,

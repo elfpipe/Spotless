@@ -59,6 +59,7 @@ RButton::RButton (Widget *parent, const char *text, const char *iconName)
 
 RButton::~RButton ()
 {
+	buttons.remove(button);
 }
 
 void RButton::setText (const char *text)

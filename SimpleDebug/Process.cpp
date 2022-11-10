@@ -106,14 +106,14 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 		NP_Seglist,					seglist,
 //		NP_Entry,					foo,
 		NP_FreeSeglist,				false, //important
-		NP_Name,					strdup(command.c_str()),
+		NP_Name,					command.c_str(),
 		// NP_CurrentDir,				lock,
 		// NP_ProgramDir,				homelock,
 		// NP_StackSize,				2000000,
 		NP_Cli,						true,
 		NP_Child,					false, //important
-		NP_Arguments,				strdup(arguments.c_str()),
-		NP_Input,					IDOS->Input(),
+		NP_Arguments,				arguments.c_str(),
+		NP_Input,					IDOS->DupFileHandle(IDOS->Input()),
 		NP_CloseInput,				false,
 		NP_Output,					IDOS->Output(), //pipe.getWrite(),
 		NP_CloseOutput,				false,
@@ -227,14 +227,14 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 			// IDOS->Printf("[HOOK] ip = 0x%x\n", context.ip);
 			// IDOS->Printf("[HOOK} trap = 0x%x\n", context.Traptype);
 
-				// if(currentTask == (struct Task *)process) { // if this is main process
-				// 	process = 0;
+				if(currentTask == (struct Task *)process) { // if this is main process
+					process = 0;
 				// 	// cout << "exists == false\n";
-				// 	exists = false;
+					exists = false;
 				// 	running = false;
 				// 	attached = false;
 				// 	// clear();
-				// }
+				}
 
 			// sendSignal = true;  //if process has ended, we must signal caller
 			IExec->PutMsg (port, (struct Message *)message);

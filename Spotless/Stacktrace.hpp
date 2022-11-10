@@ -8,7 +8,7 @@ class Stacktrace : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
-    RButton *button;
+    // RButton *button;
 
 public:
     Stacktrace(Spotless *spotless) : Widget(spotless) { setName("Stacktrace"); this->spotless = spotless; }
@@ -17,7 +17,7 @@ public:
         Layout *vLayout = layout->createVerticalLayout();
         listbrowser = vLayout->createListbrowser();
         listbrowser->setStriping(true);
-        button = vLayout->createButton("Generate stacktrace...");
+        // button = vLayout->createButton("Generate stacktrace...");
     }
     void update() {
         clear();
@@ -31,17 +31,17 @@ public:
     void clear() {
         listbrowser->clear();
     }
-    unsigned int getButtonId() {
-        return button->getId();
-    }
-    bool handleEvent(Event *event, bool *exit) {
+    // unsigned int getButtonId() {
+    //     return button->getId();
+    // }
+    // bool handleEvent(Event *event, bool *exit) {
 
-        if(event->eventClass() == Event::CLASS_ButtonPress) {
-            if(event->elementId() == getButtonId()) {
-                update();
-            }
-        }
-        return false;
-    }
+    //     if(event->eventClass() == Event::CLASS_ButtonPress) {
+    //         if(event->elementId() == getButtonId()) {
+    //             update();
+    //         }
+    //     }
+    //     return false;
+    // }
 };
 #endif

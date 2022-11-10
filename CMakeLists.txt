@@ -16,6 +16,7 @@ ReAction/Panel.cpp
 ReAction/Menubar.cpp
 ReAction/String.cpp
 ReAction/Checkbox.cpp
+ReAction/Config.cpp
 )
 
 set(SIMPLEDEBUG_SOURCES
@@ -40,6 +41,9 @@ target_link_libraries(Spotless -lunix -lauto)
 
 add_executable(ReActionTests ReAction/Tests/test.cpp ${REACTION_SOURCES})
 target_link_libraries(ReActionTests -lauto)
+
+add_executable(ConfigTest ReAction/Tests/config_test.cpp ReAction/Config.cpp)
+target_link_libraries(ConfigTest -lauto)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mcrt=newlib -athread=native -gstabs")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcrt=newlib -gstabs")

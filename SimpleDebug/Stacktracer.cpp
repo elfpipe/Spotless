@@ -37,23 +37,23 @@ int32 Stacktracer::stacktrace_callback(struct Hook *hook, struct Task *task, str
 			{
 				entry = printStringFormat("<>");
 			}
+
+		/* ---------------------------------UNSAFE:------------------------------ */
+			// struct DebugSymbol *symbol = is_readable_address_st((uint32_t)frame->MemoryAddress) ? IDebug->ObtainDebugSymbol(frame->MemoryAddress, NULL) : 0;
+			// // struct DebugSymbol *symbol = IDebug->ObtainDebugSymbol(frame->MemoryAddress, NULL);
+
+			// if(symbol) {
+			// 	if(symbol->Type == DEBUG_SYMBOL_MODULE_STABS && symbol->SourceFileName)
+			// 		entry = printStringFormat("[%s: line %d]: %s", symbol->SourceFileName, symbol->SourceLineNumber, symbol->SourceFunctionName);
+			// 	else if(symbol->SourceFunctionName)
+			// 		entry = printStringFormat("%s", symbol->SourceFunctionName);
+			// 	else
+			// 		entry = printStringFormat("[%s]", symbol->Name);
+			
+			// 	IDebug->ReleaseDebugSymbol(symbol);
+			// }
 		}
 		break;
-		// 	struct DebugSymbol *symbol = is_readable_address_st((uint32_t)frame->MemoryAddress) ? IDebug->ObtainDebugSymbol(frame->MemoryAddress, NULL) : 0;
-		// 	// struct DebugSymbol *symbol = IDebug->ObtainDebugSymbol(frame->MemoryAddress, NULL);
-
-		// 	if(symbol) {
-		// 		if(symbol->Type == DEBUG_SYMBOL_MODULE_STABS && symbol->SourceFileName)
-		// 			entry = printStringFormat("[%s: line %d]: %s", symbol->SourceFileName, symbol->SourceLineNumber, symbol->SourceFunctionName);
-		// 		else if(symbol->SourceFunctionName)
-		// 			entry = printStringFormat("%s", symbol->SourceFunctionName);
-		// 		else
-		// 			entry = printStringFormat("[%s]", symbol->Name);
-			
-		// 		IDebug->ReleaseDebugSymbol(symbol);
-		// 	}
-		// }
-		// break;
 
 		case STACK_FRAME_INVALID_BACKCHAIN_PTR:
 			entry = printStringFormat("(%p) invalid backchain pointer", frame->StackPointer);

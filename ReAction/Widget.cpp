@@ -5,6 +5,7 @@
 #include "Speedbar.hpp"
 #include "reaction.h"
 #include "Screen.hpp"
+#include "Config.hpp"
 
 #include <libraries/keymap.h>
 
@@ -35,6 +36,8 @@ bool Widget::openWindow()
 
 	struct Screen *publicScreen = PublicScreen::instance()->screenPointer();
 
+	Config config("config.prefs");
+
 	object = WindowObject,
 		WA_PubScreen,		publicScreen,
 		WA_ScreenTitle,		"Spotless",
@@ -46,7 +49,12 @@ bool Widget::openWindow()
 		WA_Activate,		TRUE,
 		WA_IDCMP,			IDCMP_RAWKEY,
 
-		WINDOW_Position,	WPOS_CENTERSCREEN,
+		WA_Top,				config.getValue(widgetName, "Top", 10),
+		WA_Left,			config.getValue(widgetName, "Left", 0),
+		WA_Width,			config.getValue(widgetName, "Width", 320),
+		WA_Height,			config.getValue(widgetName, "Height", 240),
+
+		// WINDOW_Position,	WPOS_CENTERSCREEN,
 		WINDOW_ParentLayout,	createContent(),
 		WINDOW_MenuStrip,		mainMenu ? mainMenu->systemObject() : 0,
         WINDOW_GadgetHelp,      TRUE,
@@ -91,6 +99,21 @@ void Widget::setMenubar(Menubar *menu)
 
 void Widget::closeWindow ()
 {
+	Config config("config.prefs");
+
+	uint32 top, left, width, height;
+
+	IIntuition->GetWindowAttrs (window,
+		WA_Top, &top,
+		WA_Left, &left,
+		WA_Width, &width,
+		WA_Height, &height,
+		TAG_DONE);
+	config.setValue(widgetName, "Top", top);
+	config.setValue(widgetName, "Left", left);
+	config.setValue(widgetName, "Width", width);
+	config.setValue(widgetName, "Height", height);
+
 	if (object) IIntuition->DisposeObject (object);
 	object = 0;
 	window = 0;
@@ -180,6 +203,8 @@ int Widget::waitForClose()
 								mainMenu->handleMenuPick(id, &openClose, &exit);
 								if(openClose) { break; }
 							}
+							while(IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id) != NO_MENU_ID)
+								;
 							break;
 						}
 
@@ -333,7 +358,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 		break;
 
 		case WMHI_GADGETUP: {
-			// cout << "WMHI_GADGETUP\n";
+			cout << "WMHI_GADGETUP\n";
 			uint32 gadgetId = Class & WMHI_GADGETMASK;
 				// cout << "gadgetId : " << gadgetId << "\n";
 			
@@ -345,7 +370,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 				GA_UserData, &parent,
 				TAG_DONE);
 
-			// cout << "parent : " << (void *)parent << "\n";
+			cout << "parent : " << (void *)parent << "\n";
 
 			if(Checkbox::isCheckbox(gadget)) {
 				event = new Event (Event::CLASS_CheckboxPress);
@@ -389,6 +414,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 				event->setElementId(gadgetId);
 				event->setItemId (selected);
 			} else if(Speedbar::isSpeedbar(gadget)) {
+				cout << "isSpeedbar()\n";
 				event = new Event (Event::CLASS_ActionButtonPress);
 				event->setElementId (Code);
 			}

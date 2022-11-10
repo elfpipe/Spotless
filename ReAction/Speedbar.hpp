@@ -13,6 +13,7 @@ class Layout;
 class Speedbar {
 private:
 	static bool isSpeedbar(Object *o);
+	static list<Object *> speedbars;
 
 private:
 	struct List buttonList;
