@@ -302,7 +302,7 @@ Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t sta
         sym++;
     }
     progress.close();
-    string result = toString();
+    // string result = toString();
 }
 vector<string> Binary::getSourceNames() {
     vector<string> result;

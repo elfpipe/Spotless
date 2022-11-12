@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
 #include "Screen.hpp"
 
@@ -16,11 +17,15 @@ class Widget;
 class Layout;
 class Listbrowser {
 private:
+	static list<Object *> listbrowsers;
+
+public:
+	static void clean() { listbrowsers.clear(); }
 	static bool isListbrowser(Object *o);
 
 private:
 	struct List labels;
-	Object *object;
+	Object *listbrowser;
 	struct ColumnInfo *columnInfo;
 	int noColumns;
 	Widget *parent;
@@ -31,7 +36,7 @@ private:
 private:
 	void init ();
 
-	void *systemObject() { return object; }
+	void *systemObject() { return listbrowser; }
 	unsigned int getId();
 
 public:

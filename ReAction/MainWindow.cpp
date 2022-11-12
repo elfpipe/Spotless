@@ -86,16 +86,16 @@ void MainWindow::showSplit()
     window = 0;
     object = 0;
 
-    mainLayout = new Layout(this, Layout::LAYOUT_Vertical);
+    parentLayout = new Layout(this, Layout::LAYOUT_Vertical);
 
     if(topBar) {
         topBar->setParent(0);
-        mainLayout->addEmbeddedWidget(topBar);
+        parentLayout->addEmbeddedWidget(topBar);
     }
 
     if(mainView) {
         mainView->setParent(0);
-        mainLayout->addEmbeddedWidget(mainView);
+        parentLayout->addEmbeddedWidget(mainView);
     }
 
     Config config("config.prefs");
@@ -128,7 +128,7 @@ void MainWindow::showSplit()
 		WA_Activate,			TRUE,
 		WA_ReportMouse,			TRUE,
 				        
-		WINDOW_ParentLayout,	mainLayout->systemObject(),
+		WINDOW_ParentLayout,	parentLayout->systemObject(),
         WINDOW_MenuStrip,       mainMenu ? mainMenu->systemObject() : 0,
         WINDOW_GadgetHelp,      TRUE,
         WINDOW_IconifyGadget,   TRUE,
@@ -141,20 +141,20 @@ EndWindow;
 	openedWindows.push_back(this);
 
 
-    if(leftPanel) {
-        for(vector<Widget *>::iterator it = leftPanel->widgets.begin(); it != leftPanel->widgets.end(); it++) {
+    if(leftPanel.size()) {
+        for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
             (*it)->setParent(0);
             openNewWindow(*it);
         }
     }
-    if(bottomPanel) {
-        for(vector<Widget *>::iterator it = bottomPanel->widgets.begin(); it != bottomPanel->widgets.end(); it++) {
+    if(bottomPanel.size()) {
+        for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++) {
             (*it)->setParent(0);
             openNewWindow(*it);
         }
     }
-    if(rightPanel) {
-        for(vector<Widget *>::iterator it = rightPanel->widgets.begin(); it != rightPanel->widgets.end(); it++) {
+    if(rightPanel.size()) {
+        for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++) {
             (*it)->setParent(0);
             openNewWindow(*it);
         }
@@ -163,19 +163,20 @@ EndWindow;
 }
 
 Object *MainWindow::createContent() {
-    mainLayout = new Layout(this, Layout::LAYOUT_Vertical);
+    parentLayout = new Layout(this, Layout::LAYOUT_Vertical);
 
     if(topBar) {
         topBar->setParent(this);
-        mainLayout->addEmbeddedWidget(topBar);
+        parentLayout->addEmbeddedWidget(topBar);
     }
 
-    Layout *layoutA = mainLayout->createHorizontalLayout();
+    Layout *layoutA = parentLayout->createHorizontalLayout();
 
-    if (leftPanel && leftPanel->count()) {
-        for(vector<Widget *>::iterator it = leftPanel->widgets.begin(); it != leftPanel->widgets.end(); it++)
+    if (leftPanel.size()) {
+        for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++)
             (*it)->setParent(this);
-        layoutA->addTabbedPanel(leftPanel, 30);
+        // layoutA->addTabbedPanel(leftPanel, 30);
+        layoutA->createTabbedPanel(this, leftPanel, 30);
         layoutA->addWeightBar();
     }
 
@@ -186,27 +187,28 @@ Object *MainWindow::createContent() {
         layoutB->addEmbeddedWidget(mainView);
     }
 
-    if(bottomPanel && bottomPanel->count()) {
-        for(vector<Widget *>::iterator it = bottomPanel->widgets.begin(); it != bottomPanel->widgets.end(); it++)
+    if(bottomPanel.size()) {
+        for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++)
             (*it)->setParent(this);
         layoutB->addWeightBar();
-        layoutB->addTabbedPanel(bottomPanel, 30);
+        layoutB->createTabbedPanel(this, bottomPanel, 30);
     }
 
     //and last: The right panel added to layoutA
-    if (rightPanel && rightPanel->count()) {
-        for(vector<Widget *>::iterator it = rightPanel->widgets.begin(); it != rightPanel->widgets.end(); it++)
+    if (rightPanel.size()) {
+        for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++)
             (*it)->setParent(this);
-        layoutA->addTabbedPanel(rightPanel, 30);
+        layoutA->createTabbedPanel(this, rightPanel, 30);
         layoutA->addWeightBar();
     }
 
-    return mainLayout->systemObject();
+    return parentLayout->systemObject();
 }
 
 void MainWindow::destroyContent()
 {
-    delete mainLayout;
+    if(parentLayout) delete parentLayout;
+    parentLayout = 0;
 }
 
 void MainWindow::setMainView(Widget *view)
@@ -221,18 +223,21 @@ void MainWindow::setTopBar(Widget *top)
 
 void MainWindow::addLeftPanelWidget(Widget *widget)
 {
-    if(!leftPanel) leftPanel = new Panel(this);
-    leftPanel->addWidget(widget);
+    leftPanel.push_back(widget);
+    // if(!leftPanel) leftPanel = new Panel(this);
+    // leftPanel->addWidget(widget);
 }
 
 void MainWindow::addBottomPanelWidget(Widget *widget)
 {
-    if(!bottomPanel) bottomPanel = new Panel(this);
-    bottomPanel->addWidget(widget);
+    bottomPanel.push_back(widget);
+    // if(!bottomPanel) bottomPanel = new Panel(this);
+    // bottomPanel->addWidget(widget);
 }
 
 void MainWindow::addRightPanelWidget(Widget *widget)
 {
-    if(!rightPanel) rightPanel = new Panel(this);
-    rightPanel->addWidget(widget);
+    rightPanel.push_back(widget);
+    // if(!rightPanel) rightPanel = new Panel(this);
+    // rightPanel->addWidget(widget);
 }

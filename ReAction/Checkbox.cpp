@@ -31,6 +31,8 @@ Checkbox::Checkbox (Widget *parent, const char *text, bool checked)
 
 Checkbox::~Checkbox ()
 {
+    checkboxes.remove(checkbox);
+    Widget::removeChild(checkbox);
 }
 
 void Checkbox::setChecked(bool checked)

@@ -15,7 +15,7 @@ Config::Config(string file) {
     }
 	error = IPrefsObjects->ReadPrefs(dict, READPREFS_FileName, file.c_str(), TAG_DONE);
 	if(error) {
-        cout << "Error opening prefs file " << file << "\n";
+        cout << "Error reading prefs file from disk " << file << "\n";
     }
 }
 
@@ -34,6 +34,7 @@ int Config::getValue(string object, string value, int def) {
     return IPrefsObjects->DictGetIntegerForKey(o, value.c_str(), def);
 }
 void Config::setValue(string object, string value, int number) {
+    cout << "setValue() " << object << " " << value << "\n";
     uint32 error;
     PrefsObject *o = IPrefsObjects->DictGetObjectForKey(dict, object.c_str());
     if(!o) {

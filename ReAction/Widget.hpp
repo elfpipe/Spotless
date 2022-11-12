@@ -39,12 +39,14 @@ private:
 	struct Window *windowPointer() { return window; }
 	Object *windowObject() { return object; }
 
+public:
+	static unsigned int gadgetId;
 private:
-	unsigned int gadgetId;
-	vector<Object *> children; //We need this to delegate input events
+	static list<Object *> children; //We need this to delegate input events
 
-	unsigned int addChild(Object *object); //return id
-	Object *findChild(unsigned int id);
+	static unsigned int addChild(Object *object); //return id
+	static Object *findChild(unsigned int id);
+	static void removeChild(Object *object) { children.remove(object); }
 
 	Widget *findOpenedWindowWidget(uint32 mask);
 
@@ -96,7 +98,7 @@ public:
 
 	void closeAllWindows();
 	void closeAllExceptThis();
-
+	
 	void iconify();
 	void uniconify();
 	void windowToFront();

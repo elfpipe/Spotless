@@ -34,6 +34,10 @@ This is the only way, that Spotless can identify symbols in the executable.
         Remove stray debug output when doing iconify.
         Refix ability to run self (and db101).
         Highlight source file name in Sources upon breaks.
+        Solve swallowed buttons press in split window mode.
+        Solve stepinto.
+        Solve 12 second waiting bug upon load.
+        Solve kas1e's line 30 problem.
         
 2.1.0 : Fix menus.
         Fix public screen.

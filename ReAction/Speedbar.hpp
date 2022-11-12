@@ -12,8 +12,10 @@ class Widget;
 class Layout;
 class Speedbar {
 private:
-	static bool isSpeedbar(Object *o);
 	static list<Object *> speedbars;
+public:
+	static void clean() { speedbars.clear(); }
+	static bool isSpeedbar(Object *o);
 
 private:
 	struct List buttonList;

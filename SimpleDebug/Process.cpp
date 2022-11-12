@@ -370,10 +370,9 @@ bool AmigaProcess::handleMessages() {
 				// hookOn();
 				break;
 			case AmigaProcess::MSGTYPE_REMTASK:
-				cout << "REMTASK\n";
+				// cout << "REMTASK\n";
 				if(message->task == (struct Task *)process) { // if this is main process
 					process = 0;
-					cout << "exists == false\n";
 					exists = false;
 					running = false;
 					attached = false;
@@ -554,8 +553,7 @@ void AmigaProcess::wakeUp()
 
 void AmigaProcess::go()
 {
-	cout << "GO\n";
-    IExec->RestartTask((struct Task *)process, 0);
+   IExec->RestartTask((struct Task *)process, 0);
 	running = true;
 }
 

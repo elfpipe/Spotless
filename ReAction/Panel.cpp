@@ -5,12 +5,18 @@
 
 #include <string.h>
 
-Panel::Panel(Widget *parent) {
+Panel::Panel(Widget *parent, list<Widget *> widgets) {
     parentWidget = parent;
     state = PANEL_TABBED;
+
+    for(list<Widget *>::iterator it = widgets.begin(); it != widgets.end(); it++)
+        addWidget(*it);
 }
 
 Panel::~Panel() {
+    for(list<Widget *>::iterator it = widgets.begin(); it != widgets.end(); it++)
+        (*it)->destroyContent();
+    widgets.clear();
 }
 
 void Panel::setTabbed(bool tabbed) {
@@ -30,12 +36,14 @@ Object *Panel::createGuiObject() {
     Object *pages = PageObject, EndMember;
 
     char *pageLabels[widgets.size() + 1];
-    for(int i = 0; i < widgets.size(); i++) {
-        pageLabels[i] = strdup(widgets[i]->name().c_str());
+    int i = 0;
+    for(list<Widget *>::iterator it = widgets.begin(); it != widgets.end(); it++) {
+    // for(int i = 0; i < widgets.size(); i++) {
+        pageLabels[i++] = strdup((*it)->name().c_str());
 
-        Layout *layout = new Layout(widgets[i]); //parentWidget);
-        widgets[i]->createGuiObject(layout);
-        widgets[i]->setParentLayout(layout);
+        Layout *layout = new Layout(*it); //parentWidget);
+        (*it)->createGuiObject(layout);
+        (*it)->setParentLayout(layout);
         IIntuition->SetAttrs(pages, PAGE_Add, layout->systemObject(), TAG_DONE);
     }
     pageLabels[widgets.size()] = 0;

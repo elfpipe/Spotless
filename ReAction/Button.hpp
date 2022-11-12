@@ -13,6 +13,7 @@ private:
 	static list<Object *> buttons;
 
 public:
+	static void clean() { buttons.clear(); }
 	static bool isButton(Object *o);
 
 private:

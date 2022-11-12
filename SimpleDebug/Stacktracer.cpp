@@ -76,8 +76,6 @@ int32 Stacktracer::stacktrace_callback(struct Hook *hook, struct Task *task, str
 }
 
 vector<string> Stacktracer::stacktrace(Task *task, Debugger *debugger, uint32_t sp) {
-	cout << "Stacktracer::stacktrace()\n";
-
 	trace.clear();
 	if(!task) return trace;
 	

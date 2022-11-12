@@ -26,6 +26,8 @@ Speedbar::Speedbar(Widget *parent) {
 }
 
 Speedbar::~Speedbar() {
+	speedbars.remove(speedbar);
+	Widget::removeChild(speedbar);
 }
 
 void Speedbar::init()
@@ -40,6 +42,8 @@ void Speedbar::init()
     	EndMember;
 	
 	speedbars.push_back(speedbar);
+
+	// cout << "add Speedbar " << Widget::gadgetId << " " << (void *)speedbar << "\n";
 
 	parent->topLevelParent()->addChild(speedbar);
 }
@@ -69,9 +73,6 @@ void Speedbar::clear()
 		node = nextnode;
 	}
 	IExec->NewList (&buttonList);
-
-	speedbars.remove(speedbar);
-	speedbar = 0;
 }
 
 void Speedbar::addNode (struct Node *node)

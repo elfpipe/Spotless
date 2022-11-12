@@ -14,6 +14,8 @@
 
 using namespace std;
 
+list<Object *> Listbrowser::listbrowsers;
+
 Listbrowser::Listbrowser(Widget *parent)
 	:   columnInfo(0),
 		noColumns(1),
@@ -25,13 +27,15 @@ Listbrowser::Listbrowser(Widget *parent)
 
 Listbrowser::~Listbrowser()
 {
+	listbrowsers.remove(listbrowser);
+	Widget::removeChild(listbrowser);
 }
 
 void Listbrowser::init()
 {
 	IExec->NewList(&labels);
 	
-	object = ListBrowserObject,
+	listbrowser = ListBrowserObject,
 		GA_RelVerify,				TRUE,
 		GA_UserData,				parent,
 		// GA_TabCycle,				TRUE,
@@ -40,7 +44,9 @@ void Listbrowser::init()
 		LISTBROWSER_ShowSelected,	TRUE,
 	ListBrowserEnd;
 
-	parent->topLevelParent()->addChild(object); //To direct selection events, object needs to be stored in the top level widget
+	listbrowsers.push_back(listbrowser);
+
+	parent->topLevelParent()->addChild(listbrowser); //To direct selection events, object needs to be stored in the top level widget
 }
 
 void Listbrowser::setColumnTitles(const char *titlesString) //separated by '|'
@@ -63,7 +69,7 @@ void Listbrowser::setColumnTitles(const char *titlesString) //separated by '|'
 	}
 	
     detach();
-	IIntuition->SetAttrs (object,
+	IIntuition->SetAttrs (listbrowser,
 		LISTBROWSER_ColumnInfo,		columnInfo,
 		LISTBROWSER_ColumnTitles,	true,
 	TAG_DONE);
@@ -78,28 +84,28 @@ void Listbrowser::freeColumnTitles()
 
 void Listbrowser::setHierachical(bool enable)
 {
-	IIntuition->SetAttrs((Object *)object,
+	IIntuition->SetAttrs((Object *)listbrowser,
 		LISTBROWSER_Hierarchical,	enable,
 	TAG_DONE);
 }
 
 void Listbrowser::setStriping (bool enable)
 {
-	IIntuition->SetAttrs(object,
+	IIntuition->SetAttrs(listbrowser,
 		LISTBROWSER_Striping, enable ? LBS_ROWS : LBS_NONE,
 	TAG_DONE);
 }
 
 void Listbrowser::attach ()
 {
-	IIntuition->RefreshSetGadgetAttrs((struct Gadget *)object, parent->topLevelParent()->windowPointer(), 0,
+	IIntuition->RefreshSetGadgetAttrs((struct Gadget *)listbrowser, parent->topLevelParent()->windowPointer(), 0,
 		LISTBROWSER_Labels,		&labels,
 	TAG_DONE);
 }
 
 void Listbrowser::detach ()
 {
-	IIntuition->SetAttrs(object,
+	IIntuition->SetAttrs(listbrowser,
 		LISTBROWSER_Labels,		~0,
 	TAG_DONE);
 }
@@ -113,14 +119,14 @@ void Listbrowser::clear()
 
 void Listbrowser::scrollToBottom ()
 {
-	IIntuition->SetAttrs(object,
+	IIntuition->SetAttrs(listbrowser,
 		LISTBROWSER_Position, LBP_BOTTOM,
 	TAG_DONE);	
 }
 
 void Listbrowser::focus (int line)
 {
-	IIntuition->RefreshSetGadgetAttrs ((struct Gadget *)object, parent->topLevelParent()->windowPointer(), 0,
+	IIntuition->RefreshSetGadgetAttrs ((struct Gadget *)listbrowser, parent->topLevelParent()->windowPointer(), 0,
 		LISTBROWSER_Selected,		line-1,
 		LISTBROWSER_MakeVisible,	line-1,
 	TAG_DONE);
@@ -129,7 +135,7 @@ void Listbrowser::focus (int line)
 void *Listbrowser::getUserData (int lineNumber)
 {
 	struct List *labels;
-	IIntuition->GetAttrs (object, LISTBROWSER_Labels, &labels, TAG_DONE);
+	IIntuition->GetAttrs (listbrowser, LISTBROWSER_Labels, &labels, TAG_DONE);
 
 	struct Node *node = IExec->GetHead (labels);
 	int line = 1;
@@ -148,7 +154,7 @@ void *Listbrowser::getUserData (int lineNumber)
 void *Listbrowser::getSelectedNodeData ()
 {
 	struct Node *node = 0;
-	IIntuition->GetAttrs (object, LISTBROWSER_SelectedNode, &node, TAG_DONE);
+	IIntuition->GetAttrs (listbrowser, LISTBROWSER_SelectedNode, &node, TAG_DONE);
 	
 	void *data = 0;
 	if (node)
@@ -216,14 +222,14 @@ void Listbrowser::addCheckboxNode (vector<string> columnTexts, bool checkbox, bo
 int Listbrowser::getSelectedLineNumber()
 {
 	int lineNumber = 0;
-	IIntuition->GetAttrs (object, LISTBROWSER_Selected, &lineNumber, TAG_DONE);
+	IIntuition->GetAttrs (listbrowser, LISTBROWSER_Selected, &lineNumber, TAG_DONE);
 	return ++lineNumber;
 }
 
 bool Listbrowser::checkboxChecked()
 {
 	uint32 event;
-	IIntuition->GetAttrs (object, LISTBROWSER_RelEvent, &event, TAG_DONE);
+	IIntuition->GetAttrs (listbrowser, LISTBROWSER_RelEvent, &event, TAG_DONE);
 	switch (event) {
 		case LBRE_CHECKED:
 			return true;
@@ -252,12 +258,14 @@ void Listbrowser::showSelected(string text)
 unsigned int Listbrowser::getId()
 {
 	unsigned int id;
-	IIntuition->GetAttrs(object, GA_ID, &id, TAG_DONE);
+	IIntuition->GetAttrs(listbrowser, GA_ID, &id, TAG_DONE);
 	return id;
 }
 
 bool Listbrowser::isListbrowser(Object *o)
 {
-	uint32 dummy;
-	return IIntuition->GetAttr(LISTBROWSER_Labels, o, &dummy) ? true : false;
+	for(list<Object *>::iterator it = listbrowsers.begin(); it != listbrowsers.end(); it++) {
+		if((*it) == o) return true;
+	}
+	return false;
 }

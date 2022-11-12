@@ -42,6 +42,8 @@ RString::RString (Widget *parent, const char *content)
 
 RString::~RString ()
 {
+	strings.remove(rstring);
+	Widget::removeChild(rstring);
 }
 
 void RString::setContent (const char *newContent)

@@ -15,6 +15,7 @@ private:
 
 public:
 	static bool isCheckbox(Object *o);
+	static void clean() { checkboxes.clear(); }
 
 private:
 	Object *checkbox;

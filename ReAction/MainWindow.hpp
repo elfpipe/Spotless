@@ -16,11 +16,14 @@ class MainWindow : public Widget {
 private:
     Widget *mainView;
     Widget *topBar;
-    Panel *leftPanel;
-    Panel *bottomPanel;
-    Panel *rightPanel;
-    
-    Layout *mainLayout;
+    // Panel *leftPanel;
+    // Panel *bottomPanel;
+    // Panel *rightPanel;
+    list<Widget *> leftPanel;
+    list<Widget *> bottomPanel;
+    list<Widget *> rightPanel;
+
+    // Layout *mainLayout;
     
     bool split;
 

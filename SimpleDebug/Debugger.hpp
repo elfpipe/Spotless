@@ -348,7 +348,6 @@ public:
 		return process.emptyPipe();
 	}
 	vector<string> stacktrace() {
-		cout << "Stacktrace: " << process.lives() << "\n";
 		Stacktracer stacktracer;
 		return !process.lives() || process.isRunning() || process.isTracing() ? vector<string>() : stacktracer.stacktrace((Task *)process.getProcess(), this, getSp());
 	}

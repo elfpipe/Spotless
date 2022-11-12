@@ -40,7 +40,10 @@ public:
                 update();
             }
             if(event->elementId() == getDoneId()) {                
-                *exit = true;
+                cout << "closeWindow().\n";
+                closeNewWindow(this);
+                return true;
+                // *exit = true;
             }
         }
         return false;

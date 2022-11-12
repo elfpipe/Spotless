@@ -10,6 +10,11 @@ class Widget;
 class Layout;
 class RString {
 private:
+	static list<Object *> strings;
+public:	
+	static bool isString(Object *o);
+	static void clean() { strings.clear(); }
+private:
 	Object *rstring;
 	Object *systemObject () { return rstring; }
 
@@ -18,14 +23,11 @@ private:
 private:
 	char contents[1024];
 	
-	static list<Object *> strings;
 	unsigned int id;
 
 public:
 	RString(Widget *parent, const char *content);
 	~RString();
-	
-	static bool isString(Object *o);
 
 	void setContent(const char *newContent);
 	string getContent();

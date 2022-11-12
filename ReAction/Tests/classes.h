@@ -101,11 +101,16 @@ class Panel1 : public Widget {
 public:
     Panel1() : Widget() {}
     void createGuiObject(Layout *layout) {
-        Panel *panel = new Panel(this);
-        panel->addWidget(new Listbrowser1);
-        panel->addWidget(new Listbrowser2);
-        panel->addWidget(new Listbrowser3);
-        layout->addTabbedPanel(panel, 0); //weight 0
+        // Panel *panel = new Panel(this);
+        // panel->addWidget(new Listbrowser1);
+        // panel->addWidget(new Listbrowser2);
+        // panel->addWidget(new Listbrowser3);
+        // layout->addTabbedPanel(panel, 0); //weight 0
+        list<Widget *> widgets;
+        widgets.push_back(new Listbrowser1);
+        widgets.push_back(new Listbrowser2);
+        widgets.push_back(new Listbrowser3);
+        layout->createTabbedPanel(this, widgets);
     }
 };
 

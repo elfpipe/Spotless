@@ -35,6 +35,16 @@ private:
 
 	Object *systemObject() { return layout; }
 
+private: //for cleanup
+	list<RButton *> buttons;
+	list<Speedbar *> speedbars;
+	list<Listbrowser *> listbrowsers;
+	list<RString *> strings;
+	list<Checkbox *> checkboxes;
+	list<Layout *> layouts;
+	// list<Widget *> embeddedWidgets;
+	list<Panel *> panels;
+
 public:
 	Layout(Widget *parent, LayoutDirection direction = LAYOUT_Horizontal);
 	Layout(Widget *parent, string label);
@@ -57,7 +67,7 @@ public:
 	Checkbox *createCheckbox (const char *text, bool checked = false);
 
 	void addEmbeddedWidget(Widget *widget);
-	void addTabbedPanel(Panel *panel, int weight);
+	void createTabbedPanel(Widget *parent, list<Widget *> &widgets, int weight = 0);
 	void addWeightBar();
 	
 public:

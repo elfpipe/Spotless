@@ -23,7 +23,7 @@ public:
 
         addCreateMenuItem (panel2, "Configure ...", "", 4);
 
-        MenuReference panel3 = addCreateMenu("Fun and games");
+        MenuReference panel3 = addCreateMenu("Windows");
         addCreateMenuItem (panel3, "Switch split window mode", "", 5);
 
     }
@@ -49,7 +49,9 @@ public:
                 break;
             case 4: {
                 if(spotless->configure) {
+                    cout << "Opening configure\n";
                     spotless->openNewWindow((Widget *)spotless->configure);
+                    cout << "Configure opened.\n";
                 }
             } break;
             case 5:

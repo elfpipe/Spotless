@@ -12,12 +12,15 @@
 #include <string.h>
 #include <iostream>
 
+unsigned int Widget::gadgetId = 1;
+list<Object *> Widget::children; //We need this to delegate input events
+
 Widget::Widget(Widget *parentWidget)
 	:	object(0),
 		window(0),
 		parentLayout(0),
 		mainMenu(0),
-		gadgetId(1),
+		// gadgetId(1),
 		appPort(0)
 {
 	this->parentWidget = parentWidget;
@@ -60,9 +63,9 @@ bool Widget::openWindow()
         WINDOW_GadgetHelp,      TRUE,
 
 	EndWindow;
-	
+	if(!object) cout << "Failed to create object.\n";
 	if (object) window = (struct Window *) RA_OpenWindow (object);
-
+	if(!window) cout << "Failed to open window\n";
 	openedWindows.push_back(this);
 
 	return window != 0;
@@ -70,6 +73,7 @@ bool Widget::openWindow()
 
 bool Widget::openNewWindow(Widget *widget)
 {
+	cout << "openNewWindow : " << (void *)widget << "\n";
 	if(widget->openWindow()) {
 		// widget->setMenubar(mainMenu);
 		openedWindows.push_back(widget);
@@ -88,6 +92,7 @@ Object *Widget::createContent()
 void Widget::destroyContent()
 {
 	delete parentLayout;
+	parentLayout = 0;
 }
 
 void Widget::setMenubar(Menubar *menu)
@@ -99,6 +104,8 @@ void Widget::setMenubar(Menubar *menu)
 
 void Widget::closeWindow ()
 {
+	// std::cout << "closeWindow.\n";
+
 	Config config("config.prefs");
 
 	uint32 top, left, width, height;
@@ -118,16 +125,13 @@ void Widget::closeWindow ()
 	object = 0;
 	window = 0;
 
-	if (parentLayout) delete parentLayout;
-	parentLayout = 0;
-
 	destroyContent();
-	children.clear();
 	openedWindows.remove(this);
 }
 
 void Widget::closeNewWindow(Widget *widget)
 {
+	cout << "closeNewWindow : " << (void *)widget << "\n";
 	widget->closeWindow();
 	openedWindows.remove(widget);
 }
@@ -137,10 +141,15 @@ void Widget::closeAllWindows()
 	list<Widget *> opened(openedWindows);
 	for (list<Widget *>::iterator it = opened.begin(); it != opened.end(); it++)
 		if(*it != this) closeNewWindow(*it);
-	destroyContent();
-	closeWindow();
+	// destroyContent();
+	if(window) closeWindow();
 	openedWindows.clear();
 	children.clear();
+	RButton::clean();
+	Checkbox::clean();
+	Listbrowser::clean();
+	RString::clean();
+	Speedbar::clean();
 }
 
 void Widget::closeAllExceptThis()
@@ -203,8 +212,8 @@ int Widget::waitForClose()
 								mainMenu->handleMenuPick(id, &openClose, &exit);
 								if(openClose) { break; }
 							}
-							while(IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id) != NO_MENU_ID)
-								;
+							// while(IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id) != NO_MENU_ID)
+							// 	;
 							break;
 						}
 
@@ -233,7 +242,6 @@ int Widget::waitForClose()
 
 						default:
 							openClose = target->processEvent(Class, Code, &exit);
-							// exit = (openClose && target==this);
 							break;
 					}
 				}
@@ -257,6 +265,7 @@ Widget *Widget::topLevelParent()
 
 unsigned int Widget::addChild(Object *object)
 {
+	// cout << "addChild " << gadgetId << "\n";
 	children.push_back(object);
 	IIntuition->SetAttrs(object, GA_ID, gadgetId, TAG_DONE);
 	return gadgetId++;
@@ -264,12 +273,11 @@ unsigned int Widget::addChild(Object *object)
 
 Object *Widget::findChild(unsigned int id)
 {
-	for (int i = 0; i < children.size(); i++) {
-		Object *child = children[i];
+	for (list<Object *>::iterator it = children.begin(); it != children.end(); it++) {
 		unsigned int childId;
-		IIntuition->GetAttrs (child, GA_ID, &childId, TAG_DONE);
+		IIntuition->GetAttrs ((*it), GA_ID, &childId, TAG_DONE);
 		if (childId == id)
-			return child;
+			return (*it);
 	}
 	return 0;
 }
@@ -358,7 +366,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 		break;
 
 		case WMHI_GADGETUP: {
-			cout << "WMHI_GADGETUP\n";
+			// cout << "WMHI_GADGETUP\n";
 			uint32 gadgetId = Class & WMHI_GADGETMASK;
 				// cout << "gadgetId : " << gadgetId << "\n";
 			
@@ -370,13 +378,14 @@ bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 				GA_UserData, &parent,
 				TAG_DONE);
 
-			cout << "parent : " << (void *)parent << "\n";
+			// cout << "parent : " << (void *)parent << "\n";
 
 			if(Checkbox::isCheckbox(gadget)) {
 				event = new Event (Event::CLASS_CheckboxPress);
 				event->setElementId (gadgetId);
 				event->setElementDescription ("");
 			} else if(RButton::isButton(gadget)) {
+				// cout << "isButton().\n";
 				// char *text;
 
 				// IIntuition->GetAttrs(gadget,
@@ -387,6 +396,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 				event->setElementId (gadgetId);
 				event->setElementDescription ("");
 			} else if(RString::isString(gadget)) {
+				// cout << "isString()\n";
 				char *text;
 
 				IIntuition->GetAttrs(gadget,
@@ -397,6 +407,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 				event->setElementId (gadgetId);
 				event->setElementDescription(text);
 			} else if(Listbrowser::isListbrowser(gadget)) {
+				// cout << "isListbrowser()\n";
 				uint32 relEvent, selected;
 
 				IIntuition->GetAttrs(gadget,
@@ -414,7 +425,7 @@ bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 				event->setElementId(gadgetId);
 				event->setItemId (selected);
 			} else if(Speedbar::isSpeedbar(gadget)) {
-				cout << "isSpeedbar()\n";
+				// cout << "isSpeedbar()\n";
 				event = new Event (Event::CLASS_ActionButtonPress);
 				event->setElementId (Code);
 			}
