@@ -220,18 +220,20 @@ int Widget::waitForClose()
 						case WMHI_ICONIFY : {
 							if(!appPort) break;
 
-							// list<Widget *> saveWindows = openedWindows;
+							 list<Widget *> saveWindows = openedWindows;
 							closeAllExceptThis();
 							iconify();
 							result = 0x0;
 
 							uint32 newResult = IExec->Wait (1L << appPort->mp_SigBit);
 
-							// openedWindows.clear();
-							for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++)
+							openedWindows.clear();
+							for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
 								if((*it) != this) (*it)->openWindow();
+								openedWindows.push_back(*it);
+							}
 							uniconify();
-							// openedWindows.push_back(this);
+							openedWindows.push_back(this);
 							openClose = true;
 							break;
 						}
