@@ -228,7 +228,7 @@ int Widget::waitForClose()
 							uint32 newResult = IExec->Wait (1L << appPort->mp_SigBit);
 
 							openedWindows.clear();
-							for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
+							for(list<Widget *>::iterator it = saveWindows.begin(); it != saveWindows.end(); it++) {
 								if((*it) != this) (*it)->openWindow();
 								openedWindows.push_back(*it);
 							}
