@@ -20,6 +20,7 @@ public:
         // button = vLayout->createButton("Generate stacktrace...");
     }
     void update() {
+        if(!open()) return;
         clear();
         // if(!spotless->childLives) return;
         vector<string> trace = spotless->debugger.stacktrace();
@@ -29,6 +30,7 @@ public:
         listbrowser->attach();
     }
     void clear() {
+        if(!open()) return;
         listbrowser->clear();
     }
     // unsigned int getButtonId() {

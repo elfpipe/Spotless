@@ -48,6 +48,7 @@ public:
         return false;
     }
     void update() {
+        if(!open()) return;
         clear();
         list<string> roots = spotless->debugger.getSourceRoots();
         listbrowser->detach();
@@ -57,6 +58,7 @@ public:
         listbrowser->attach();
     }
     void clear() {
+        if(!open()) return;
         listbrowser->clear();
     }
     unsigned int getAddId() {

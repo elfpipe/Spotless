@@ -24,6 +24,7 @@ public:
         globalsCheckbox = vertical->createCheckbox("Show globals", showGlobals);
     }
     void add(vector<string> context, int generation) {
+        if(!open()) return;
         listbrowser->detach();
         for(int i = 0; i < context.size(); i++) {
             astream str(context[i]);
@@ -36,6 +37,7 @@ public:
         listbrowser->attach();
     }
     void update() {
+        if(!open()) return;
         clear();
         add(spotless->debugger.context(), 1);
         if(showGlobals) add(spotless->debugger.globals(), 1);
@@ -45,6 +47,7 @@ public:
         update();
     }
     void clear() {
+        if(!open()) return;
         listbrowser->clear();
     }
     unsigned int getGlobalsId() {

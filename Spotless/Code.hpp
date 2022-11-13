@@ -22,6 +22,7 @@ public:
         listbrowser->setColumnTitles("Break|Line|Text");
     }
     void show(string file, string foundPath) {
+        if(!open()) return;
         if(!foundPath.size()) {
             clear();
             char buffer[4096];
@@ -58,9 +59,11 @@ public:
         listbrowser->attach();
     }
     void highlight(int line) {
+        if(!open()) return;
         listbrowser->focus(line);
     }
     void update() {
+        if(!open()) return;
         if(fileName.size()) {
             show(fileName, filePath);
             return;
@@ -90,6 +93,7 @@ public:
         spotless->debugger.breakpoint(file, line, checked);
     }
     void clear() {
+        if(!open()) return;
         listbrowser->clear();
         fileName = string();
     }

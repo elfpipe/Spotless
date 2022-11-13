@@ -40,7 +40,11 @@ public:
                     PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alfkil Thorbjørn Wennermark");
                 else
                     PublicScreen::instance()->closePublicScreen();
-                spotless->openWindow();
+                if(!spotless->isSplit()) {
+                    spotless->openWindow();
+                } else {
+                    spotless->showSplit();
+                }
                 spotless->sources->update();
                 spotless->code->update();
                 spotless->updateAll();
@@ -56,7 +60,6 @@ public:
                 }
             } break;
             case 5:
-                // cout << "isSplit() : " << spotless->isSplit();
                 if(spotless->isSplit()) {
                     spotless->openWindow();
                 } else {

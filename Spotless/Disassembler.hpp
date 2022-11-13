@@ -28,6 +28,7 @@ public:
         memSurf = buttonLayout->createButton("Memory surfer", "scrollpan");
     } 
     void update() {
+        if(!open()) return;
         clear();
         vector<string> disassembly = spotless->debugger.disassemble();
         listbrowser->detach();
@@ -37,6 +38,7 @@ public:
         listbrowser->focus(spotless->debugger.getDisassebmlyLine());
     }
     void clear() {
+        if(!open()) return;
         listbrowser->clear();
     }
     unsigned int getAsmStepId() {

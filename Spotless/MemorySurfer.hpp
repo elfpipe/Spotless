@@ -126,6 +126,7 @@ public:
     }
 
     void updateDisassembly() {
+        if(!open()) return;
         string symbol = symbolName->getContent();
         if(symbol.compare(lastSymbol)) disassembly->clear();
         vector<string> result = spotless->debugger.disassembleSymbol(symbol);
@@ -145,6 +146,7 @@ public:
         disassembly->focus(line);
     }
     void updateHex() {
+        if(!open()) return;
         hex->clear();
         string hexString = addressString->getContent();
         vector<string> result = spotless->debugger.hexDump(hexString);
@@ -165,6 +167,7 @@ public:
         // spotless->updateAll();
     }
     void update() {
+        if(!open()) return;
         string breakpoint = spotless->debugger.getSymbolFromAddress(spotless->debugger.getIp());
         if(!breakpoint.size()) breakpoint = "<not a symbol>";
         sprintf(buffer1, "%s", breakpoint.c_str());

@@ -9,6 +9,15 @@ private:
     static Spotless *spotless;
     static Listbrowser *listbrowser;
 
+    class Line {
+        public:
+        Line(string text, PublicScreen::PenType pen) {this->text=text;this->pen=pen;}
+        string text;
+        PublicScreen::PenType pen;
+    };
+
+    static vector<Line> buffer;
+
 public:
     Console(Spotless *spotless) : Widget(spotless) { setName("Console"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
@@ -28,9 +37,17 @@ public:
             listbrowser->addNode(text);
             listbrowser->attach();
         }
+        buffer.push_back(Line(text,pen));
     }
     static void clear() {
+        if(!spotless->console->open()) return;
         listbrowser->clear();
+    }
+    static void update() {
+        if(!spotless->console->open()) return;
+        clear();
+        for(vector<Line>::iterator it = buffer.begin(); it != buffer.end(); it++)
+            write((*it).pen, (*it).text);
     }
 };
 #endif

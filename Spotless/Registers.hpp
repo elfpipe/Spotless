@@ -27,10 +27,12 @@ public:
         listbrowser->attach();
     }
     void update() {
+        if(!open()) return;
         clear();
         add(spotless->debugger.registersDump());
     }
     void clear() {
+        if(!open()) return;
         listbrowser->clear();
     }
 };

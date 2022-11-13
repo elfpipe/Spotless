@@ -27,6 +27,7 @@ public:
         return listbrowser->getNode(listbrowser->getSelectedLineNumber());
     }
     void update() {
+        if(!open()) return;
         vector<string> sources = spotless->debugger.sourceFiles();
         listbrowser->clear();
         listbrowser->detach();
@@ -35,10 +36,12 @@ public:
         listbrowser->attach();
     }
     void showCurrent() {
+        if(!open()) return;
         string current = spotless->debugger.getSourceFile();
         if(current.size()) listbrowser->showSelected(current);
     }
     void clear() {
+        if(!open()) return;
         listbrowser->clear();
     }
     bool handleEvent(Event *event, bool *exit) {

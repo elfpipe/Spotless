@@ -17,16 +17,11 @@
 
 #include "../SimpleDebug/Strings.hpp"
 
-// string vectorToString(vector<string> v) {
-// 	string result;
-// 	for(int i = 0; i < v.size(); i++)
-// 		result += v[i] + "\n";
-// 	return result;
-// }
-
 Listbrowser *Console::listbrowser = 0;
 Spotless *Console::spotless = 0;
 Spotless *Spotless::spotless = 0;
+
+vector<Console::Line> Console::buffer;
 
 void Spotless::create() {
     spotless = this;
@@ -80,15 +75,24 @@ int Spotless::unfold() {
     {
         Config config("config.prefs");
         setSplit(config.getBool("Split mode", false));
-    }
-    //to not interfere with below:
+        if(config.getBool("Using public screen", false))
+            PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alfkil Thorbjørn Wennermark");
+    } //to not interfere with below:
 
     if(isSplit()) {
         showSplit();    
     } else {
         openWindow();
     }
-    return waitForClose();
+
+    bool result = waitForClose();
+
+    { // to not interfere with the above
+        Config config("config.prefs");
+        config.setBool("Using public screen", PublicScreen::usingPublicScreen());
+    }
+
+    return result;
 }
 
 // void Spotless::trapHandler() {
@@ -155,20 +159,18 @@ bool Spotless::handleEvent(Event *event, bool *exit) {
 void Spotless::updateAll(bool doSources) {
     actions->update();
     code->update();
-    if(doSources) sources->update(); /* this is normally done in Actions.hpp, except for when doing iconify */
-    sources->showCurrent();
     context->update();
     stacktrace->update();
-    // stacktrace->clear();
-
-    // console->clear();
     disassembler->update();
     registers->update();
+
+    if(doSources) sources->update(); /* this is normally done in Actions.hpp, except for when doing iconify */
+    sources->showCurrent();
+
     if(memorySurfer && memorySurfer->windowObject()) memorySurfer->update();
 }
 
 void Spotless::clearAll() {
-    // cout << "clearAll()\n";
     actions->clear();
     code->clear();
     context->clear();
