@@ -37,7 +37,7 @@ public:
             case 2: //switch public screen
                 spotless->closeAllWindows();
                 if (!PublicScreen::usingPublicScreen())
-                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alpha Kilimanjaro");
+                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alfkil Thorbjørn Wennermark");
                 else
                     PublicScreen::instance()->closePublicScreen();
                 spotless->openWindow();
