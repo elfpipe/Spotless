@@ -163,7 +163,7 @@ void Requesters::showAboutWindow ()
 	Object *requesterObject = (Object *)IIntuition->NewObject( IRequester->REQUESTER_GetClass(), NULL,
 		REQ_Type,       REQTYPE_INFO,
 		REQ_TitleText,  "About",
-		REQ_BodyText,   "Spotless - Copyright (c) 2020, 2022 Alpha Kilimanjaro\nCode and concept : Alfkil Thorbjorn Wennermark\nTesting : kasie, jabirulo and walkero\nThanks to : the people at amigans.net and the exec-sg team",
+		REQ_BodyText,   "Spotless - Copyright (c) 2020, 2022 Alfkil Thorbjørn Wennermark\nCode and concept : Alfkil Thorbjorn Wennermark\nTesting : kasie, jabirulo and walkero\nThanks to : the people at amigans.net and the exec-sg team",
 		REQ_GadgetText, "Ok",
 		TAG_DONE);
 
