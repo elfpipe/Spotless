@@ -39,7 +39,7 @@ public:
 
     virtual void createMenu() = 0;
 
-    virtual bool handleMenuPick(int id, bool *closeAll, bool *exit) { *closeAll = false; *exit = false; return false; }
+    virtual bool handleMenuPick(int id, bool *openClose, bool *exit) { *openClose = false; *exit = false; return false; }
 
     // bool switchScreen() { return doScreenSwitch; }
 
