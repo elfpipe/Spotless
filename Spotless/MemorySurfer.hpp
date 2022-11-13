@@ -69,11 +69,15 @@ public:
 
         }
         if(event->eventClass() == Event::CLASS_CheckboxCheck) {
-            spotless->debugger.breakpointAddress((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()), true);
+            uint32_t br = (uint32_t) disassembly->getUserData (disassembly->getSelectedLineNumber());
+            spotless->debugger.breakpointAddress(br, true);
+            breaks.push_back(br);
             // updateDisassembly();
         }
         if(event->eventClass() == Event::CLASS_CheckboxUncheck) {
-            spotless->debugger.breakpointAddress((uint32_t)disassembly->getUserData (disassembly->getSelectedLineNumber()), false);
+            uint32_t br = (uint32_t) disassembly->getUserData (disassembly->getSelectedLineNumber());
+            spotless->debugger.breakpointAddress(br, false);
+            breaks.remove(br);
             // updateDisassembly();
         }
         if(event->eventClass() == Event::CLASS_ButtonPress) {
@@ -81,6 +85,8 @@ public:
                 blindRunner();
             }
             if(event->elementId() == getClearBreaksId()) {
+                for(list<uint32_t>::iterator it = breaks.begin(); it != breaks.end(); it++)
+                    spotless->debugger.breakpointAddress((*it), false);
                 breaks.clear();
                 updateDisassembly();
             }

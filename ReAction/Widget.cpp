@@ -14,10 +14,12 @@
 
 unsigned int Widget::gadgetId = 1;
 list<Object *> Widget::children; //We need this to delegate input events
+list<Widget *> Widget::openedWindows;
 
 Widget::Widget(Widget *parentWidget)
 	:	object(0),
 		window(0),
+		isOpen(false),
 		parentLayout(0),
 		mainMenu(0),
 		// gadgetId(1),
@@ -68,6 +70,7 @@ bool Widget::openWindow()
 	if(!window) cout << "Failed to open window\n";
 	openedWindows.push_back(this);
 
+	if(window) isOpen = true;
 	return window != 0;
 }
 
@@ -76,7 +79,7 @@ bool Widget::openNewWindow(Widget *widget)
 	cout << "openNewWindow : " << (void *)widget << "\n";
 	if(widget->openWindow()) {
 		// widget->setMenubar(mainMenu);
-		openedWindows.push_back(widget);
+		// openedWindows.push_back(widget);
 		return true;
 	}
 	return false;
@@ -98,7 +101,7 @@ void Widget::destroyContent()
 void Widget::setMenubar(Menubar *menu)
 {
 	mainMenu = menu;
-	if(mainMenu) mainMenu->createMenu();
+	if(mainMenu && !mainMenu->isCreated()) mainMenu->createMenu();
 	if(window) IIntuition->SetMenuStrip(window, (struct Menu *)mainMenu->systemObject());
 }
 
@@ -124,6 +127,7 @@ void Widget::closeWindow ()
 	if (object) IIntuition->DisposeObject (object);
 	object = 0;
 	window = 0;
+	isOpen = false;
 
 	destroyContent();
 	openedWindows.remove(this);
@@ -220,12 +224,18 @@ int Widget::waitForClose()
 						case WMHI_ICONIFY : {
 							if(!appPort) break;
 
+							list<Widget *> saveWindows = openedWindows;
 							closeAllExceptThis();
 							iconify();
 							result = 0x0;
 
 							uint32 newResult = IExec->Wait (1L << appPort->mp_SigBit);
+
+							openedWindows.clear();
+							for(list<Widget *>::iterator it = saveWindows.begin(); it != saveWindows.end(); it++)
+								if((*it) != this) openNewWindow(*it);
 							uniconify();
+							openedWindows.push_back(this);
 							openClose = true;
 							break;
 						}

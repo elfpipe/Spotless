@@ -25,7 +25,7 @@ private:
 
     // Layout *mainLayout;
     
-    bool split;
+    static bool split;
 
 private:
     Object *createContent();
@@ -36,9 +36,11 @@ public:
     ~MainWindow();
 
     bool openWindow();
-    void showSplit();
+    void closeWindow();
+    bool showSplit();
     bool isSplit() { return split; }
-
+    void setSplit(bool split) { this->split = split; }
+    
     void setMainView(Widget *view);
     void setTopBar(Widget *top);
 

@@ -26,7 +26,7 @@ class Widget {
 private:
 	Object *object;
 	struct Window *window;
-	list<Widget *> openedWindows;
+	static list<Widget *> openedWindows;
 
 	Object *createContent();
 	void destroyContent();
@@ -38,6 +38,11 @@ private:
 
 	struct Window *windowPointer() { return window; }
 	Object *windowObject() { return object; }
+
+private:
+	bool isOpen;
+public:
+	bool open() { return isOpen; }
 
 public:
 	static unsigned int gadgetId;
@@ -89,11 +94,11 @@ public:
 	void setName(string name);
 	string name() { return widgetName; }
 		
-	virtual int waitForClose();
+	int waitForClose();
 	virtual bool openWindow();
 	bool openNewWindow(Widget *);
 
-	void closeWindow();
+	virtual void closeWindow();
 	void closeNewWindow(Widget *);
 
 	void closeAllWindows();

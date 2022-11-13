@@ -1,6 +1,7 @@
 #include <proto/exec.h>
 #include "Config.hpp"
-
+#include <iostream>
+using namespace std;
 Config::Config(string file) {
     ApplicationBase = IExec->OpenLibrary("application.library", 52);
     if(ApplicationBase)
@@ -44,4 +45,13 @@ void Config::setValue(string object, string value, int number) {
 	IPrefsObjects->DictSetObjectForKey(o,
         IPrefsObjects->PrefsNumber(NULL, &error, ALPONUM_AllocSetLong, number, TAG_DONE),
         value.c_str());
+}
+bool Config::getBool(string object, bool def) {
+    return IPrefsObjects->DictGetBoolForKey(dict, object.c_str(), def);
+} 
+void Config::setBool(string object, bool value) {
+    uint32 error;
+	IPrefsObjects->DictSetObjectForKey(dict,
+        IPrefsObjects->PrefsNumber(NULL, &error, ALPONUM_AllocSetBool, value, TAG_DONE),
+        object.c_str());
 }

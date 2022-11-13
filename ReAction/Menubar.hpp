@@ -14,7 +14,11 @@ public:
 private:
     Object *menu;
     Widget *parent;
+    bool created;
 
+public:
+    bool isCreated() { return created; }
+private:
     // bool doScreenSwitch;
 
     void attach();

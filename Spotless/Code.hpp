@@ -11,7 +11,7 @@ class Code : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
-    string fileName;
+    string fileName, filePath;
 
 public:
     Code(Spotless *spotless) : Widget(spotless) { setName("Code"); this->spotless = spotless; }
@@ -53,12 +53,18 @@ public:
             );
             line++;
         }
+        fileName = file;
+        filePath = foundPath;
         listbrowser->attach();
     }
     void highlight(int line) {
         listbrowser->focus(line);
     }
     void update() {
+        if(fileName.size()) {
+            show(fileName, filePath);
+            return;
+        }
         string file = spotless->debugger.getSourceFile();
         if(!file.compare("<built-in>")) {
             clear();
@@ -73,19 +79,19 @@ public:
             return;
         }
         if(fileName.compare(file)) {
-            string filePath = spotless->debugger.searchSourcePath(file);
+            fileName = file;
+            filePath = spotless->debugger.searchSourcePath(file);
             show(file, filePath);
         }
         highlight(spotless->debugger.getSourceLine());
-        fileName = file;
     }
     void checkboxSelected(string file, bool checked) {
         int line = listbrowser->getSelectedLineNumber();
         spotless->debugger.breakpoint(file, line, checked);
     }
-
     void clear() {
         listbrowser->clear();
+        fileName = string();
     }
     bool handleEvent(Event *event, bool *exit);
 

@@ -6,7 +6,8 @@
 #include "Widget.hpp"
 
 Menubar::Menubar(Widget *parent)
-    : menu(0)
+    : menu(0),
+    created(false)
 {
     this->parent = parent;
     createMenuStrip();
@@ -20,11 +21,13 @@ Menubar::~Menubar()
 
 void Menubar::createMenuStrip () {
     menu = IIntuition->NewObject(NULL, "menuclass", MA_Type, T_ROOT, TAG_END);
+    // created = true;
 }
 
 void Menubar::destroyMenuStrip () {
     if (menu) IIntuition->DisposeObject(menu);
     menu = 0;
+    created = false;
 }
 
 void Menubar::attach() {

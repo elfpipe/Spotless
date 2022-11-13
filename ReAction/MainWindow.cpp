@@ -12,14 +12,16 @@
 using namespace std;
 /* ----------------------------------------------------- */
 
+bool MainWindow::split = false;
+
 MainWindow::MainWindow()
     :   Widget(0),
         topBar(0),
         mainView(0),
         leftPanel(0),
         bottomPanel(0),
-        rightPanel(0),
-        split(false)
+        rightPanel(0)
+        // ,split(false)
 {
     appPort = (struct MsgPort *)IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 }
@@ -32,13 +34,13 @@ MainWindow::~MainWindow()
 bool MainWindow::openWindow() {
     closeAllWindows();
 
+	Config config("config.prefs");
+    setName("Spotless");
+
     int windowWidth = PublicScreen::instance()->screenWidth();
     int windowHeight = PublicScreen::instance()->screenHeight() - PublicScreen::instance()->screenBarHeight();
 
 	bool backdropWindow = PublicScreen::usingPublicScreen();
-
-	Config config("config.prefs");
-    setName("Spotless");
 
 	object = WindowObject,
 		WA_ScreenTitle,         "Spotless",
@@ -80,11 +82,36 @@ EndWindow;
     return window != 0;
 }
 
-void MainWindow::showSplit()
+bool MainWindow::showSplit()
 {
     closeAllWindows();
     window = 0;
     object = 0;
+
+    Config config("config.prefs");
+    split = true;
+
+    if(leftPanel.size()) {
+        for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
+            (*it)->setParent(0);
+            (*it)->setMenubar(mainMenu);
+            openNewWindow(*it);
+        }
+    }
+    if(bottomPanel.size()) {
+        for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++) {
+            (*it)->setParent(0);
+            (*it)->setMenubar(mainMenu);
+            openNewWindow(*it);
+        }
+    }
+    if(rightPanel.size()) {
+        for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++) {
+            (*it)->setParent(0);
+            (*it)->setMenubar(mainMenu);
+            openNewWindow(*it);
+        }
+    }
 
     parentLayout = new Layout(this, Layout::LAYOUT_Vertical);
 
@@ -98,7 +125,6 @@ void MainWindow::showSplit()
         parentLayout->addEmbeddedWidget(mainView);
     }
 
-    Config config("config.prefs");
     setName("SpotlessMini");
 
     int windowWidth = PublicScreen::instance()->screenWidth();
@@ -137,29 +163,9 @@ void MainWindow::showSplit()
 EndWindow;
 	
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
-
+    if(window) isOpen = true;
 	openedWindows.push_back(this);
-
-
-    if(leftPanel.size()) {
-        for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
-            (*it)->setParent(0);
-            openNewWindow(*it);
-        }
-    }
-    if(bottomPanel.size()) {
-        for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++) {
-            (*it)->setParent(0);
-            openNewWindow(*it);
-        }
-    }
-    if(rightPanel.size()) {
-        for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++) {
-            (*it)->setParent(0);
-            openNewWindow(*it);
-        }
-    }
-    split = true;
+    return window != 0;
 }
 
 Object *MainWindow::createContent() {
@@ -205,6 +211,14 @@ Object *MainWindow::createContent() {
     return parentLayout->systemObject();
 }
 
+void MainWindow::closeWindow()
+{
+    cout << "MainWindow::closeWindow()\n";
+    Config config("config.prefs");
+    config.setBool("Split mode", split);
+
+    Widget::closeWindow();
+}
 void MainWindow::destroyContent()
 {
     if(parentLayout) delete parentLayout;

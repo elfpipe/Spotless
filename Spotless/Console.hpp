@@ -6,7 +6,7 @@
 
 class Console : public Widget {
 private:
-    Spotless *spotless;
+    static Spotless *spotless;
     static Listbrowser *listbrowser;
 
 public:
@@ -17,6 +17,8 @@ public:
         listbrowser = layout->createListbrowser();
     }
     static void write(PublicScreen::PenType pen, string text) {
+        if(!spotless->console->open()) return;
+
         static int n = 0;
         if(n++ == 100) { clear()  ; n = 0; }
 

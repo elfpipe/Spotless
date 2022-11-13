@@ -9,6 +9,7 @@
 #include "Spotless.hpp"
 #include "MemorySurfer.hpp"
 #include "Registers.hpp"
+#include "../ReAction/Config.hpp"
 
 #include <libraries/keymap.h>
 
@@ -75,7 +76,14 @@ void Spotless::destroy() {
 }
 
 int Spotless::unfold() {
-    openWindow();
+    Config config("config.prefs");
+    setSplit(config.getBool("Split mode", false));
+
+    if(isSplit()) {
+        showSplit();    
+    } else {
+        openWindow();
+    }
     return waitForClose();
 }
 

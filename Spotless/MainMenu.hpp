@@ -26,6 +26,7 @@ public:
         MenuReference panel3 = addCreateMenu("Windows");
         addCreateMenuItem (panel3, "Switch split window mode", "", 5);
 
+        created = true;
     }
     bool handleMenuPick(int id, bool *openClose, bool *exit) {
         bool done = false;
@@ -40,6 +41,8 @@ public:
                 else
                     PublicScreen::instance()->closePublicScreen();
                 spotless->openWindow();
+                spotless->sources->update();
+                spotless->code->update();
                 spotless->updateAll();
                 *openClose = true;
                 break;
@@ -55,6 +58,7 @@ public:
                 }
             } break;
             case 5:
+                cout << "isSplit() : " << spotless->isSplit();
                 if(spotless->isSplit()) {
                     spotless->openWindow();
                 } else {

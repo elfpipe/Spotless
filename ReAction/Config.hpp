@@ -18,4 +18,7 @@ public:
 
     int getValue(string object, string value, int def);
     void setValue(string object, string value, int number);
+
+    bool getBool(string object, bool def);
+    void setBool(string object, bool value);
 };
