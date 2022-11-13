@@ -40,8 +40,8 @@ private:
 	Object *windowObject() { return object; }
 
 public:
-	virtual void updateAll() { }
-	
+	virtual void updateAll(bool flag = false) { }
+
 private:
 	bool isOpen;
 public:

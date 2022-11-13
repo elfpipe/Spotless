@@ -49,7 +49,7 @@ public:
     // static void pipeHandler();
     bool handleEvent(Event *event, bool *exit);
     
-    void updateAll();
+    void updateAll(bool doSources = false);
     void clearAll();
     
     friend class MainMenu;

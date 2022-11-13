@@ -233,7 +233,7 @@ int Widget::waitForClose()
 								if((*it) != this) (*it)->openWindow();
 							uniconify();
 
-							updateAll();
+							updateAll(true); //do sources update
 
 							openClose = true;
 							break;

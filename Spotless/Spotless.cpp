@@ -152,10 +152,10 @@ bool Spotless::handleEvent(Event *event, bool *exit) {
     return false;
 }
 
-void Spotless::updateAll() {
+void Spotless::updateAll(bool doSources) {
     actions->update();
     code->update();
-    // sources->update(); /* this is done in Actions.hpp */
+    if(doSources) sources->update(); /* this is normally done in Actions.hpp, except for when doing iconify */
     sources->showCurrent();
     context->update();
     stacktrace->update();
