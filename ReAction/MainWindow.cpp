@@ -89,9 +89,6 @@ bool MainWindow::showSplit()
     window = 0;
     object = 0;
 
-    Config config("config.prefs");
-    split = true;
-
     if(leftPanel.size()) {
         for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
             (*it)->setParent(0);
@@ -132,6 +129,8 @@ bool MainWindow::showSplit()
     }
 
     setName("SpotlessMini");
+    Config config("config.prefs");
+    split = true;
 
     int windowWidth = PublicScreen::instance()->screenWidth();
     int windowHeight = PublicScreen::instance()->screenHeight() - PublicScreen::instance()->screenBarHeight();
@@ -227,8 +226,11 @@ Object *MainWindow::createContent() {
 
 void MainWindow::closeWindow()
 {
-    Config config("config.prefs");
-    config.setBool("Split mode", split);
+    {
+        Config config("config.prefs");
+        config.setBool("Split mode", split);
+    }
+    // to not interfere with below:
 
     Widget::closeWindow();
 }

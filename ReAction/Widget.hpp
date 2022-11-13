@@ -39,12 +39,15 @@ private:
 	struct Window *windowPointer() { return window; }
 	Object *windowObject() { return object; }
 
+public:
+	virtual void updateAll() { }
+	
 private:
 	bool isOpen;
 public:
 	bool open() { return isOpen; }
 	void setOpen(bool open) { isOpen = open; }
-	
+
 public:
 	static unsigned int gadgetId;
 private:

@@ -62,6 +62,9 @@ public:
                 } else {
                     spotless->showSplit();
                 }
+                spotless->sources->update();
+                spotless->code->update();
+                spotless->updateAll();
                 *openClose = true;
                 break;
         }

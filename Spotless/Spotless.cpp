@@ -77,8 +77,11 @@ void Spotless::destroy() {
 }
 
 int Spotless::unfold() {
-    Config config("config.prefs");
-    setSplit(config.getBool("Split mode", false));
+    {
+        Config config("config.prefs");
+        setSplit(config.getBool("Split mode", false));
+    }
+    //to not interfere with below:
 
     if(isSplit()) {
         showSplit();    

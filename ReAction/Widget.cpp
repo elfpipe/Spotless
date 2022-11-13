@@ -140,7 +140,8 @@ void Widget::closeWindow ()
 
 void Widget::closeAllWindows()
 {
-	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++)
+	list<Widget *> windows = openedWindows;
+	for (list<Widget *>::iterator it = windows.begin(); it != windows.end(); it++)
 		if(*it != this) (*it)->closeWindow();
 	// destroyContent();
 	if(window) closeWindow();
@@ -220,16 +221,20 @@ int Widget::waitForClose()
 						case WMHI_ICONIFY : {
 							if(!appPort) break;
 
-							for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++)
+							list<Widget *> windows = openedWindows;
+							for(list<Widget *>::iterator it = windows.begin(); it != windows.end(); it++)
 								if((*it) != this) (*it)->closeWindow();
 							iconify();
 							result = 0x0;
 
 							uint32 newResult = IExec->Wait (1L << appPort->mp_SigBit);
 
-							for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++)
+							for(list<Widget *>::iterator it = windows.begin(); it != windows.end(); it++)
 								if((*it) != this) (*it)->openWindow();
 							uniconify();
+
+							updateAll();
+
 							openClose = true;
 							break;
 						}
