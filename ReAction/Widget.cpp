@@ -229,8 +229,10 @@ int Widget::waitForClose()
 
 							openedWindows.clear();
 							for(list<Widget *>::iterator it = saveWindows.begin(); it != saveWindows.end(); it++) {
-								if((*it) != this) (*it)->openWindow();
-								openedWindows.push_back(*it);
+								if((*it) != this) {
+									(*it)->openWindow();
+									openedWindows.push_back(*it);
+								}
 							}
 							uniconify();
 							openedWindows.push_back(this);
