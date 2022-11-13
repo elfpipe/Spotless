@@ -173,5 +173,5 @@ void Spotless::clearAll() {
     stacktrace->clear();
     disassembler->clear();
     debugger.clear();
-    if(memorySurfer && memorySurfer->windowObject()) closeNewWindow(memorySurfer);
+    if(memorySurfer && memorySurfer->windowObject()) memorySurfer->closeWindow();
 }

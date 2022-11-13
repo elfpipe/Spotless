@@ -95,21 +95,24 @@ bool MainWindow::showSplit()
         for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
             (*it)->setParent(0);
             (*it)->setMenubar(mainMenu);
-            openNewWindow(*it);
+            // openNewWindow(*it);
+            (*it)->openWindow();
         }
     }
     if(bottomPanel.size()) {
         for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++) {
             (*it)->setParent(0);
             (*it)->setMenubar(mainMenu);
-            openNewWindow(*it);
+            // openNewWindow(*it);
+            (*it)->openWindow();
         }
     }
     if(rightPanel.size()) {
         for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++) {
             (*it)->setParent(0);
             (*it)->setMenubar(mainMenu);
-            openNewWindow(*it);
+            // openNewWindow(*it);
+            (*it)->openWindow();
         }
     }
 

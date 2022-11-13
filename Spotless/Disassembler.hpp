@@ -73,7 +73,7 @@ public:
             }
             if(event->elementId() == spotless->disassembler->getMemSurfId()) {
                 if(spotless->memorySurfer) {
-                    spotless->openNewWindow((Widget *)spotless->memorySurfer);
+                    spotless->memorySurfer->openWindow();
                     spotless->memorySurfer->update();
                 }
             }

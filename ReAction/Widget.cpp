@@ -74,16 +74,16 @@ bool Widget::openWindow()
 	return window != 0;
 }
 
-bool Widget::openNewWindow(Widget *widget)
-{
-	cout << "openNewWindow : " << (void *)widget << "\n";
-	if(widget->openWindow()) {
-		// widget->setMenubar(mainMenu);
-		// openedWindows.push_back(widget);
-		return true;
-	}
-	return false;
-}
+// bool Widget::openNewWindow(Widget *widget)
+// {
+// 	cout << "openNewWindow : " << (void *)widget << "\n";
+// 	if(widget->openWindow()) {
+// 		// widget->setMenubar(mainMenu);
+// 		// openedWindows.push_back(widget);
+// 		return true;
+// 	}
+// 	return false;
+// }
 
 Object *Widget::createContent()
 {
@@ -131,18 +131,17 @@ void Widget::closeWindow ()
 	openedWindows.remove(this);
 }
 
-void Widget::closeNewWindow(Widget *widget)
-{
-	cout << "closeNewWindow : " << (void *)widget << "\n";
-	widget->closeWindow();
-	openedWindows.remove(widget);
-}
+// void Widget::closeNewWindow(Widget *widget)
+// {
+// 	cout << "closeNewWindow : " << (void *)widget << "\n";
+// 	widget->closeWindow();
+// 	openedWindows.remove(widget);
+// }
 
 void Widget::closeAllWindows()
 {
-	list<Widget *> opened(openedWindows);
-	for (list<Widget *>::iterator it = opened.begin(); it != opened.end(); it++)
-		if(*it != this) closeNewWindow(*it);
+	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++)
+		if(*it != this) (*it)->closeWindow();
 	// destroyContent();
 	if(window) closeWindow();
 	openedWindows.clear();
@@ -156,9 +155,8 @@ void Widget::closeAllWindows()
 
 void Widget::closeAllExceptThis()
 {
-	list<Widget *> opened(openedWindows);
-	for (list<Widget *>::iterator it = opened.begin(); it != opened.end(); it++) {
-		if((*it) != this) closeNewWindow(*it);
+	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
+		if((*it) != this) (*it)->closeWindow();
 	}
 	openedWindows.clear();
 	openedWindows.push_back(this);
@@ -205,7 +203,7 @@ int Widget::waitForClose()
 							done = true;
 							openClose = true;
 							if(target == this) { exit = true; }
-							if(target != this) { closeNewWindow(target); }
+							if(target != this) { target->closeWindow(); }
 							break;
 
 						case WMHI_MENUPICK: {
@@ -231,7 +229,7 @@ int Widget::waitForClose()
 
 							openedWindows.clear();
 							for(list<Widget *>::iterator it = saveWindows.begin(); it != saveWindows.end(); it++)
-								if((*it) != this) openNewWindow(*it);
+								if((*it) != this) (*it)->openWindow();
 							uniconify();
 							openedWindows.push_back(this);
 							openClose = true;

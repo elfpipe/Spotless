@@ -96,10 +96,10 @@ public:
 		
 	int waitForClose();
 	virtual bool openWindow();
-	bool openNewWindow(Widget *);
+	// bool openNewWindow(Widget *);
 
 	virtual void closeWindow();
-	void closeNewWindow(Widget *);
+	// void closeNewWindow(Widget *);
 
 	void closeAllWindows();
 	void closeAllExceptThis();

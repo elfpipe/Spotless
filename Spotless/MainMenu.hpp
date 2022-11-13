@@ -52,7 +52,7 @@ public:
                 break;
             case 4: {
                 if(spotless->configure) {
-                    spotless->openNewWindow((Widget *)spotless->configure);
+                    spotless->configure->openWindow();
                 }
             } break;
             case 5:

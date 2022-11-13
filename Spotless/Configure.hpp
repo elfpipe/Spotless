@@ -40,7 +40,7 @@ public:
                 update();
             }
             if(event->elementId() == getDoneId()) {                
-                closeNewWindow(this);
+                closeWindow();
                 return true;
                 // *exit = true;
             }
