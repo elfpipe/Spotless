@@ -31,7 +31,7 @@ private:
 	Widget *parent;
 
 	PublicScreen::PenType penType;
-	int gid; //only values btw 0 and 255
+	// int gid; //only values btw 0 and 255
 
 private:
 	void init ();

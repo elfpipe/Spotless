@@ -20,7 +20,7 @@ public:
 private:
 	struct List buttonList;
 	Object *speedbar;
-	int gid;
+	// int gid;
 
 	Widget *parent;
 

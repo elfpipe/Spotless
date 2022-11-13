@@ -53,7 +53,7 @@ private:
 	static Object *findChild(unsigned int id);
 	static void removeChild(Object *object) { children.remove(object); }
 
-	Widget *findOpenedWindowWidget(uint32 mask);
+	// Widget *findOpenedWindowWidget(uint32 mask);
 
     struct MsgPort *appPort;
 

@@ -35,7 +35,6 @@ int Config::getValue(string object, string value, int def) {
     return IPrefsObjects->DictGetIntegerForKey(o, value.c_str(), def);
 }
 void Config::setValue(string object, string value, int number) {
-    cout << "setValue() " << object << " " << value << "\n";
     uint32 error;
     PrefsObject *o = IPrefsObjects->DictGetObjectForKey(dict, object.c_str());
     if(!o) {

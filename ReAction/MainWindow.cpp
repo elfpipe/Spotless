@@ -213,12 +213,12 @@ Object *MainWindow::createContent() {
 
 void MainWindow::closeWindow()
 {
-    cout << "MainWindow::closeWindow()\n";
     Config config("config.prefs");
     config.setBool("Split mode", split);
 
     Widget::closeWindow();
 }
+
 void MainWindow::destroyContent()
 {
     if(parentLayout) delete parentLayout;

@@ -25,6 +25,7 @@
 // }
 
 Listbrowser *Console::listbrowser = 0;
+Spotless *Console::spotless = 0;
 Spotless *Spotless::spotless = 0;
 
 void Spotless::create() {

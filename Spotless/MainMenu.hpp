@@ -52,13 +52,11 @@ public:
                 break;
             case 4: {
                 if(spotless->configure) {
-                    cout << "Opening configure\n";
                     spotless->openNewWindow((Widget *)spotless->configure);
-                    cout << "Configure opened.\n";
                 }
             } break;
             case 5:
-                cout << "isSplit() : " << spotless->isSplit();
+                // cout << "isSplit() : " << spotless->isSplit();
                 if(spotless->isSplit()) {
                     spotless->openWindow();
                 } else {

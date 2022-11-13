@@ -18,9 +18,8 @@ private:
 
 public:
     bool isCreated() { return created; }
-private:
-    // bool doScreenSwitch;
 
+private:
     void attach();
     void detach();
 

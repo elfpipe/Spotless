@@ -34,9 +34,7 @@ public:
     
 private:
     static Spotless *spotless;
-    
-    // bool childLives = false;
-    
+        
 public:
     Spotless () : MainWindow() { create(); }
     ~Spotless() { destroy(); }

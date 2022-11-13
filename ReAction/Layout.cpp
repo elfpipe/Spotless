@@ -35,13 +35,9 @@ Layout::Layout (Widget *parent, string label)
 
 Layout::~Layout()
 {
-	// std::cout << "cleanup.\n";
 	//cleanup
 	for(list<RButton *>::iterator it = buttons.begin(); it != buttons.end(); it++)
-	{
-		// cout << "deleting button " << (void *)(*it) << "\n";
 		delete (*it);
-	}
 	buttons.clear();
 	for(list<Speedbar *>::iterator it = speedbars.begin(); it != speedbars.end(); it++)
 		delete (*it);

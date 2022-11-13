@@ -107,8 +107,6 @@ void Widget::setMenubar(Menubar *menu)
 
 void Widget::closeWindow ()
 {
-	// std::cout << "closeWindow.\n";
-
 	Config config("config.prefs");
 
 	uint32 top, left, width, height;
@@ -341,22 +339,22 @@ uint32 Widget::openedWindowsSignalMask()
 	return mask;
 }
 
-Widget *Widget::findOpenedWindowWidget(uint32 mask) {
-	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
-		// cout << "windowSignalMask() : " << (void *)(*it)->windowSignalMask() << "\n";
-		if(mask & (*it)->windowSignalMask())
-			return *it;
-		// Object *object = (*it)->windowObject();
-		// uint32 sigMask;
-		// if (object) {
-		// 	IIntuition->GetAttr (WINDOW_SigMask, object, &sigMask);
-		// 	if(sigMask & mask) {
-		// 		return *it;
-		// 	}
-		// }
-	}
-	return 0x0;
-}
+// Widget *Widget::findOpenedWindowWidget(uint32 mask) {
+// 	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
+// 		// cout << "windowSignalMask() : " << (void *)(*it)->windowSignalMask() << "\n";
+// 		if(mask & (*it)->windowSignalMask())
+// 			return *it;
+// 		// Object *object = (*it)->windowObject();
+// 		// uint32 sigMask;
+// 		// if (object) {
+// 		// 	IIntuition->GetAttr (WINDOW_SigMask, object, &sigMask);
+// 		// 	if(sigMask & mask) {
+// 		// 		return *it;
+// 		// 	}
+// 		// }
+// 	}
+// 	return 0x0;
+// }
 
 bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 {

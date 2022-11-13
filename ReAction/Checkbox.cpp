@@ -3,8 +3,6 @@
 
 #include <reaction/reaction_macros.h>
 
-// #include <string>
-// #include <string.h>
 #include <iostream>
 
 #include "Checkbox.hpp"
