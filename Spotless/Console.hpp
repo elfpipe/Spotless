@@ -6,8 +6,8 @@
 
 class Console : public Widget {
 private:
-    static Spotless *spotless;
-    static Listbrowser *listbrowser;
+    Spotless *spotless;
+    Listbrowser *listbrowser;
 
     class Line {
         public:
@@ -16,16 +16,15 @@ private:
         PublicScreen::PenType pen;
     };
 
-    static vector<Line> buffer;
+    vector<Line *> buffer;
 
 public:
     Console(Spotless *spotless) : Widget(spotless) { setName("Console"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
                 layout->setParent(this);
-
         listbrowser = layout->createListbrowser();
     }
-    static void write(PublicScreen::PenType pen, string text) {
+    void write(PublicScreen::PenType pen, string text) {
         if(!spotless->console->open()) return;
 
         static int n = 0;
@@ -37,17 +36,24 @@ public:
             listbrowser->addNode(text);
             listbrowser->attach();
         }
-        buffer.push_back(Line(text,pen));
+        buffer.push_back(new Line(text,pen));
     }
-    static void clear() {
+    void clear() {
         if(!spotless->console->open()) return;
         listbrowser->clear();
+        for(vector<Line *>::iterator it = buffer.begin(); it != buffer.end(); it++)
+            delete *it;
+        buffer.clear();
     }
-    static void update() {
+    void update() {
         if(!spotless->console->open()) return;
-        clear();
-        for(vector<Line>::iterator it = buffer.begin(); it != buffer.end(); it++)
-            write((*it).pen, (*it).text);
+        listbrowser->clear();
+        for(vector<Line *>::iterator it = buffer.begin(); it != buffer.end(); it++) {
+            listbrowser->setPen((*it)->pen);
+            listbrowser->detach();
+            listbrowser->addNode((*it)->text);
+            listbrowser->attach();
+        }
     }
 };
 #endif

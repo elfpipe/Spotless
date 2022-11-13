@@ -54,11 +54,10 @@ public:
                 *openClose = true;
                 *exit = true;
                 break;
-            case 4: {
-                if(spotless->configure) {
+            case 4:
+                if(spotless->configure)
                     spotless->configure->openWindow();
-                }
-            } break;
+                break;
             case 5:
                 if(spotless->isSplit()) {
                     spotless->openWindow();

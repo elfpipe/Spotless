@@ -14,6 +14,9 @@ class Sources : public Widget {
 private:
     Spotless *spotless;
     Listbrowser *listbrowser;
+
+    vector<string> buffer;
+
 public:
     Sources(Spotless *spotless) : Widget(spotless) { setName("Source files"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
@@ -28,11 +31,12 @@ public:
     }
     void update() {
         if(!open()) return;
-        vector<string> sources = spotless->debugger.sourceFiles();
+        if(!buffer.size())
+            buffer = spotless->debugger.sourceFiles();
         listbrowser->clear();
         listbrowser->detach();
-        for(int i = 0; i < sources.size(); i++)
-            listbrowser->addNode(sources[i]);
+        for(int i = 0; i < buffer.size(); i++)
+            listbrowser->addNode(buffer[i]);
         listbrowser->attach();
     }
     void showCurrent() {
@@ -43,6 +47,7 @@ public:
     void clear() {
         if(!open()) return;
         listbrowser->clear();
+        buffer.clear();
     }
     bool handleEvent(Event *event, bool *exit) {
         if(event->eventClass() == Event::CLASS_SelectNode) {

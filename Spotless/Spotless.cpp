@@ -17,11 +17,11 @@
 
 #include "../SimpleDebug/Strings.hpp"
 
-Listbrowser *Console::listbrowser = 0;
-Spotless *Console::spotless = 0;
+// Listbrowser *Console::listbrowser = 0;
+// Spotless *Console::spotless = 0;
 Spotless *Spotless::spotless = 0;
 
-vector<Console::Line> Console::buffer;
+// vector<Console::Line *> Console::buffer;
 
 void Spotless::create() {
     spotless = this;
@@ -111,7 +111,7 @@ void Spotless::portHandler() {
         // if(spotless->debugger.isDead()) 
         if(spotless->debugger.handleMessages()) { // if trap or exception
                 spotless->debugger.suspendBreaks();
-                Console::write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
+                spotless->console->write(PublicScreen::PENTYPE_EVENT, "At break : " + spotless->debugger.printLocation());
         }
         // if(!spotless->debugger.lives()) {
         //     spotless->clearAll();
@@ -163,8 +163,9 @@ void Spotless::updateAll(bool doSources) {
     stacktrace->update();
     disassembler->update();
     registers->update();
-
-    if(doSources) sources->update(); /* this is normally done in Actions.hpp, except for when doing iconify */
+    console->update();
+    
+    /*if(doSources)*/ sources->update(); /* this is normally done in Actions.hpp, except for when doing iconify */
     sources->showCurrent();
 
     if(memorySurfer && memorySurfer->windowObject()) memorySurfer->update();
