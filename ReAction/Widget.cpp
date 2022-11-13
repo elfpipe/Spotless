@@ -153,14 +153,14 @@ void Widget::closeAllWindows()
 	Speedbar::clean();
 }
 
-void Widget::closeAllExceptThis()
-{
-	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
-		if((*it) != this) (*it)->closeWindow();
-	}
-	openedWindows.clear();
-	openedWindows.push_back(this);
-}
+// void Widget::closeAllExceptThis()
+// {
+// 	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
+// 		if((*it) != this) (*it)->closeWindow();
+// 	}
+// 	openedWindows.clear();
+// 	openedWindows.push_back(this);
+// }
 
 extern struct MsgPort *AppPort;
 
@@ -220,22 +220,16 @@ int Widget::waitForClose()
 						case WMHI_ICONIFY : {
 							if(!appPort) break;
 
-							 list<Widget *> saveWindows = openedWindows;
-							closeAllExceptThis();
+							for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++)
+								if((*it) != this) (*it)->closeWindow();
 							iconify();
 							result = 0x0;
 
 							uint32 newResult = IExec->Wait (1L << appPort->mp_SigBit);
 
-							openedWindows.clear();
-							for(list<Widget *>::iterator it = saveWindows.begin(); it != saveWindows.end(); it++) {
-								if((*it) != this) {
-									(*it)->openWindow();
-									openedWindows.push_back(*it);
-								}
-							}
+							for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++)
+								if((*it) != this) (*it)->openWindow();
 							uniconify();
-							openedWindows.push_back(this);
 							openClose = true;
 							break;
 						}
