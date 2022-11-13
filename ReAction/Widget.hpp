@@ -43,7 +43,8 @@ private:
 	bool isOpen;
 public:
 	bool open() { return isOpen; }
-
+	void setOpen(bool open) { isOpen = open; }
+	
 public:
 	static unsigned int gadgetId;
 private:

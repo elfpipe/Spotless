@@ -75,6 +75,7 @@ bool MainWindow::openWindow() {
 EndWindow;
 	
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
+    if(window) isOpen = true;
 
 	openedWindows.push_back(this);
     split = false;
@@ -121,11 +122,13 @@ bool MainWindow::showSplit()
     if(topBar) {
         topBar->setParent(0);
         parentLayout->addEmbeddedWidget(topBar);
+        topBar->setOpen(true);
     }
 
     if(mainView) {
         mainView->setParent(0);
         parentLayout->addEmbeddedWidget(mainView);
+        mainView->setOpen(true);
     }
 
     setName("SpotlessMini");
@@ -177,13 +180,16 @@ Object *MainWindow::createContent() {
     if(topBar) {
         topBar->setParent(this);
         parentLayout->addEmbeddedWidget(topBar);
+        topBar->setOpen(true);
     }
 
     Layout *layoutA = parentLayout->createHorizontalLayout();
 
     if (leftPanel.size()) {
-        for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++)
+        for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
+            (*it)->setOpen(true);
             (*it)->setParent(this);
+        }
         // layoutA->addTabbedPanel(leftPanel, 30);
         layoutA->createTabbedPanel(this, leftPanel, 30);
         layoutA->addWeightBar();
@@ -194,19 +200,24 @@ Object *MainWindow::createContent() {
     if(mainView) {
         mainView->setParent(this);
         layoutB->addEmbeddedWidget(mainView);
+        mainView->setOpen(true);
     }
 
     if(bottomPanel.size()) {
-        for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++)
+        for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++) {
+            (*it)->setOpen(true);
             (*it)->setParent(this);
+        }
         layoutB->addWeightBar();
         layoutB->createTabbedPanel(this, bottomPanel, 30);
     }
 
     //and last: The right panel added to layoutA
     if (rightPanel.size()) {
-        for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++)
+        for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++) {
+            (*it)->setOpen(true);
             (*it)->setParent(this);
+        }
         layoutA->createTabbedPanel(this, rightPanel, 30);
         layoutA->addWeightBar();
     }
