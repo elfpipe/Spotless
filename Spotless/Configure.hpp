@@ -55,7 +55,6 @@ public:
         return true;
     }
     void saveConfig() {
-        cout << "save config : " << configFile << "\n";
         if(!configFile.size()) return;
         Config config(configFile);
         list<string> roots = spotless->debugger.getSourceRoots();

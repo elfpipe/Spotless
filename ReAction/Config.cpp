@@ -16,7 +16,7 @@ Config::Config(string file) {
     }
 	error = IPrefsObjects->ReadPrefs(dict, READPREFS_FileName, file.c_str(), TAG_DONE);
 	if(error) {
-        cout << "Error reading prefs file from disk " << file << "\n";
+        cout << "Error reading prefs file from disk " << file << ". A new file will be created.\n";
     }
 }
 
@@ -53,6 +53,25 @@ void Config::setBool(string object, bool value) {
 	IPrefsObjects->DictSetObjectForKey(dict,
         IPrefsObjects->PrefsNumber(NULL, &error, ALPONUM_AllocSetBool, value, TAG_DONE),
         object.c_str());
+}
+bool Config::getBool(string object, string item, bool def) {
+    PrefsObject *o = IPrefsObjects->DictGetObjectForKey(dict, object.c_str());
+    if(!o) return def;
+    bool result = IPrefsObjects->DictGetBoolForKey(o, item.c_str(), def);
+    // cout << "getBool() " << object << " " << item << " " << result << "\n";
+    return result;
+} 
+void Config::setBool(string object, string item, bool value) {
+    // cout << "setBool() " << object << " " << item << " " << value << "\n";
+    uint32 error;
+    PrefsObject *o = IPrefsObjects->DictGetObjectForKey(dict, object.c_str());
+    if(!o) {
+        IPrefsObjects->PrefsDictionary(0, &error, ALPO_Alloc, 0, TAG_DONE);
+        IPrefsObjects->DictSetObjectForKey(dict, o, object.c_str());
+    }
+	IPrefsObjects->DictSetObjectForKey(o,
+        IPrefsObjects->PrefsNumber(NULL, &error, ALPONUM_AllocSetBool, value, TAG_DONE),
+        item.c_str());
 }
 vector<string> Config::getArray(string object) {
     vector<string> result;

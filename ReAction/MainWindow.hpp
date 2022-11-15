@@ -38,7 +38,7 @@ public:
     ~MainWindow();
 
     bool openExtraWindow(Widget *widget);
-    void closeExtraWindow(Widget *widget);
+    bool closeExtraWindow(Widget *widget);
     
     bool openWindow();
     void closeWindow();

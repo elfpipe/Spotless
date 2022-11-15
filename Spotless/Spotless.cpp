@@ -89,6 +89,10 @@ int Spotless::unfold() {
         setSplit(config.getBool("Split mode", false));
         if(config.getBool("Using public screen", false))
             PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright (c) 2020, 2022 by Alfkil Thorbjoern Wennermark");
+        // vector<Widget *> windows = getAllPanelWidgets();
+        // for(int i = 0; i < windows.size(); i++) {
+        //     mainMenu->setWindowSelected(windows[i]->name(), config.getBool(windows[i]->name(), "Window selected", true));
+        // }
     } //to not interfere with below:
 
     if(isSplit()) {
@@ -102,6 +106,10 @@ int Spotless::unfold() {
     { // to not interfere with the above
         Config config("config.prefs");
         config.setBool("Using public screen", PublicScreen::usingPublicScreen());
+        // vector<Widget*> windows = getAllPanelWidgets();
+        // for(int i = 0; i < windows.size(); i++) {
+        //     config.setBool(windows[i]->name(), "Window selected", mainMenu->getWindowSelected(windows[i]->name()));
+        // }
     }
 
     return result;
@@ -192,5 +200,7 @@ void Spotless::clearAll() {
     stacktrace->clear();
     disassembler->clear();
     debugger.clear();
-    // if(memorySurfer->open()) memorySurfer->closeWindow();
+    configure->clear();
+
+    if(memorySurfer->open()) memorySurfer->clear();
 }

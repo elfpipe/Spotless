@@ -41,6 +41,9 @@ public:
     bool isSelected(Object *item);
     void setSelected(Object *item, bool selected);
     
+    virtual bool getWindowSelected(string name, bool def) { return false; }
+    virtual void setWindowSelected(string name, bool value) { }
+
     virtual void createMenu() = 0;
 
     virtual bool handleMenuPick(int id, bool *openClose, bool *exit) { *openClose = false; *exit = false; return false; }
@@ -48,6 +51,7 @@ public:
     // bool switchScreen() { return doScreenSwitch; }
 
     virtual void update() {}
+    virtual void clear() {}
 
     friend class Widget;
     friend class MainWindow;

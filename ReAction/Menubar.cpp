@@ -4,7 +4,8 @@
 
 #include "Menubar.hpp"
 #include "Widget.hpp"
-
+#include <iostream>
+using namespace std;
 Menubar::Menubar(Widget *parent)
     : menu(0),
     created(false)
@@ -24,6 +25,7 @@ void Menubar::createMenuStrip () {
 }
 
 void Menubar::destroyMenuStrip () {
+    clear();
     if (menu) IIntuition->DisposeObject(menu);
     menu = 0;
     created = false;

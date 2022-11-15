@@ -24,6 +24,8 @@ public:
 
     bool getBool(string object, bool def);
     void setBool(string object, bool value);
+    bool getBool(string object, string item, bool def);
+    void setBool(string object, string item, bool value);
 
     vector<string> getArray(string object);
     void setArray(string object, vector<string> array);

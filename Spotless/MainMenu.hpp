@@ -46,15 +46,12 @@ public:
         addSeparator(panel3);
         windowItems.push_back(addCreateMenuItem (panel3, "Configure", "", 6 + (i++), true, false));
         windowItems.push_back(addCreateMenuItem( panel3, "Memory Surfer", "", 6 + i, true, false));
-
-        update();
         
         created = true;
     }
     void update() {
-        if(!created) return;
+        if(!created || !spotless->open()) return;
         for(int i = 0; i < windowItems.size(); i++) {
-            cout << "MainMenu::update () : " << widgets[i]->name() << " " << widgets[i]->open() << "\n";
             setSelected(windowItems[i], widgets[i]->open());
         }
     }
@@ -67,7 +64,7 @@ public:
             case 2: //switch public screen
                 spotless->closeAllWindows();
                 if (!PublicScreen::usingPublicScreen())
-                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alfkil Thorbjørn Wennermark");
+                    PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright (c) 2020, 2022 by Alfkil Thorbjoern Wennermark");
                 else
                     PublicScreen::instance()->closePublicScreen();
                 if(!spotless->isSplit()) {
@@ -121,6 +118,21 @@ public:
             break;
         }
         return done;
+    }
+    bool getWindowSelected(string name, bool def) {
+        for(int i = 0; i < windowItems.size(); i++) {
+            if(!name.compare(widgets[i]->name())) {
+                return isSelected(windowItems[i]);
+            }
+        }
+        return def;
+    }
+    void setWindowSelected(string name, bool value) {
+        for(int i = 0; i < windowItems.size(); i++) {
+            if(!name.compare(widgets[i]->name())) {
+                setSelected(windowItems[i], value);
+            }
+        }
     }
 };
 #endif

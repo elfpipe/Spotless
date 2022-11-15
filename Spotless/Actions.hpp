@@ -91,7 +91,6 @@ public:
                     file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
                     unixPath = Requesters::convertToUnixRelative(path);
                     configFile = Roots::append(unixPath, "spotless.conf");
-                    cout << "config file : " << configFile << "\n";
                     if(!spotless->configure->openConfig(configFile)) {
                         spotless->debugger.addSourceRoot(unixPath);
                     }

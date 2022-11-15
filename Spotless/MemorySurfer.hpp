@@ -217,6 +217,11 @@ public:
             spotless->debugger.breakpointAddress(*it, false);
         }
         breaks.clear();
+
+        disassembly->clear();
+        hex->clear();
+        symbolName->setContent("");
+        addressString->setContent("");
     }
 };
 #endif

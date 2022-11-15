@@ -104,21 +104,42 @@ bool MainWindow::showSplit()
         for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
             (*it)->setParent(0);
             (*it)->setMenubar(mainMenu);
-            (*it)->openWindow();
+            bool windowSelected;
+            {
+                Config config("config.prefs");
+                windowSelected = config.getBool((*it)->name(), "Window selected", true);
+            }
+            if(windowSelected)
+                (*it)->openWindow();
+            mainMenu->setWindowSelected((*it)->name(), windowSelected);
         }
     }
     if(bottomPanel.size()) {
         for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++) {
             (*it)->setParent(0);
             (*it)->setMenubar(mainMenu);
-            (*it)->openWindow();
+            bool windowSelected;
+            {
+                Config config("config.prefs");
+                windowSelected = config.getBool((*it)->name(), "Window selected", true);
+            }
+            if(windowSelected)
+                (*it)->openWindow();
+            mainMenu->setWindowSelected((*it)->name(), windowSelected);
         }
     }
     if(rightPanel.size()) {
         for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++) {
             (*it)->setParent(0);
             (*it)->setMenubar(mainMenu);
-            (*it)->openWindow();
+            bool windowSelected;
+            {
+                Config config("config.prefs");
+                windowSelected = config.getBool((*it)->name(), "Window selected", true);
+            }
+            if(windowSelected)
+                (*it)->openWindow();
+            mainMenu->setWindowSelected((*it)->name(), windowSelected);
         }
     }
 
@@ -175,12 +196,14 @@ bool MainWindow::showSplit()
 EndWindow;
 	
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
-    if(window) isOpen = true;
-	openedWindows.push_back(this);
 
     // open extra windows again :
     for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++)
         (*it)->openWindow();
+
+    if(window) isOpen = true;
+	openedWindows.push_back(this);
+
 
     return window != 0;
 }
@@ -241,6 +264,25 @@ void MainWindow::closeWindow()
     {
         Config config("config.prefs");
         config.setBool("Split mode", split);
+
+        if(leftPanel.size())
+            for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
+                bool result = mainMenu->getWindowSelected((*it)->name(), true);
+                // cout << "closeWindow() " << (*it)->name() << " " << result << "\n";
+                config.setBool((*it)->name(), "Window selected", result);
+            }
+        if(bottomPanel.size())
+            for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
+                bool result = mainMenu->getWindowSelected((*it)->name(), true);
+                // cout << "closeWindow() " << (*it)->name() << " " << result << "\n";
+                config.setBool((*it)->name(), "Window selected", result);
+            }
+        if(rightPanel.size())
+            for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
+                bool result = mainMenu->getWindowSelected((*it)->name(), true);
+                // cout << "closeWindow() " << (*it)->name() << " " << result << "\n";
+                config.setBool((*it)->name(), "Window selected", result);
+            }
     }
     // to not interfere with below:
 
@@ -257,10 +299,16 @@ bool MainWindow::openExtraWindow(Widget *widget)
 	return false;
 }
    
-void MainWindow::closeExtraWindow(Widget *widget)
+bool MainWindow::closeExtraWindow(Widget *widget)
 {
-	widget->closeWindow();
-	extraWindows.remove(widget);
+    for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++) {
+        if ((*it) == widget) {
+            widget->closeWindow();
+            extraWindows.remove(widget);
+            return true;
+        }
+    }
+    return false;
 }
 
 void MainWindow::destroyContent()

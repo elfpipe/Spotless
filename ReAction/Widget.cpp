@@ -6,11 +6,13 @@
 #include "reaction.h"
 #include "Screen.hpp"
 #include "Config.hpp"
+#include "MainWindow.hpp"
 
 #include <libraries/keymap.h>
 
 #include <string.h>
 #include <iostream>
+#include <algorithm>
 
 unsigned int Widget::gadgetId = 1;
 list<Object *> Widget::children; //We need this to delegate input events
@@ -146,11 +148,11 @@ void Widget::closeWindow ()
 
 void Widget::closeAllWindows()
 {
+	if(window) closeWindow();
 	list<Widget *> windows = openedWindows;
 	for (list<Widget *>::iterator it = windows.begin(); it != windows.end(); it++)
 		if(*it != this) (*it)->closeWindow();
 	// destroyContent();
-	if(window) closeWindow();
 	if(mainMenu) mainMenu->destroyMenuStrip();
 	openedWindows.clear();
 	children.clear();
@@ -207,13 +209,20 @@ int Widget::waitForClose()
 					done = true;
 				} else {
 					switch (Class & WMHI_CLASSMASK) {
-						case WMHI_CLOSEWINDOW:
+						case WMHI_CLOSEWINDOW: {
+							MainWindow *mw = dynamic_cast<MainWindow *>(this);
+							if(mw && target != this) {
+								if(!mw->closeExtraWindow(target))
+									target->closeWindow();
+								openClose = true;
+								break;
+							}
 							done = true;
 							openClose = true;
 							if(target == this) { exit = true; }
 							if(target != this) { target->closeWindow(); }
 							break;
-
+						}
 						case WMHI_MENUPICK: {
 							uint32 id = NO_MENU_ID;
 							while ((id = IIntuition->IDoMethod(mainMenu->systemObject(),MM_NEXTSELECT,0,id)) != NO_MENU_ID) {

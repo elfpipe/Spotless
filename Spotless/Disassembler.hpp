@@ -18,9 +18,9 @@ public:
     Disassembler(Spotless *spotless) : Widget() { setName("Disassembler"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
                 layout->setParent(this);
-
-        listbrowser = layout->createListbrowser();
-        Layout *buttonLayout = layout->createVerticalLayout(100, 0);
+        Layout *hLayout = layout->createHorizontalLayout();
+        listbrowser = hLayout->createListbrowser();
+        Layout *buttonLayout = hLayout->createVerticalLayout(100, 0);
         asmBackSkip = buttonLayout->createButton("Back skip", "scrollstart");
         asmStep = buttonLayout->createButton("Asm step", "scrolldown");
         asmSkip = buttonLayout->createButton("Asm skip", "scrollend");
