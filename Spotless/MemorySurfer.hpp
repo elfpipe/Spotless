@@ -27,7 +27,7 @@ private:
     char buffer1[4096], buffer2[4096];
 
 public:
-    MemorySurfer(Spotless *spotless) : Widget(0) { setName("Memory surfer"); this->spotless = spotless; }
+    MemorySurfer(Spotless *spotless) : Widget() { setName("Memory surfer"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
         Layout *controlLayout = layout->createHorizontalLayout(0, 0);
         run = controlLayout->createButton("Run", "debug");
@@ -118,6 +118,7 @@ public:
             }
             if(event->elementId() == getDoneId()) {
                 breaks.clear();
+                spotless->closeExtraWindow(this);
                 result = true;
             }
             spotless->updateAll();

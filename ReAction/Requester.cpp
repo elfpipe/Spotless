@@ -99,6 +99,26 @@ string Requesters::convertToUnixRelative(string path)
 	return result;
 }
 
+string Requesters::convertToAmigaRelative(string unixPath)
+{
+	string result;
+	for (string::iterator it = unixPath.begin(); it != unixPath.end(); it++) {
+		if((*it) == '.') {
+			it++;
+			if((*it) == '.')
+				continue;
+			if((*it) == '/') {
+				result += '/';
+				continue;
+			}
+			result += '.';
+		}
+		cout << "add : " << (*it) << "\n";
+		result += (*it);
+	}
+	return result;
+}
+
 int Requesters::choice(const char *title, const char *gadgetsText, const char *format, ...)
 {
 	va_list argptr;

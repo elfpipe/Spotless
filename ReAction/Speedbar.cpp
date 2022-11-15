@@ -45,7 +45,7 @@ void Speedbar::init()
 
 	// cout << "add Speedbar " << Widget::gadgetId << " " << (void *)speedbar << "\n";
 
-	parent->topLevelParent()->addChild(speedbar);
+	Widget::addChild(speedbar);
 }
 
 // void Speedbar::attach ()

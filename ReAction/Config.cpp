@@ -54,3 +54,30 @@ void Config::setBool(string object, bool value) {
         IPrefsObjects->PrefsNumber(NULL, &error, ALPONUM_AllocSetBool, value, TAG_DONE),
         object.c_str());
 }
+vector<string> Config::getArray(string object) {
+    vector<string> result;
+    uint32 error;
+    PrefsObject *o = IPrefsObjects->DictGetObjectForKey(dict, object.c_str());
+    uint32 count;
+    struct ALPOObjIndex oi;
+    IPrefsObjects->PrefsArray(o, &error, ALPOARR_GetCount, &count, TAG_DONE);
+    if(error) return result;
+    for(oi.index = 0; oi.index < count; oi.index++) {
+        IPrefsObjects->PrefsArray(o, NULL, ALPOARR_GetObjAtIndex, &oi, TAG_DONE);
+        struct ALPOString s;
+        if(oi.obj)
+            IPrefsObjects->PrefsString(oi.obj, &error, ALPOSTR_GetString, &s, TAG_DONE);
+        result.push_back(s.string);
+    }
+    return result;
+}
+void Config::setArray(string object, vector<string> array) {
+ 	uint32 error;
+	PrefsObject *a = IPrefsObjects->PrefsArray(0, &error, ALPO_Alloc, 0, TAG_DONE);
+    for(int i = 0; i < array.size(); i++) {
+        IPrefsObjects->PrefsArray(a, &error, ALPOARR_AddObj,
+            IPrefsObjects->PrefsString(0, 0, ALPOSTR_AllocSetString, array[i].c_str(), TAG_DONE),
+            TAG_DONE);
+    }
+    IPrefsObjects->DictSetObjectForKey(dict, a, object.c_str());
+}

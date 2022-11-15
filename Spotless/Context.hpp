@@ -14,7 +14,7 @@ private:
 
     bool showGlobals;
 public:
-    Context(Spotless *spotless) : Widget(spotless), showGlobals(false) { setName("Variables"); this->spotless = spotless; }
+    Context(Spotless *spotless) : Widget(), showGlobals(false) { setName("Variables"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
                 layout->setParent(this);
 

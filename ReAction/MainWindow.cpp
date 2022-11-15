@@ -15,7 +15,7 @@ using namespace std;
 bool MainWindow::split = false;
 
 MainWindow::MainWindow()
-    :   Widget(0),
+    :   Widget(),
         topBar(0),
         mainView(0),
         leftPanel(0),
@@ -41,6 +41,10 @@ bool MainWindow::openWindow() {
     int windowHeight = PublicScreen::instance()->screenHeight() - PublicScreen::instance()->screenBarHeight();
 
 	bool backdropWindow = PublicScreen::usingPublicScreen();
+
+    split = false;
+
+    if(mainMenu) mainMenu->createMenu();
 
 	object = WindowObject,
 		WA_ScreenTitle,         "Spotless",
@@ -78,7 +82,10 @@ EndWindow;
     if(window) isOpen = true;
 
 	openedWindows.push_back(this);
-    split = false;
+
+    // open extra windows again :
+    for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++)
+        (*it)->openWindow();
 
     return window != 0;
 }
@@ -89,11 +96,14 @@ bool MainWindow::showSplit()
     window = 0;
     object = 0;
 
+    split = true;
+
+    if(mainMenu) mainMenu->createMenu();
+
     if(leftPanel.size()) {
         for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
             (*it)->setParent(0);
             (*it)->setMenubar(mainMenu);
-            // openNewWindow(*it);
             (*it)->openWindow();
         }
     }
@@ -101,7 +111,6 @@ bool MainWindow::showSplit()
         for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++) {
             (*it)->setParent(0);
             (*it)->setMenubar(mainMenu);
-            // openNewWindow(*it);
             (*it)->openWindow();
         }
     }
@@ -109,7 +118,6 @@ bool MainWindow::showSplit()
         for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++) {
             (*it)->setParent(0);
             (*it)->setMenubar(mainMenu);
-            // openNewWindow(*it);
             (*it)->openWindow();
         }
     }
@@ -130,7 +138,6 @@ bool MainWindow::showSplit()
 
     setName("SpotlessMini");
     Config config("config.prefs");
-    split = true;
 
     int windowWidth = PublicScreen::instance()->screenWidth();
     int windowHeight = PublicScreen::instance()->screenHeight() - PublicScreen::instance()->screenBarHeight();
@@ -170,6 +177,11 @@ EndWindow;
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
     if(window) isOpen = true;
 	openedWindows.push_back(this);
+
+    // open extra windows again :
+    for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++)
+        (*it)->openWindow();
+
     return window != 0;
 }
 
@@ -233,6 +245,22 @@ void MainWindow::closeWindow()
     // to not interfere with below:
 
     Widget::closeWindow();
+}
+
+bool MainWindow::openExtraWindow(Widget *widget)
+{
+    widget->setMenubar(mainMenu);
+ 	if(widget->openWindow()) {
+		extraWindows.push_back(widget);
+		return true;
+	}
+	return false;
+}
+   
+void MainWindow::closeExtraWindow(Widget *widget)
+{
+	widget->closeWindow();
+	extraWindows.remove(widget);
 }
 
 void MainWindow::destroyContent()

@@ -15,7 +15,7 @@ private:
     RButton *asmBackSkip, *asmStep, *asmSkip, *memSurf;
     
 public:
-    Disassembler(Spotless *spotless) : Widget(spotless) { setName("Disassembler"); this->spotless = spotless; }
+    Disassembler(Spotless *spotless) : Widget() { setName("Disassembler"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
                 layout->setParent(this);
 
@@ -75,7 +75,7 @@ public:
             }
             if(event->elementId() == spotless->disassembler->getMemSurfId()) {
                 if(spotless->memorySurfer) {
-                    spotless->memorySurfer->openWindow();
+                    spotless->openExtraWindow(spotless->memorySurfer);
                     spotless->memorySurfer->update();
                 }
             }

@@ -55,6 +55,18 @@ void Spotless::create() {
     // addSignalHandler(pipeHandler, debugger.getPipeSignal());
 }
 
+vector<Widget *> Spotless::getAllPanelWidgets()
+{
+    vector<Widget *> result;
+    result.push_back(sources);
+    result.push_back(context);
+    result.push_back(stacktrace);
+    result.push_back(disassembler);
+    result.push_back(registers);
+    result.push_back(console);
+    return result;
+}
+
 void Spotless::destroy() {
 
     delete menu;
@@ -76,7 +88,7 @@ int Spotless::unfold() {
         Config config("config.prefs");
         setSplit(config.getBool("Split mode", false));
         if(config.getBool("Using public screen", false))
-            PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright © 2020, 2022 by Alfkil Thorbjørn Wennermark");
+            PublicScreen::instance()->openPublicScreen("Spotless", "Spotless - Copyright (c) 2020, 2022 by Alfkil Thorbjoern Wennermark");
     } //to not interfere with below:
 
     if(isSplit()) {
@@ -164,11 +176,12 @@ void Spotless::updateAll(bool doSources) {
     disassembler->update();
     registers->update();
     console->update();
-    
+    configure->update();
+
     /*if(doSources)*/ sources->update(); /* this is normally done in Actions.hpp, except for when doing iconify */
     sources->showCurrent();
 
-    if(memorySurfer && memorySurfer->windowObject()) memorySurfer->update();
+    if(memorySurfer->open()) memorySurfer->update();
 }
 
 void Spotless::clearAll() {
@@ -179,5 +192,5 @@ void Spotless::clearAll() {
     stacktrace->clear();
     disassembler->clear();
     debugger.clear();
-    if(memorySurfer && memorySurfer->windowObject()) memorySurfer->closeWindow();
+    // if(memorySurfer->open()) memorySurfer->closeWindow();
 }

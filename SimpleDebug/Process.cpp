@@ -107,9 +107,9 @@ APTR AmigaProcess::load(string path, string file, string arguments)
 //		NP_Entry,					foo,
 		NP_FreeSeglist,				false, //important
 		NP_Name,					command.c_str(),
-		// NP_CurrentDir,				lock,
-		// NP_ProgramDir,				homelock,
-		// NP_StackSize,				2000000,
+		NP_CurrentDir,				lock,
+		NP_ProgramDir,				homelock,
+		NP_StackSize,				2000000,
 		NP_Cli,						true,
 		NP_Child,					false, //important
 		NP_Arguments,				arguments.c_str(),

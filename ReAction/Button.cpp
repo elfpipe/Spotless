@@ -51,7 +51,7 @@ RButton::RButton (Widget *parent, const char *text, const char *iconName)
 	this->text = text;
 	buttons.push_back(button);
 
-	id = parent->topLevelParent()->addChild(button);
+	id = Widget::addChild(button);
 }
 
 RButton::~RButton ()

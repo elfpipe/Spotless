@@ -46,7 +46,7 @@ void Listbrowser::init()
 
 	listbrowsers.push_back(listbrowser);
 
-	parent->topLevelParent()->addChild(listbrowser); //To direct selection events, object needs to be stored in the top level widget
+	Widget::addChild(listbrowser); //To direct selection events, object needs to be stored in the top level widget
 }
 
 void Listbrowser::setColumnTitles(const char *titlesString) //separated by '|'

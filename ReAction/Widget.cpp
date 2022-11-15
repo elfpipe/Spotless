@@ -71,6 +71,9 @@ bool Widget::openWindow()
 	openedWindows.push_back(this);
 
 	if(window) isOpen = true;
+
+	if(mainMenu) mainMenu->update();
+
 	return window != 0;
 }
 
@@ -101,8 +104,8 @@ void Widget::destroyContent()
 void Widget::setMenubar(Menubar *menu)
 {
 	mainMenu = menu;
-	if(mainMenu && !mainMenu->isCreated()) mainMenu->createMenu();
-	if(window) IIntuition->SetMenuStrip(window, (struct Menu *)mainMenu->systemObject());
+	// if(mainMenu && !mainMenu->isCreated()) mainMenu->createMenu();
+	// if(window) IIntuition->SetMenuStrip(window, (struct Menu *)mainMenu->systemObject());
 }
 
 void Widget::closeWindow ()
@@ -128,7 +131,10 @@ void Widget::closeWindow ()
 	isOpen = false;
 
 	destroyContent();
+	
 	openedWindows.remove(this);
+
+	if(mainMenu) mainMenu->update();
 }
 
 // void Widget::closeNewWindow(Widget *widget)
@@ -145,6 +151,7 @@ void Widget::closeAllWindows()
 		if(*it != this) (*it)->closeWindow();
 	// destroyContent();
 	if(window) closeWindow();
+	if(mainMenu) mainMenu->destroyMenuStrip();
 	openedWindows.clear();
 	children.clear();
 	RButton::clean();

@@ -14,7 +14,7 @@ private:
     string fileName, filePath;
 
 public:
-    Code(Spotless *spotless) : Widget(spotless) { setName("Code"); this->spotless = spotless; }
+    Code(Spotless *spotless) : Widget() { setName("Code"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
         layout->setParent(this);
 

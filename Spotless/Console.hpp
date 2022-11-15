@@ -19,7 +19,7 @@ private:
     vector<Line *> buffer;
 
 public:
-    Console(Spotless *spotless) : Widget(spotless) { setName("Console"); this->spotless = spotless; }
+    Console(Spotless *spotless) : Widget() { setName("Console"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
                 layout->setParent(this);
         listbrowser = layout->createListbrowser();

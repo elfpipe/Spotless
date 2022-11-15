@@ -11,7 +11,7 @@ private:
     // RButton *button;
 
 public:
-    Stacktrace(Spotless *spotless) : Widget(spotless) { setName("Stacktrace"); this->spotless = spotless; }
+    Stacktrace(Spotless *spotless) : Widget() { setName("Stacktrace"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
                 layout->setParent(this);
         Layout *vLayout = layout->createVerticalLayout();

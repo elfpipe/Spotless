@@ -18,7 +18,7 @@ private:
     vector<string> buffer;
 
 public:
-    Sources(Spotless *spotless) : Widget(spotless) { setName("Source files"); this->spotless = spotless; }
+    Sources(Spotless *spotless) : Widget() { setName("Source files"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
         layout->setParent(this);
 

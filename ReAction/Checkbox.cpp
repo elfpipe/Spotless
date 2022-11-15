@@ -24,7 +24,7 @@ Checkbox::Checkbox (Widget *parent, const char *text, bool checked)
 	// this->text = text;
 	checkboxes.push_back(checkbox);
 
-	id = parent->topLevelParent()->addChild(checkbox);
+	id = Widget::addChild(checkbox);
 }
 
 Checkbox::~Checkbox ()

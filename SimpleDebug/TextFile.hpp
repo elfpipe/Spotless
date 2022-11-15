@@ -8,13 +8,16 @@ using namespace std;
 class TextFile {
 private:
     ifstream is;
-    bool isValid = false;
+    // bool isValid = false;
 public:
     TextFile(string file) {
         is.open(file);
     }
     ~TextFile() {
         is.close();
+    }
+    bool exists() {
+        return is.good();
     }
     void findLine(int line) {
         is.seekg(0, is.beg);

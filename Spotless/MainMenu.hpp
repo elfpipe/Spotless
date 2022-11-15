@@ -4,15 +4,20 @@
 #include "../ReAction/classes.h"
 #include "Spotless.hpp"
 #include "Configure.hpp"
+#include "MemorySurfer.hpp"
 
 class MainMenu : public Menubar {
 private:
     Spotless *spotless;
     PublicScreen *screen;
     bool usingPublicScreen = false;
+    vector<Widget *> widgets;
+    vector<Object *> windowItems;
 public:
     MainMenu(Spotless *spotless) : Menubar(0) { this->spotless = spotless; }
     void createMenu() {
+        createMenuStrip();
+
         MenuReference panel1 = addCreateMenu("Spotless");
 
         addCreateMenuItem (panel1, "About", "", 1);
@@ -26,7 +31,32 @@ public:
         MenuReference panel3 = addCreateMenu("Windows");
         addCreateMenuItem (panel3, "Switch split window mode", "", 5);
 
+        widgets.clear();
+        windowItems.clear();
+
+        int i = 0;
+        if(spotless->isSplit()) {
+            widgets = spotless->getAllPanelWidgets();
+            for(vector<Widget*>::iterator it = widgets.begin(); it != widgets.end(); it++)
+                windowItems.push_back(addCreateMenuItem (panel3, (*it)->name().c_str(), "", 6 + (i++), true, true));
+        }
+        widgets.push_back(spotless->configure);
+        widgets.push_back(spotless->memorySurfer);
+
+        addSeparator(panel3);
+        windowItems.push_back(addCreateMenuItem (panel3, "Configure", "", 6 + (i++), true, false));
+        windowItems.push_back(addCreateMenuItem( panel3, "Memory Surfer", "", 6 + i, true, false));
+
+        update();
+        
         created = true;
+    }
+    void update() {
+        if(!created) return;
+        for(int i = 0; i < windowItems.size(); i++) {
+            cout << "MainMenu::update () : " << widgets[i]->name() << " " << widgets[i]->open() << "\n";
+            setSelected(windowItems[i], widgets[i]->open());
+        }
     }
     bool handleMenuPick(int id, bool *openClose, bool *exit) {
         bool done = false;
@@ -55,8 +85,10 @@ public:
                 *exit = true;
                 break;
             case 4:
-                if(spotless->configure)
-                    spotless->configure->openWindow();
+                if(spotless->configure) {
+                    spotless->openExtraWindow(spotless->configure);
+                    spotless->configure->update();
+                }
                 break;
             case 5:
                 if(spotless->isSplit()) {
@@ -69,6 +101,24 @@ public:
                 spotless->updateAll();
                 *openClose = true;
                 break;
+            default: {
+                if(id > 5+windowItems.size()-2) {
+                    if(isSelected(windowItems[id-6]))
+                        spotless->openExtraWindow(widgets[id-6]);
+                    else
+                        spotless->closeExtraWindow(widgets[id-6]);
+                } else {
+                    if(isSelected(windowItems[id-6]))
+                        widgets[id-6]->openWindow();
+                    else
+                        widgets[id-6]->closeWindow();
+                }
+                spotless->sources->update();
+                spotless->code->update();
+                spotless->updateAll();
+                *openClose = true;
+            }
+            break;
         }
         return done;
     }

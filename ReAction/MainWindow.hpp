@@ -23,6 +23,8 @@ private:
     list<Widget *> bottomPanel;
     list<Widget *> rightPanel;
 
+    list<Widget *> extraWindows;
+
     // Layout *mainLayout;
     
     static bool split;
@@ -35,12 +37,15 @@ public:
     MainWindow();
     ~MainWindow();
 
+    bool openExtraWindow(Widget *widget);
+    void closeExtraWindow(Widget *widget);
+    
     bool openWindow();
     void closeWindow();
     bool showSplit();
     bool isSplit() { return split; }
     void setSplit(bool split) { this->split = split; }
-    
+        
     void setMainView(Widget *view);
     void setTopBar(Widget *top);
 

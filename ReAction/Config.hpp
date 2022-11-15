@@ -1,7 +1,10 @@
+#ifndef SPOTLESS_CONFIG_HPP
+#define SPOTLESS_CONFIG_HPP
 #include <proto/application.h>
 #include <string>
 #include <iostream>
- 
+#include <vector>
+
 using namespace std;
 class Config {
 private:
@@ -21,4 +24,8 @@ public:
 
     bool getBool(string object, bool def);
     void setBool(string object, bool value);
+
+    vector<string> getArray(string object);
+    void setArray(string object, vector<string> array);
 };
+#endif

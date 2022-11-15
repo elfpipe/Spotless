@@ -52,6 +52,8 @@ public:
     void updateAll(bool doSources = false);
     void clearAll();
     
+    vector<Widget *> getAllPanelWidgets();
+
     friend class MainMenu;
     friend class Actions;
     friend class Code;
@@ -61,5 +63,6 @@ public:
     friend class Console;
     friend class Disassembler;
     friend class MemorySurfer;
+    friend class Configure;
 };
 #endif

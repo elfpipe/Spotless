@@ -28,5 +28,6 @@ public:
 	static void showAboutWindow();
 
 	static string convertToUnixRelative(string path);
+	static string convertToAmigaRelative(string unixPath);
 };
 #endif

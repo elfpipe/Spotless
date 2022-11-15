@@ -12,7 +12,7 @@ private:
     Listbrowser *listbrowser;
 
 public:
-    Registers(Spotless *spotless) : Widget(spotless) { setName("Registers"); this->spotless = spotless; }
+    Registers(Spotless *spotless) : Widget() { setName("Registers"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
                 layout->setParent(this);
         listbrowser = layout->createListbrowser();

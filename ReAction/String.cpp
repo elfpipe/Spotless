@@ -28,7 +28,7 @@ RString::RString (Widget *parent, const char *content)
 	strings.push_back(rstring);
 	this->parent = parent;
 
-	id = parent->topLevelParent()->addChild(rstring);
+	id = Widget::addChild(rstring);
 }
 
 // gb_StringGad = (struct Gadget *) IIntuition->NewObject(IString->STRING_GetClass(),NULL,

@@ -5,6 +5,10 @@
 #include "Spotless.hpp"
 #include "Sources.hpp"
 #include "Console.hpp"
+#include "Configure.hpp"
+#include "../SimpleDebug/TextFile.hpp"
+#include "../SimpleDebug/Roots.hpp"
+
 class Actions : public Widget {
 public:
     typedef enum {
@@ -21,8 +25,10 @@ private:
     Spotless *spotless;
     Speedbar *actions;
 
+    string file, path, unixPath, configFile;
+
 public:
-    Actions(Spotless *spotless) : Widget(this) { this->spotless = spotless; setName("Actions"); }
+    Actions(Spotless *spotless) : Widget() { this->spotless = spotless; setName("Actions"); }
     void createGuiObject(Layout *layout) {
         layout->setParent(this);
         actions = layout->createSpeedbar();
@@ -82,11 +88,17 @@ public:
             switch(event->elementId()) {
                 case Actions::Load: {
                     spotless->debugger.clearRoots();
-                    string path;
-                    string file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
-                    string unixPath = Requesters::convertToUnixRelative(path);
-                    spotless->debugger.addSourceRoot(unixPath);
-                    if(spotless->debugger.load(path, file, "")) { //Use amigaos path for LoadSeg
+                    file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
+                    unixPath = Requesters::convertToUnixRelative(path);
+                    configFile = Roots::append(unixPath, "spotless.conf");
+                    cout << "config file : " << configFile << "\n";
+                    if(!spotless->configure->openConfig(configFile)) {
+                        spotless->debugger.addSourceRoot(unixPath);
+                    }
+                    string arguments;
+                    if(spotless->configure->askArguments())
+                        arguments = Requesters::requestString("Runtime", "Please provide arguments for %s:", file.c_str());
+                    if(spotless->debugger.load(path, file, arguments)) { //Use amigaos path for LoadSeg
                         spotless->updateAll();
                         spotless->sources->update();
                         spotless->sources->showCurrent();
@@ -121,6 +133,15 @@ public:
             update();
         }
         return false;
+    }
+    string getFile() {
+        return file;
+    }
+    string getPath() {
+        return path;
+    }
+    string getUnixPath() {
+        return unixPath;
     }
 };
 #endif
