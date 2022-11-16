@@ -71,7 +71,7 @@ void Config::setBool(string object, string item, bool value) {
     if(!o) {
         // cout << "create " << object << "\n";
 
-        IPrefsObjects->PrefsDictionary(0, &error, ALPO_Alloc, 0, TAG_DONE);
+        o = IPrefsObjects->PrefsDictionary(0, &error, ALPO_Alloc, 0, TAG_DONE);
         IPrefsObjects->DictSetObjectForKey(dict, o, object.c_str());
     }
     PrefsObject *b = IPrefsObjects->PrefsNumber(NULL, &error, ALPONUM_AllocSetBool, value, TAG_DONE);
