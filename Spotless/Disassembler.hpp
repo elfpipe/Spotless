@@ -75,7 +75,8 @@ public:
             }
             if(event->elementId() == spotless->disassembler->getMemSurfId()) {
                 if(spotless->memorySurfer) {
-                    spotless->openExtraWindow(spotless->memorySurfer);
+                    // spotless->openExtraWindow(spotless->memorySurfer);
+                    spotless->memorySurfer->openWindow();
                     spotless->memorySurfer->update();
                 }
             }

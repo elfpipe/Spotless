@@ -79,13 +79,35 @@ bool MainWindow::openWindow() {
 EndWindow;
 	
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
-    if(window) isOpen = true;
-
-	openedWindows.push_back(this);
 
     // open extra windows again :
+    vector<Widget *> allWidgets;
+    vector<bool> windowSelected;
+
     for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++)
-        (*it)->openWindow();
+        allWidgets.push_back(*it);
+    {
+        Config config("config.prefs");
+        for(int i = 0; i < allWidgets.size(); i++) {
+            bool result = config.getBool(allWidgets[i]->name(), "Window selected", false);
+            windowSelected.push_back(result);
+            mainMenu->setWindowSelected(allWidgets[i]->name(), result);
+        }
+    }
+
+    for(int i = 0; i < allWidgets.size(); i++)
+        if(windowSelected[i]) {
+            allWidgets[i]->setParent(0);
+            allWidgets[i]->setMenubar(mainMenu);
+            allWidgets[i]->openWindow();
+        }
+
+
+    if(window) isOpen = true;
+
+    // mainMenu->update();
+
+	openedWindows.push_back(this);
 
     return window != 0;
 }
@@ -100,48 +122,95 @@ bool MainWindow::showSplit()
 
     if(mainMenu) mainMenu->createMenu();
 
-    if(leftPanel.size()) {
-        for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
-            (*it)->setParent(0);
-            (*it)->setMenubar(mainMenu);
-            bool windowSelected;
-            {
-                Config config("config.prefs");
-                windowSelected = config.getBool((*it)->name(), "Window selected", true);
-            }
-            if(windowSelected)
-                (*it)->openWindow();
-            mainMenu->setWindowSelected((*it)->name(), windowSelected);
+    vector<Widget *> allWidgets;
+    for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++)
+        allWidgets.push_back(*it);
+    for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++)
+        allWidgets.push_back(*it);
+    for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++)
+        allWidgets.push_back(*it);
+    for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++)
+        allWidgets.push_back(*it);
+
+    vector<bool> windowSelected;
+    {
+        Config config("config.prefs");
+        for(int i = 0; i < allWidgets.size(); i++) {
+            bool result = config.getBool(allWidgets[i]->name(), "Window selected", i >= allWidgets.size() - extraWindows.size() ? false :true);
+            windowSelected.push_back(result);
+            mainMenu->setWindowSelected(allWidgets[i]->name(), result);
         }
     }
-    if(bottomPanel.size()) {
-        for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++) {
-            (*it)->setParent(0);
-            (*it)->setMenubar(mainMenu);
-            bool windowSelected;
-            {
-                Config config("config.prefs");
-                windowSelected = config.getBool((*it)->name(), "Window selected", true);
-            }
-            if(windowSelected)
-                (*it)->openWindow();
-            mainMenu->setWindowSelected((*it)->name(), windowSelected);
+
+    for(int i = 0; i < allWidgets.size(); i++) {
+        if(windowSelected[i]) {
+            allWidgets[i]->setParent(0);
+            allWidgets[i]->setMenubar(mainMenu);
+            allWidgets[i]->openWindow();
         }
     }
-    if(rightPanel.size()) {
-        for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++) {
-            (*it)->setParent(0);
-            (*it)->setMenubar(mainMenu);
-            bool windowSelected;
-            {
-                Config config("config.prefs");
-                windowSelected = config.getBool((*it)->name(), "Window selected", true);
-            }
-            if(windowSelected)
-                (*it)->openWindow();
-            mainMenu->setWindowSelected((*it)->name(), windowSelected);
-        }
-    }
+
+    // allWidgets.clear();
+    // windowSelected.clear();
+    // for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++)
+    //     allWidgets.push_back(*it);
+    // {
+    //     Config config("config.prefs");
+    //     for(int i = 0; i < allWidgets.size(); i++) {
+    //         bool result = config.getBool(allWidgets[i]->name(), "Window selected", false);
+    //         windowSelected.push_back(result);
+    //         mainMenu->setWindowSelected(allWidgets[i]->name(), result);
+    //     }
+    // }
+    // for(int i = 0; i < allWidgets.size(); i++)
+    //     if(windowSelected[i]) {
+    //         allWidgets[i]->setParent(0);
+    //         allWidgets[i]->setMenubar(mainMenu);
+    //         allWidgets[i]->openWindow();
+    //     }
+
+    // if(leftPanel.size()) {
+    //     for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
+    //         (*it)->setParent(0);
+    //         (*it)->setMenubar(mainMenu);
+    //         bool windowSelected;
+    //         {
+    //             Config config("config.prefs");
+    //             windowSelected = config.getBool((*it)->name(), "Window selected", true);
+    //         }
+    //         if(windowSelected)
+    //             (*it)->openWindow();
+    //         mainMenu->setWindowSelected((*it)->name(), windowSelected);
+    //     }
+    // }
+    // if(bottomPanel.size()) {
+    //     for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++) {
+    //         (*it)->setParent(0);
+    //         (*it)->setMenubar(mainMenu);
+    //         bool windowSelected;
+    //         {
+    //             Config config("config.prefs");
+    //             windowSelected = config.getBool((*it)->name(), "Window selected", true);
+    //         }
+    //         if(windowSelected)
+    //             (*it)->openWindow();
+    //         mainMenu->setWindowSelected((*it)->name(), windowSelected);
+    //     }
+    // }
+    // if(rightPanel.size()) {
+    //     for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++) {
+    //         (*it)->setParent(0);
+    //         (*it)->setMenubar(mainMenu);
+    //         bool windowSelected;
+    //         {
+    //             Config config("config.prefs");
+    //             windowSelected = config.getBool((*it)->name(), "Window selected", true);
+    //         }
+    //         if(windowSelected)
+    //             (*it)->openWindow();
+    //         mainMenu->setWindowSelected((*it)->name(), windowSelected);
+    //     }
+    // }
 
     parentLayout = new Layout(this, Layout::LAYOUT_Vertical);
 
@@ -198,12 +267,13 @@ EndWindow;
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
 
     // open extra windows again :
-    for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++)
-        (*it)->openWindow();
+    // for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++)
+    //     (*it)->openWindow();
 
     if(window) isOpen = true;
 	openedWindows.push_back(this);
 
+    // mainMenu->update();
 
     return window != 0;
 }
@@ -265,51 +335,41 @@ void MainWindow::closeWindow()
         Config config("config.prefs");
         config.setBool("Split mode", split);
 
-        if(leftPanel.size())
-            for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
-                bool result = mainMenu->getWindowSelected((*it)->name(), true);
-                // cout << "closeWindow() " << (*it)->name() << " " << result << "\n";
-                config.setBool((*it)->name(), "Window selected", result);
-            }
-        if(bottomPanel.size())
-            for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
-                bool result = mainMenu->getWindowSelected((*it)->name(), true);
-                // cout << "closeWindow() " << (*it)->name() << " " << result << "\n";
-                config.setBool((*it)->name(), "Window selected", result);
-            }
-        if(rightPanel.size())
-            for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++) {
-                bool result = mainMenu->getWindowSelected((*it)->name(), true);
-                // cout << "closeWindow() " << (*it)->name() << " " << result << "\n";
-                config.setBool((*it)->name(), "Window selected", result);
-            }
+        for(list<Widget *>::iterator it = leftPanel.begin(); it != leftPanel.end(); it++)
+            config.setBool((*it)->name(), "Window selected", mainMenu->getWindowSelected((*it)->name(), true));
+        for(list<Widget *>::iterator it = bottomPanel.begin(); it != bottomPanel.end(); it++)
+            config.setBool((*it)->name(), "Window selected", mainMenu->getWindowSelected((*it)->name(), true));
+        for(list<Widget *>::iterator it = rightPanel.begin(); it != rightPanel.end(); it++)
+            config.setBool((*it)->name(), "Window selected", mainMenu->getWindowSelected((*it)->name(), true));
+        for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++)
+            config.setBool((*it)->name(), "Window selected", mainMenu->getWindowSelected((*it)->name(), false));
     }
     // to not interfere with below:
-
+    
     Widget::closeWindow();
 }
 
-bool MainWindow::openExtraWindow(Widget *widget)
-{
-    widget->setMenubar(mainMenu);
- 	if(widget->openWindow()) {
-		extraWindows.push_back(widget);
-		return true;
-	}
-	return false;
-}
+// bool MainWindow::openExtraWindow(Widget *widget)
+// {
+//     widget->setMenubar(mainMenu);
+//  	if(widget->openWindow()) {
+// 		extraWindows.push_back(widget);
+// 		return true;
+// 	}
+// 	return false;
+// }
    
-bool MainWindow::closeExtraWindow(Widget *widget)
-{
-    for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++) {
-        if ((*it) == widget) {
-            widget->closeWindow();
-            extraWindows.remove(widget);
-            return true;
-        }
-    }
-    return false;
-}
+// bool MainWindow::closeExtraWindow(Widget *widget)
+// {
+//     for(list<Widget *>::iterator it = extraWindows.begin(); it != extraWindows.end(); it++) {
+//         if ((*it) == widget) {
+//             widget->closeWindow();
+//             extraWindows.remove(widget);
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 void MainWindow::destroyContent()
 {
@@ -346,4 +406,9 @@ void MainWindow::addRightPanelWidget(Widget *widget)
     rightPanel.push_back(widget);
     // if(!rightPanel) rightPanel = new Panel(this);
     // rightPanel->addWidget(widget);
+}
+
+void MainWindow::addExtraWidget(Widget *widget)
+{
+    extraWindows.push_back(widget);
 }

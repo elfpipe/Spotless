@@ -37,8 +37,8 @@ public:
     MainWindow();
     ~MainWindow();
 
-    bool openExtraWindow(Widget *widget);
-    bool closeExtraWindow(Widget *widget);
+    // bool openExtraWindow(Widget *widget);
+    // bool closeExtraWindow(Widget *widget);
     
     bool openWindow();
     void closeWindow();
@@ -52,6 +52,7 @@ public:
     void addLeftPanelWidget(Widget *widget);
     void addBottomPanelWidget(Widget *widget);
     void addRightPanelWidget(Widget *widget);
+    void addExtraWidget(Widget *widget);
 
     void createGuiObject(Layout *layout) {} //dummy
 };

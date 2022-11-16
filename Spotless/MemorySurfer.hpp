@@ -118,7 +118,8 @@ public:
             }
             if(event->elementId() == getDoneId()) {
                 breaks.clear();
-                spotless->closeExtraWindow(this);
+                // spotless->closeExtraWindow(this);
+                closeWindow();
                 result = true;
             }
             spotless->updateAll();

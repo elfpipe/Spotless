@@ -49,6 +49,9 @@ void Spotless::create() {
     addBottomPanelWidget(registers);
     addBottomPanelWidget(console);
 
+    addExtraWidget(configure);
+    addExtraWidget(memorySurfer);
+    
     // addSignalHandler(deathHandler, SIGF_CHILD);
     // addSignalHandler(trapHandler, debugger.getTrapSignal());
     addSignalHandler(portHandler, debugger.getPortSignal());

@@ -79,7 +79,8 @@ public:
                 saveConfig();
             }
             if(event->elementId() == getDoneId()) {                
-                spotless->closeExtraWindow(this);
+                // spotless->closeExtraWindow(this);
+                closeWindow();
                 saveConfig();
                 return true;
                 // *exit = true;

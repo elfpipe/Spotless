@@ -83,7 +83,8 @@ public:
                 break;
             case 4:
                 if(spotless->configure) {
-                    spotless->openExtraWindow(spotless->configure);
+                    // spotless->openExtraWindow(spotless->configure);
+                    spotless->configure->openWindow();
                     spotless->configure->update();
                 }
                 break;
@@ -99,17 +100,17 @@ public:
                 *openClose = true;
                 break;
             default: {
-                if(id > 5+windowItems.size()-2) {
-                    if(isSelected(windowItems[id-6]))
-                        spotless->openExtraWindow(widgets[id-6]);
-                    else
-                        spotless->closeExtraWindow(widgets[id-6]);
-                } else {
+                // if(id > 5+windowItems.size()-2) {
+                //     if(isSelected(windowItems[id-6]))
+                //         spotless->openExtraWindow(widgets[id-6]);
+                //     else
+                //         spotless->closeExtraWindow(widgets[id-6]);
+                // } else {
                     if(isSelected(windowItems[id-6]))
                         widgets[id-6]->openWindow();
                     else
                         widgets[id-6]->closeWindow();
-                }
+                // }
                 spotless->sources->update();
                 spotless->code->update();
                 spotless->updateAll();

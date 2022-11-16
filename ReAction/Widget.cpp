@@ -148,10 +148,11 @@ void Widget::closeWindow ()
 
 void Widget::closeAllWindows()
 {
-	if(window) closeWindow();
+	if(!window) return;
+	closeWindow();
 	list<Widget *> windows = openedWindows;
 	for (list<Widget *>::iterator it = windows.begin(); it != windows.end(); it++)
-		if(*it != this) (*it)->closeWindow();
+		if((*it) != this) (*it)->closeWindow();
 	// destroyContent();
 	if(mainMenu) mainMenu->destroyMenuStrip();
 	openedWindows.clear();
@@ -211,12 +212,12 @@ int Widget::waitForClose()
 					switch (Class & WMHI_CLASSMASK) {
 						case WMHI_CLOSEWINDOW: {
 							MainWindow *mw = dynamic_cast<MainWindow *>(this);
-							if(mw && target != this) {
-								if(!mw->closeExtraWindow(target))
-									target->closeWindow();
-								openClose = true;
-								break;
-							}
+							// if(mw && target != this) {
+							// 	if(!mw->closeExtraWindow(target))
+							// 		target->closeWindow();
+							// 	openClose = true;
+							// 	break;
+							// }
 							done = true;
 							openClose = true;
 							if(target == this) { exit = true; }
