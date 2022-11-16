@@ -90,8 +90,8 @@ string Requesters::convertToUnixRelative(string path)
 	string result = path;
 	for (string::iterator it = result.begin(); it != result.end(); it++) {
 		if((*it) != '/') break;
-		result.insert(it, '.'); it++;
-		result.insert(it, '.'); it++;
+		it = result.insert(it, '.'); it++;
+		it = result.insert(it, '.'); it++;
 	}
 
 	// cout << "convertToUnixRelative : result = " << result << "\n";

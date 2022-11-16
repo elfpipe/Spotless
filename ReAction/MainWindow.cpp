@@ -215,13 +215,13 @@ bool MainWindow::showSplit()
     parentLayout = new Layout(this, Layout::LAYOUT_Vertical);
 
     if(topBar) {
-        topBar->setParent(0);
+        topBar->setParent(this);
         parentLayout->addEmbeddedWidget(topBar);
         topBar->setOpen(true);
     }
 
     if(mainView) {
-        mainView->setParent(0);
+        mainView->setParent(this);
         parentLayout->addEmbeddedWidget(mainView);
         mainView->setOpen(true);
     }
@@ -411,4 +411,5 @@ void MainWindow::addRightPanelWidget(Widget *widget)
 void MainWindow::addExtraWidget(Widget *widget)
 {
     extraWindows.push_back(widget);
+    widget->setMenubar(mainMenu);
 }
