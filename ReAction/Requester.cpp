@@ -113,7 +113,7 @@ string Requesters::convertToAmigaRelative(string unixPath)
 			}
 			result += '.';
 		}
-		cout << "add : " << (*it) << "\n";
+		// cout << "add : " << (*it) << "\n";
 		result += (*it);
 	}
 	return result;

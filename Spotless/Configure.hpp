@@ -23,7 +23,7 @@ private:
     string configFile;
 
 public:
-    Configure(Spotless *spotless) : Widget(), ask(false) { setName("Configure"); this->spotless = spotless; }
+    Configure(Spotless *spotless) : Widget(0), ask(false), configFile("spotless.conf") { setName("Configure"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
         Layout *rootsLayout = layout->createLabeledLayout("Source roots");
         listbrowser = rootsLayout->createListbrowser();
@@ -68,10 +68,12 @@ public:
         if(event->eventClass() == Event::CLASS_ButtonPress) {
             if(event->elementId() == getAddId()) {
                 string newRoot = Requesters::path(Requesters::REQUESTER_MODULE, "Choose path to add to list of source code roots...");
-                string unixRoot = Requesters::convertToUnixRelative(newRoot);
-                spotless->debugger.addSourceRoot(unixRoot);
-                update();
-                saveConfig();
+                if(newRoot.size()) {
+                    string unixRoot = Requesters::convertToUnixRelative(newRoot);
+                    spotless->debugger.addSourceRoot(unixRoot);
+                    update();
+                    saveConfig();
+                }
             }
             if(event->elementId() == getRemoveId()) {
                 spotless->debugger.removeSourceRoot(listbrowser->getNode(listbrowser->getSelectedLineNumber()));
