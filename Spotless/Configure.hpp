@@ -16,14 +16,14 @@ private:
     Spotless *spotless;
     Listbrowser *listbrowser;
     RButton *add, *remove, *done;
-    Checkbox *arguments;
+    // Checkbox *arguments;
 
 // state:
-    bool ask;
+    // bool ask;
     string configFile;
 
 public:
-    Configure(Spotless *spotless) : Widget(0), ask(false), configFile("spotless.conf") { setName("Configure"); this->spotless = spotless; }
+    Configure(Spotless *spotless) : Widget(0), /*ask(false),*/ configFile("spotless.conf") { setName("Configure"); this->spotless = spotless; }
     void createGuiObject(Layout *layout) {
         Layout *rootsLayout = layout->createLabeledLayout("Source roots");
         listbrowser = rootsLayout->createListbrowser();
@@ -32,14 +32,15 @@ public:
         remove = hl->createButton("-");
         done = hl->createButton("Done");
 
-        Layout *entryLayout = layout->createLabeledLayout("Entry");
-        arguments = entryLayout->createCheckbox("Ask for arguments", false);
+        // Layout *entryLayout = layout->createLabeledLayout("Entry");
+        // arguments = entryLayout->createCheckbox("Ask for arguments", false);
 
         setOpen(true);
         update();
-    }    bool askArguments() {
-        return ask;
     }
+    //     bool askArguments() {
+    //     return ask;
+    // }
     bool openConfig(string file) {
         configFile = Requesters::convertToAmigaRelative(file);
         {
@@ -51,7 +52,7 @@ public:
         spotless->debugger.clearRoots();
         for(vector<string>::iterator it = roots.begin(); it != roots.end(); it++)
             spotless->debugger.addSourceRoot(*it);
-        ask = config.getBool("Ask for arguments", false);
+        // ask = config.getBool("Ask for arguments", false);
         return true;
     }
     void saveConfig() {
@@ -62,7 +63,7 @@ public:
         for(list<string>::iterator it = roots.begin(); it != roots.end(); it++)
             _roots.push_back(*it);
         config.setArray("Roots", _roots);
-        config.setBool("Ask for arguments", ask);
+        // config.setBool("Ask for arguments", ask);
     }
     bool handleEvent (Event *event, bool *exit) {
         if(event->eventClass() == Event::CLASS_ButtonPress) {
@@ -88,10 +89,10 @@ public:
                 // *exit = true;
             }
         }
-        if(event->eventClass() == Event::CLASS_CheckboxPress) {
-            ask = arguments->getChecked();
-            saveConfig();
-        }
+        // if(event->eventClass() == Event::CLASS_CheckboxPress) {
+        //     ask = arguments->getChecked();
+        //     saveConfig();
+        // }
         return false;
     }
     void update() {
@@ -103,7 +104,7 @@ public:
             listbrowser->addNode(*it);
         }
         listbrowser->attach();
-        arguments->setChecked(ask);
+        // arguments->setChecked(ask);
     }
     void clear() {
         saveConfig();

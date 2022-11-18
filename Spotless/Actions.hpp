@@ -8,6 +8,7 @@
 #include "Configure.hpp"
 #include "../SimpleDebug/TextFile.hpp"
 #include "../SimpleDebug/Roots.hpp"
+#include "MainMenu.hpp"
 
 class Actions : public Widget {
 public:
@@ -89,13 +90,15 @@ public:
                 case Actions::Load: {
                     spotless->debugger.clearRoots();
                     file = Requesters::file(Requesters::REQUESTER_EXECUTABLE, "", path, "Select executable...");
+                    if(!file.size()) break;
                     unixPath = Requesters::convertToUnixRelative(path);
                     configFile = Roots::append(unixPath, "spotless.conf");
                     if(!spotless->configure->openConfig(configFile)) {
                         spotless->debugger.addSourceRoot(unixPath);
                     }
                     string arguments;
-                    if(spotless->configure->askArguments())
+                    // if(spotless->configure->askArguments())
+                    if(spotless->menu->getAskArguments())
                         arguments = Requesters::requestString("Runtime", "Please provide arguments for %s:", file.c_str());
                     if(spotless->debugger.load(path, file, arguments)) { //Use amigaos path for LoadSeg
                         spotless->updateAll();

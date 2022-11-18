@@ -33,7 +33,6 @@ Widget::Widget(Widget *parentWidget)
 Widget::~Widget()
 {
     if(window) closeWindow();
-	// destroyContent();
 	handlers.clear();
 }
 
@@ -79,17 +78,6 @@ bool Widget::openWindow()
 	return window != 0;
 }
 
-// bool Widget::openNewWindow(Widget *widget)
-// {
-// 	cout << "openNewWindow : " << (void *)widget << "\n";
-// 	if(widget->openWindow()) {
-// 		// widget->setMenubar(mainMenu);
-// 		// openedWindows.push_back(widget);
-// 		return true;
-// 	}
-// 	return false;
-// }
-
 Object *Widget::createContent()
 {
     parentLayout = new Layout(this, Layout::LAYOUT_Vertical);
@@ -106,8 +94,6 @@ void Widget::destroyContent()
 void Widget::setMenubar(Menubar *menu)
 {
 	mainMenu = menu;
-	// if(mainMenu && !mainMenu->isCreated()) mainMenu->createMenu();
-	// if(window) IIntuition->SetMenuStrip(window, (struct Menu *)mainMenu->systemObject());
 }
 
 void Widget::closeWindow ()
@@ -139,13 +125,6 @@ void Widget::closeWindow ()
 	if(mainMenu) mainMenu->update();
 }
 
-// void Widget::closeNewWindow(Widget *widget)
-// {
-// 	cout << "closeNewWindow : " << (void *)widget << "\n";
-// 	widget->closeWindow();
-// 	openedWindows.remove(widget);
-// }
-
 void Widget::closeAllWindows()
 {
 	if(!window) return;
@@ -163,15 +142,6 @@ void Widget::closeAllWindows()
 	RString::clean();
 	Speedbar::clean();
 }
-
-// void Widget::closeAllExceptThis()
-// {
-// 	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
-// 		if((*it) != this) (*it)->closeWindow();
-// 	}
-// 	openedWindows.clear();
-// 	openedWindows.push_back(this);
-// }
 
 extern struct MsgPort *AppPort;
 
@@ -211,7 +181,7 @@ int Widget::waitForClose()
 				} else {
 					switch (Class & WMHI_CLASSMASK) {
 						case WMHI_CLOSEWINDOW: {
-							MainWindow *mw = dynamic_cast<MainWindow *>(this);
+							// MainWindow *mw = dynamic_cast<MainWindow *>(this);
 							// if(mw && target != this) {
 							// 	if(!mw->closeExtraWindow(target))
 							// 		target->closeWindow();
@@ -346,33 +316,9 @@ uint32 Widget::openedWindowsSignalMask()
 	uint32 mask = 0x0;
 	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
 		mask |= (*it)->windowSignalMask();
-	// 	Object *object = (*it)->windowObject();
-	// 	uint32 sigMask;
-	// 	if (object) {
-	// 		IIntuition->GetAttr (WINDOW_SigMask, object, &sigMask);
-	// 		mask |= sigMask;
-	// 	}
-	// }
 	}
 	return mask;
 }
-
-// Widget *Widget::findOpenedWindowWidget(uint32 mask) {
-// 	for (list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++) {
-// 		// cout << "windowSignalMask() : " << (void *)(*it)->windowSignalMask() << "\n";
-// 		if(mask & (*it)->windowSignalMask())
-// 			return *it;
-// 		// Object *object = (*it)->windowObject();
-// 		// uint32 sigMask;
-// 		// if (object) {
-// 		// 	IIntuition->GetAttr (WINDOW_SigMask, object, &sigMask);
-// 		// 	if(sigMask & mask) {
-// 		// 		return *it;
-// 		// 	}
-// 		// }
-// 	}
-// 	return 0x0;
-// }
 
 bool Widget::processEvent (uint32 Class, uint16 Code, bool *exit)
 {

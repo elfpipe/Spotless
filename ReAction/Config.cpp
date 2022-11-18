@@ -3,7 +3,6 @@
 #include <iostream>
 using namespace std;
 Config::Config(string file) {
-    // cout << "Config::create()\n";
     ApplicationBase = IExec->OpenLibrary("application.library", 52);
     if(ApplicationBase)
         IPrefsObjects = (struct PrefsObjectsIFace *) IExec->GetInterface(ApplicationBase, "prefsobjects", 2, NULL);
@@ -22,7 +21,6 @@ Config::Config(string file) {
 }
 
 Config::~Config() {
-    // cout << "Config::destroy()\n";
 	uint32 error = IPrefsObjects->WritePrefs(dict, WRITEPREFS_FileName, file.c_str(), TAG_DONE);
 	if(error) {
         cout << "Error writing to prefs file " << file << "\n";
@@ -37,7 +35,6 @@ int Config::getValue(string object, string value, int def) {
     return IPrefsObjects->DictGetIntegerForKey(o, value.c_str(), def);
 }
 void Config::setValue(string object, string value, int number) {
-    // cout << "setValue() " << object << " " << value << " " << number << "\n";
     uint32 error;
     PrefsObject *o = IPrefsObjects->DictGetObjectForKey(dict, object.c_str());
     if(!o) {
@@ -61,16 +58,12 @@ bool Config::getBool(string object, string item, bool def) {
     PrefsObject *o = IPrefsObjects->DictGetObjectForKey(dict, object.c_str());
     if(!o) return def;
     bool result = IPrefsObjects->DictGetBoolForKey(o, item.c_str(), def);
-    // cout << "getBool() " << object << " " << item << " " << result << "\n";
     return result;
 } 
 void Config::setBool(string object, string item, bool value) {
-    // cout << "setBool() " << object << " " << item << " " << value << "\n";
     uint32 error;
     PrefsObject *o = IPrefsObjects->DictGetObjectForKey(dict, object.c_str());
     if(!o) {
-        // cout << "create " << object << "\n";
-
         o = IPrefsObjects->PrefsDictionary(0, &error, ALPO_Alloc, 0, TAG_DONE);
         IPrefsObjects->DictSetObjectForKey(dict, o, object.c_str());
     }

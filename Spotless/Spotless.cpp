@@ -96,6 +96,7 @@ int Spotless::unfold() {
         // for(int i = 0; i < windows.size(); i++) {
         //     mainMenu->setWindowSelected(windows[i]->name(), config.getBool(windows[i]->name(), "Window selected", true));
         // }
+        menu->setAskArguments(config.getBool("Ask for arguments", true));
     } //to not interfere with below:
 
     if(isSplit()) {
@@ -113,6 +114,7 @@ int Spotless::unfold() {
         // for(int i = 0; i < windows.size(); i++) {
         //     config.setBool(windows[i]->name(), "Window selected", mainMenu->getWindowSelected(windows[i]->name()));
         // }
+        config.setBool("Ask for arguments", menu->getAskArguments());
     }
 
     return result;

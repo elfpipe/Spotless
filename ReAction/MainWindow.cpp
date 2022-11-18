@@ -34,7 +34,6 @@ MainWindow::~MainWindow()
 bool MainWindow::openWindow() {
     closeAllWindows();
 
-	Config config("config.prefs");
     setName("Spotless");
 
     int windowWidth = PublicScreen::instance()->screenWidth();
@@ -46,38 +45,41 @@ bool MainWindow::openWindow() {
 
     if(mainMenu) mainMenu->createMenu();
 
-	object = WindowObject,
-		WA_ScreenTitle,         "Spotless",
-		WA_Title,              	"Spotless",
-		WA_PubScreen,           PublicScreen::instance()->screenPointer(),
+    {
+        Config config("config.prefs");
 
-		WA_Top,				config.getValue(widgetName, "Top", PublicScreen::instance()->screenBarHeight()),
-		WA_Left,			config.getValue(widgetName, "Left", 0),
-		WA_Width,			config.getValue(widgetName, "Width", windowWidth),
-		WA_Height,			config.getValue(widgetName, "Height", windowHeight),
+        object = WindowObject,
+            WA_ScreenTitle,         "Spotless",
+            WA_Title,              	"Spotless",
+            WA_PubScreen,           PublicScreen::instance()->screenPointer(),
 
-		// WA_Top,				    PublicScreen::instance()->screenBarHeight(),
-		// WA_Width,			    windowWidth,
-		// WA_Height,			    windowHeight,
+            WA_Top,				config.getValue(widgetName, "Top", PublicScreen::instance()->screenBarHeight()),
+            WA_Left,			config.getValue(widgetName, "Left", 0),
+            WA_Width,			config.getValue(widgetName, "Width", windowWidth),
+            WA_Height,			config.getValue(widgetName, "Height", windowHeight),
 
-        WA_DepthGadget,		    true,
-		WA_SizeGadget,		    true,
-		WA_DragBar,			    true,
-		WA_CloseGadget,			true,
-        
-		// WA_Backdrop,            backdropWindow,
-		// WA_Borderless,          backdropWindow,
-		WA_Activate,			TRUE,
-		WA_ReportMouse,			TRUE,
-				        
-		WINDOW_ParentLayout,	createContent(),
-        WINDOW_MenuStrip,       mainMenu ? mainMenu->systemObject() : 0,
-        WINDOW_GadgetHelp,      TRUE,
-        WINDOW_IconifyGadget,   TRUE,
-	  WINDOW_IconTitle, "Spotless",
-	   WINDOW_AppPort, appPort,
-EndWindow;
-	
+            // WA_Top,				    PublicScreen::instance()->screenBarHeight(),
+            // WA_Width,			    windowWidth,
+            // WA_Height,			    windowHeight,
+
+            WA_DepthGadget,		    true,
+            WA_SizeGadget,		    true,
+            WA_DragBar,			    true,
+            WA_CloseGadget,			true,
+            
+            // WA_Backdrop,            backdropWindow,
+            // WA_Borderless,          backdropWindow,
+            WA_Activate,			TRUE,
+            WA_ReportMouse,			TRUE,
+                            
+            WINDOW_ParentLayout,	createContent(),
+            WINDOW_MenuStrip,       mainMenu ? mainMenu->systemObject() : 0,
+            WINDOW_GadgetHelp,      TRUE,
+            WINDOW_IconifyGadget,   TRUE,
+            WINDOW_IconTitle, "Spotless",
+            WINDOW_AppPort, appPort,
+        EndWindow;
+    } // Config
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
 
     // open extra windows again :
@@ -104,8 +106,6 @@ EndWindow;
 
 
     if(window) isOpen = true;
-
-    // mainMenu->update();
 
 	openedWindows.push_back(this);
 
@@ -227,43 +227,44 @@ bool MainWindow::showSplit()
     }
 
     setName("SpotlessMini");
-    Config config("config.prefs");
+    {
+        Config config("config.prefs");
 
-    int windowWidth = PublicScreen::instance()->screenWidth();
-    int windowHeight = PublicScreen::instance()->screenHeight() - PublicScreen::instance()->screenBarHeight();
+        int windowWidth = PublicScreen::instance()->screenWidth();
+        int windowHeight = PublicScreen::instance()->screenHeight() - PublicScreen::instance()->screenBarHeight();
 
-	object = WindowObject,
-		WA_ScreenTitle,         "Spotless",
-		WA_Title,              	"Spotless",
-		WA_PubScreen,           PublicScreen::instance()->screenPointer(),
+        object = WindowObject,
+            WA_ScreenTitle,         "Spotless",
+            WA_Title,              	"Spotless",
+            WA_PubScreen,           PublicScreen::instance()->screenPointer(),
 
-		WA_Top,				config.getValue(widgetName, "Top", PublicScreen::instance()->screenBarHeight()),
-		WA_Left,			config.getValue(widgetName, "Left", 0),
-		WA_Width,			config.getValue(widgetName, "Width", windowWidth),
-		WA_Height,			config.getValue(widgetName, "Height", windowHeight),
+            WA_Top,				config.getValue(widgetName, "Top", PublicScreen::instance()->screenBarHeight()),
+            WA_Left,			config.getValue(widgetName, "Left", 0),
+            WA_Width,			config.getValue(widgetName, "Width", windowWidth),
+            WA_Height,			config.getValue(widgetName, "Height", windowHeight),
 
-		// WA_Top,				    PublicScreen::instance()->screenBarHeight(),
-		// WA_Width,			    windowWidth,
-		// WA_Height,			    windowHeight,
+            // WA_Top,				    PublicScreen::instance()->screenBarHeight(),
+            // WA_Width,			    windowWidth,
+            // WA_Height,			    windowHeight,
 
-        WA_DepthGadget,		    true,
-		WA_SizeGadget,		    true,
-		WA_DragBar,			    true,
-		WA_CloseGadget,			true,
-        
-		//WA_Backdrop,            backdropWindow,
-		//WA_Borderless,          backdropWindow,
-		WA_Activate,			TRUE,
-		WA_ReportMouse,			TRUE,
-				        
-		WINDOW_ParentLayout,	parentLayout->systemObject(),
-        WINDOW_MenuStrip,       mainMenu ? mainMenu->systemObject() : 0,
-        WINDOW_GadgetHelp,      TRUE,
-        WINDOW_IconifyGadget,   TRUE,
-	  WINDOW_IconTitle, "Spotless",
-	   WINDOW_AppPort, appPort,
-EndWindow;
-	
+            WA_DepthGadget,		    true,
+            WA_SizeGadget,		    true,
+            WA_DragBar,			    true,
+            WA_CloseGadget,			true,
+            
+            //WA_Backdrop,            backdropWindow,
+            //WA_Borderless,          backdropWindow,
+            WA_Activate,			TRUE,
+            WA_ReportMouse,			TRUE,
+                            
+            WINDOW_ParentLayout,	parentLayout->systemObject(),
+            WINDOW_MenuStrip,       mainMenu ? mainMenu->systemObject() : 0,
+            WINDOW_GadgetHelp,      TRUE,
+            WINDOW_IconifyGadget,   TRUE,
+            WINDOW_IconTitle, "Spotless",
+            WINDOW_AppPort, appPort,
+        EndWindow;
+    } // Config
 	if (object) window = (struct Window *) RA_OpenWindow(object); 
 
     // open extra windows again :
@@ -272,8 +273,6 @@ EndWindow;
 
     if(window) isOpen = true;
 	openedWindows.push_back(this);
-
-    // mainMenu->update();
 
     return window != 0;
 }
@@ -390,22 +389,19 @@ void MainWindow::setTopBar(Widget *top)
 void MainWindow::addLeftPanelWidget(Widget *widget)
 {
     leftPanel.push_back(widget);
-    // if(!leftPanel) leftPanel = new Panel(this);
-    // leftPanel->addWidget(widget);
+    widget->setMenubar(mainMenu);
 }
 
 void MainWindow::addBottomPanelWidget(Widget *widget)
 {
     bottomPanel.push_back(widget);
-    // if(!bottomPanel) bottomPanel = new Panel(this);
-    // bottomPanel->addWidget(widget);
+    widget->setMenubar(mainMenu);
 }
 
 void MainWindow::addRightPanelWidget(Widget *widget)
 {
     rightPanel.push_back(widget);
-    // if(!rightPanel) rightPanel = new Panel(this);
-    // rightPanel->addWidget(widget);
+    widget->setMenubar(mainMenu);
 }
 
 void MainWindow::addExtraWidget(Widget *widget)

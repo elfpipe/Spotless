@@ -13,6 +13,8 @@ private:
     bool usingPublicScreen = false;
     vector<Widget *> widgets;
     vector<Object *> windowItems;
+    Object *arguments;
+    bool ask = true;
 public:
     MainMenu(Spotless *spotless) : Menubar(0) { this->spotless = spotless; }
     void createMenu() {
@@ -27,25 +29,26 @@ public:
         MenuReference panel2 = addCreateMenu("Project");
 
         addCreateMenuItem (panel2, "Configure ...", "", 4);
+        arguments = addCreateMenuItem (panel2, "Ask for arguments", "", 5, true, ask);
 
         MenuReference panel3 = addCreateMenu("Windows");
-        addCreateMenuItem (panel3, "Switch split window mode", "", 5);
+        addCreateMenuItem (panel3, "Switch split window mode", "", 6);
 
         widgets.clear();
         windowItems.clear();
 
-        int i = 0;
+        int id = 7;
         if(spotless->isSplit()) {
             widgets = spotless->getAllPanelWidgets();
             for(vector<Widget*>::iterator it = widgets.begin(); it != widgets.end(); it++)
-                windowItems.push_back(addCreateMenuItem (panel3, (*it)->name().c_str(), "", 6 + (i++), true, true));
+                windowItems.push_back(addCreateMenuItem (panel3, (*it)->name().c_str(), "", id++, true, true));
         }
         widgets.push_back(spotless->configure);
         widgets.push_back(spotless->memorySurfer);
 
         addSeparator(panel3);
-        windowItems.push_back(addCreateMenuItem (panel3, "Configure", "", 6 + (i++), true, false));
-        windowItems.push_back(addCreateMenuItem( panel3, "Memory Surfer", "", 6 + i, true, false));
+        windowItems.push_back(addCreateMenuItem (panel3, "Configure", "", id++, true, false));
+        windowItems.push_back(addCreateMenuItem( panel3, "Memory Surfer", "", id++, true, false));
         
         created = true;
     }
@@ -89,6 +92,9 @@ public:
                 }
                 break;
             case 5:
+                ask = isSelected(arguments);
+                break;
+            case 6:
                 if(spotless->isSplit()) {
                     spotless->openWindow();
                 } else {
@@ -99,18 +105,12 @@ public:
                 spotless->updateAll();
                 *openClose = true;
                 break;
-            default: {
-                // if(id > 5+windowItems.size()-2) {
-                //     if(isSelected(windowItems[id-6]))
-                //         spotless->openExtraWindow(widgets[id-6]);
-                //     else
-                //         spotless->closeExtraWindow(widgets[id-6]);
-                // } else {
-                    if(isSelected(windowItems[id-6]))
-                        widgets[id-6]->openWindow();
+            default: { // 7 or higher
+                    int wid = id - 7;
+                    if(isSelected(windowItems[wid]))
+                        widgets[wid]->openWindow();
                     else
-                        widgets[id-6]->closeWindow();
-                // }
+                        widgets[wid]->closeWindow();
                 spotless->sources->update();
                 spotless->code->update();
                 spotless->updateAll();
@@ -134,6 +134,14 @@ public:
                 setSelected(windowItems[i], value);
             }
         }
+    }
+    bool getAskArguments() {
+        if(created) return isSelected(arguments);
+        return ask;
+    }
+    void setAskArguments(bool set) {
+        ask = set;
+        if(created) setSelected(arguments, set);
     }
 };
 #endif
