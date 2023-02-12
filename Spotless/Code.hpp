@@ -64,10 +64,10 @@ public:
     }
     void update() {
         if(!open()) return;
-        if(fileName.size()) {
-            show(fileName, filePath);
-            return;
-        }
+        // if(fileName.size()) {
+        //     show(fileName, filePath);
+        //     return;
+        // }
         string file = spotless->debugger.getSourceFile();
         if(!file.compare("<built-in>")) {
             clear();
@@ -81,7 +81,7 @@ public:
             fileName = "<built-in>";
             return;
         }
-        if(fileName.compare(file)) {
+        if(1) { //fileName.compare(file)) {
             fileName = file;
             filePath = spotless->debugger.searchSourcePath(file);
             show(file, filePath);

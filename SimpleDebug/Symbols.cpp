@@ -38,7 +38,7 @@ void ElfSymbols::readAll(ElfHandle *elfHandle) {
 	APTR handle = elfHandle->getHandle();
 	
 	struct Hook hook;
-	hook.h_Entry = (ULONG (*)())amigaos_symbols_callback;
+	hook.h_Entry = (HOOKFUNC)amigaos_symbols_callback;
 	hook.h_Data =  this;
 
 	IElf->ScanSymbolTable((Elf32_Handle)handle, &hook, NULL);

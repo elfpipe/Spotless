@@ -29,12 +29,12 @@ public:
     string getName() { return name; }
 
 	bool open () {	
-		handle = IElf->OpenElfTags(OET_ReadOnlyCopy, TRUE, OET_ElfHandle, handle, TAG_DONE);
+		handle = IElf->OpenElfTags(/*OET_ReadOnlyCopy, TRUE,*/ OET_ElfHandle, handle, TAG_DONE);
         isOpen = true;
 		return isOpen;
 	}
 	void close () {
-		if(isOpen) IElf->CloseElfTags ((Elf32_Handle)handle, CET_ReClose, TRUE, TAG_DONE);
+		if(isOpen) IElf->CloseElfTags ((Elf32_Handle)handle, CET_CloseInput, TRUE, CET_CloseAll, TRUE, TAG_DONE);
 		isOpen = false;
 	}
 	

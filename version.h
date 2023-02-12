@@ -1,0 +1,1 @@
+#define SPOTLESS_VERSION "2.2.1"

@@ -30,25 +30,38 @@ https://github.com/alfkil/Spotless
 
 == History:
 
+2.2.1 :
+        -- Correct highlighing of sourceline on trace/stepwise execution.
+        -- Iconify now shows the Spotless icon on the workbench.
+        -- Corrected menu texts.
+        -- Added __DATE__ macro in version cookie and screen title.
+
 2.2.0 : 
         -- Many improvements to the menus :         
-           -- added split window mode with ability to show/hide individual windows
-           -- added ability to choose also from RMB menu extra windows : config and memory surfer ones.
-           -- added code to reflect every case with extra windows: does not matter if choosen by RMB or
-                       buttons, RMB menu reflect all the states in any mode, on the fly.
+           -- added split window mode with ability to show/hide individual
+                windows
+           -- added ability to choose also from RMB menu extra windows : config
+                and memory surfer ones.
+           -- added code to reflect every case with extra windows: does not
+                matter if choosen by RMB or buttons, RMB menu reflect all the
+                states in any mode, on the fly.
            
        -- Added highlighting of source file name in Sources panel upon breaks.
-       -- Added auto-generated configs to auto save size and positions of windows across switch in
-                       different modes, including restarting.
+       -- Added auto-generated configs to auto save size and positions of
+                windows across switch in different modes, including restarting.
        -- Added option to "Ask for arguments" or not to ask, when load a binary.
-       -- Reworked disassembler window in the split window mode, so it doesn't feel like there is alot of empty space.
-       -- Improvements to overall stability and a lot of code cleaning work being done.
+       -- Reworked disassembler window in the split window mode, so it doesn't
+                feel like there is alot of empty space.
+       -- Improvements to overall stability and a lot of code cleaning work
+                being done.
                 
        --  And lot's of bug fixes: 
            -- stacktrace (varius fixes, including kas1e'e "line 30" problem)
-           -- iconify (proper refresh of window's content in all modes in all conditions, remove debug output)
+           -- iconify (proper refresh of window's content in all modes in all
+                conditions, remove debug output)
            -- about window and public screen title (copyright symbol (c) )
-           -- fixes in binary handling area (ability to run self, db101 and all the binaries using external amiga libraries).
+           -- fixes in binary handling area (ability to run self, db101 and all
+                the binaries using external amiga libraries).
            -- fixed a "long waiting bug" when parsing binary's stabs 
            -- fixed main stepinto (tracer)
            -- fixed memory surfer's bugs (clean break points, assmebler steps, etc)

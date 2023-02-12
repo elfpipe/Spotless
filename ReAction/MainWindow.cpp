@@ -8,6 +8,8 @@
 #include "Menubar.hpp"
 #include "Config.hpp"
 
+#include "../version.h"
+
 #include <iostream>
 using namespace std;
 /* ----------------------------------------------------- */
@@ -49,7 +51,7 @@ bool MainWindow::openWindow() {
         Config config("config.prefs");
 
         object = WindowObject,
-            WA_ScreenTitle,         "Spotless",
+            WA_ScreenTitle,         "Spotless " SPOTLESS_VERSION " (" __DATE__ ")",
             WA_Title,              	"Spotless",
             WA_PubScreen,           PublicScreen::instance()->screenPointer(),
 

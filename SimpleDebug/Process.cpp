@@ -324,7 +324,7 @@ void AmigaProcess::hookOn(struct Task *task)
 {
 	struct HookData *data = new HookData(IExec->FindTask(0), signal);
 
-    hook.h_Entry = (ULONG (*)())amigaos_debug_callback;
+    hook.h_Entry = (HOOKFUNC)amigaos_debug_callback;
     hook.h_Data =  (APTR)data;
 
 	IDebug->AddDebugHook(task, &hook);

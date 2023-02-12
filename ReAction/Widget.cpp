@@ -10,6 +10,10 @@
 
 #include <libraries/keymap.h>
 
+//iconify
+#include <proto/icon.h>
+#include <proto/wb.h>
+
 #include <string.h>
 #include <iostream>
 #include <algorithm>
@@ -208,19 +212,21 @@ int Widget::waitForClose()
 						case WMHI_ICONIFY : {
 							if(!appPort) break;
 
-							list<Widget *> windows = openedWindows;
-							for(list<Widget *>::iterator it = windows.begin(); it != windows.end(); it++)
-								if((*it) != this) (*it)->closeWindow();
 							iconify();
-							result = 0x0;
 
-							uint32 newResult = IExec->Wait (1L << appPort->mp_SigBit);
+							// list<Widget *> windows = openedWindows;
+							// for(list<Widget *>::iterator it = windows.begin(); it != windows.end(); it++)
+							// 	if((*it) != this) (*it)->closeWindow();
+							// iconify();
+							// result = 0x0;
 
-							for(list<Widget *>::iterator it = windows.begin(); it != windows.end(); it++)
-								if((*it) != this) (*it)->openWindow();
-							uniconify();
+							// uint32 newResult = IExec->Wait (1L << appPort->mp_SigBit);
 
-							updateAll(true); //do sources update
+							// for(list<Widget *>::iterator it = windows.begin(); it != windows.end(); it++)
+							// 	if((*it) != this) (*it)->openWindow();
+							// uniconify();
+
+							// updateAll(true); //do sources update
 
 							openClose = true;
 							break;
@@ -286,18 +292,47 @@ void Widget::setName(string name)
 
 void Widget::iconify()
 {
-	if(object) {
-		RA_Iconify(object);
-		// cout << "RA_Iconify.\n";
-		window = 0;
+	// if(object) {
+	// 	RA_Iconify(object);
+	// 	// cout << "RA_Iconify.\n";
+	// 	window = 0;
+	// }
+
+	struct DiskObject *diskObject = IIcon->GetDiskObject("Spotless");
+	if(diskObject) {
+		struct AppIcon *appIcon = IWorkbench->AddAppIcon(0, 0, "Spotless", appPort, (BPTR)NULL, diskObject, TAG_END);
+		if (appIcon) {
+			for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++)
+				IIntuition->HideWindow((*it)->windowPointer());
+			bool done = false;
+			while (!done) {
+				IExec->WaitPort(appPort);
+				struct AppMessage *imsg = 0;
+				while ((imsg = (struct AppMessage *)IExec->GetMsg(appPort))) {
+					if (imsg->am_Type == AMTYPE_APPICON) {
+						if (imsg->am_Class == AMCLASSICON_Open && imsg->am_NumArgs == 0)
+							done = true;
+					}
+					if(imsg->am_Message.mn_ReplyPort)
+						IExec->ReplyMsg((struct Message *)imsg);
+				}
+			}
+			IWorkbench->RemoveAppIcon(appIcon);
+			for(list<Widget *>::iterator it = openedWindows.begin(); it != openedWindows.end(); it++)
+				IIntuition->ShowWindow((*it)->windowPointer(), WINDOW_FRONTMOST);
+			IIntuition->ActivateWindow(window);
+		}
+		if(diskObject)
+			IIcon->FreeDiskObject(diskObject);
 	}
+
 }
 
-void Widget::uniconify()
-{
-	if(object)
-		window = RA_Uniconify(object);
-}
+// void Widget::uniconify()
+// {
+// 	if(object)
+// 		window = RA_Uniconify(object);
+// }
 
 void Widget::windowToFront ()
 {

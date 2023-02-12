@@ -22,13 +22,13 @@ public:
 
         MenuReference panel1 = addCreateMenu("Spotless");
 
-        addCreateMenuItem (panel1, "About", "", 1);
+        addCreateMenuItem (panel1, "About...", "", 1);
         addCreateMenuItem (panel1, "Switch public screen", "", 2);
-        addCreateMenuItem (panel1, "Exit", "", 3);
+        addCreateMenuItem (panel1, "Quit", "", 3);
 
         MenuReference panel2 = addCreateMenu("Project");
 
-        addCreateMenuItem (panel2, "Configure ...", "", 4);
+        addCreateMenuItem (panel2, "Configure...", "", 4);
         arguments = addCreateMenuItem (panel2, "Ask for arguments", "", 5, true, ask);
 
         MenuReference panel3 = addCreateMenu("Windows");
