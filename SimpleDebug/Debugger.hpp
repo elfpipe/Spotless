@@ -57,10 +57,10 @@ public:
 
 		if(handle->performRelocation())
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
+		else cout << "Relocations failed.\n";
 		firstRun = true;
 
-		// handle->close();
-		// delete handle; handle = 0;
+		handle->close();
 	}
 	bool load(string path, string file, string args) {
 		APTR handle = process.load(path, file, args);
@@ -92,7 +92,7 @@ public:
 	void detach() {
 		process.detach();
 	}
-	ElfHandle *getElfHandle() { return handle; }
+	// ElfHandle *getElfHandle() { return handle; }
 	bool handleMessages() {
 		return process.handleMessages();
 	}

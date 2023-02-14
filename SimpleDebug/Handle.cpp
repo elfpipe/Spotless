@@ -5,13 +5,14 @@ ElfHandle::ElfHandle (APTR handle, string name, bool isOpen) {
     this->handle = handle;
     this->isOpen = isOpen;
 
+	this->handleCopy = 0;
 	// if (!isOpen)
 	// 	open();
     //    lock();
 }
 
 ElfHandle::~ElfHandle() {
-	if(isOpen) close();
+	// if(isOpen) close();
 }
 
 void ElfHandle::lock()
