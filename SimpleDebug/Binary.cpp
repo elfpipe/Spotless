@@ -3,8 +3,8 @@
 #include "symtabs.h"
 #include <vector>
 Type::~Type(){}
-Array::Array(SourceObject *object, TypeNo no, astream &str)
-: Type(T_Array, no)
+Array::Array(SourceObject *object, astream &str)
+: Type(T_Array)
 {
     str.peekSkip('a');
     if(str.peek() == 'r') {
@@ -25,29 +25,26 @@ Array::Array(SourceObject *object, TypeNo no, astream &str)
         upper = str.getInt();
         str.peekSkip(';');
         if(str.peek() == '(') {
-            TypeNo tNo(str);
-            type = object->findType(tNo);
-            if(!type) {
-                type = object->interpretType(tNo, str);
-                if(type) object->addType(type);
-            }
+            type = object->interpretType(str);
+            // TypeNo tNo(str);
+            // type = object->findType(tNo);
+            // if(!type) {
+            //     type = object->interpretType(tNo, str);
+            //     if(type) object->addType(type);
+            // }
         } else type = 0;
     }
 }
-Struct::Struct(SourceObject *object, Type::TypeNo no, astream &str)
-: Type(T_Struct, no)
+Struct::Struct(SourceObject *object, astream &str)
+: Type(T_Struct)
 {
+    // cout << "struct :" << no.toString() << "\n";
     str.peekSkip('s');
     str.peekSkip('u');
     size = str.getInt();
     while(!str.eof()) {
         string name = str.get(':');
-        Type::TypeNo no(str);
-        Type *type = object->findType(no);
-        if(!type) {
-            type = object->interpretType(no, str);
-            if(type) object->addType(type);
-        }
+        Type *type = object->interpretType(str);
         str.peekSkip(',');
         uint64_t bitOffset = str.getInt();
         str.peekSkip(',');
@@ -55,85 +52,109 @@ Struct::Struct(SourceObject *object, Type::TypeNo no, astream &str)
         str.peekSkip(';');
         addEntry(name, type, bitOffset, bitSize);
         if(str.peek() == ';') {
+            // cout << "= = = = = END OF STRUCT = = = = = =\n";
             str.skip();
             break;
         }
     }
 }
-Pointer::Pointer(SourceObject *object, Type::TypeNo no, astream &str)
-: Type(T_Pointer, no),
-pointsTo(0)
-{
-    str.skip(); // '*'
-    Type::TypeNo pNo(str);
-    pointsTo = object->findType(pNo);
-    if(!pointsTo) {
-        pointsTo = object->interpretType(pNo, str);
-        if(pointsTo) object->addType(pointsTo);
-    }
-}
-Type *SourceObject::interpretType(Type::TypeNo no, astream &str) {
-    Type *type = 0;
+Type *SourceObject::interpretType(astream &str) {
+    if(str.eof()) return 0;
     str.peekSkip('='); //skip the '='
-    switch(str.peek()) {
+    char c = str.peek();
+    Type *nType = 0;
+    switch (c)
+    {
         case 'R': // range
-        case 'r':
-            type = new Range(no, str);
+        case 'r': {
+            Type::TypeNo no(str);
+            Type *iType = findType(no);
+            if(str.peek() == '=') {
+                str.skip();
+                if(str.peek() != 'r') {
+                    Type *rType = interpretType(str);
+                    nType = new Range(no, rType);
+                }
+                else
+                    nType = new Range(no, str);
+                addType(nType);
+            } else if (str.peek() == ';') {
+                nType = new Range(no, str);
+            } else {
+                nType = iType;
+            }
             break;
+        }
         case 'a': //array
-            type = new Array(this, no, str);
+            nType = new Array(this, str);
             break;
         case 's':  //struct or
         case 'u':  //union
-            type = new Struct(this, no, str);
+            nType = new Struct(this, str);
             break;
         case 'e': //enum
-            type = new Enum(no, str);
+            nType = new Enum(str);
             break;
-        case '*': //pointer
-            type = new Pointer(this, no, str);                
-            break;
-        case 'x': //conformant array
-            type = new ConformantArray(this, no, str);
-            break;
-        case 'f':
-            type = new FunctionType(no);
-            break;
-        case '(': {
-            Type::TypeNo iNo(str);
-            if(iNo.equals(no)) {
-                type = new Void(no);
+        case '*': { //pointer
+            Type::TypeNo no(str);
+            Type *pType = findType(no);
+            if(pType)
+                nType = new Pointer(no, pType);
+            if(str.peek() == '=') {
+                nType = new Pointer(no, interpretType(str));
             } else {
-                Type *iType = findType(iNo);
-                if(!iType) {
-                    iType = interpretType(iNo, str);
-                    if(iType) addType(iType);
-                }
-                type = new Ref(no, iType);
+                nType = new Pointer(no, nullptr);
+            }
+            addType (nType);
+            break;
+        }
+        case 'x': //conformant array
+            nType = new ConformantArray(this, str);
+            break;
+        case 'f': {
+            Type::TypeNo no(str);
+            Type *fType = findType(no);
+            if(fType)
+                nType = fType;
+            if(str.peek() == '=') {
+                nType = new FunctionType(no, interpretType(str));
+                addType(nType);
+            } else {
+                nType = new FunctionType(no, nullptr);
+                addType(nType);
+            }
+            break;
+        }
+        case 'p':
+        case 'P':
+        case 'G':
+        case 't':
+        case 'T':
+        case '(': {
+            Type::TypeNo no(str);
+            nType = findType(no);
+            Type::TypeNo iNo(0,21);
+            if(str.peek() == '=') {
+                nType = new Ref(no, interpretType(str));
+                addType(nType);
             }
             break;
         }
         default:
+            cout << "noise in interpretType() : character == \'" << c << "\'\n";
             break;
     }
-    if(type)
-        addType(type);
-    return type;
+    return nType;
 }
-Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address) {
+Type *SourceObject::resolveType(Type::TypeNo no, int *pointers) {
+    Type *iType = findType(no);
+    return iType->resolve(pointers);
+}
+Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address, unsigned char stabstype) {
     Symbol *result = 0;
     string name = str.get(':');
     char c = str.peek();
-    if(c != '(') str.skip(); 
-    Type::TypeNo no(str);
-    Type *type = findType(no);
-    if(type->typeClass == Type::T_ConformantArray) {
-        type = 0;
-    }
-    if(!type) {
-        type = interpretType(no, str);
-        if(type) addType(type);
-    }
+    Type *type = interpretType(str);
     switch(c) {
         case 't':
         case 'T':
@@ -146,34 +167,53 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address) {
             result = new Symbol(Symbol::S_Global, name, type, address);
             break;
         case 'p':
+        case 'P':
             result = new Symbol(Symbol::S_Param, name, type, address);
             break;
+        case 'r':
+            result = new Symbol(
+                stabstype == N_LSYM ? Symbol::S_Local :
+                stabstype == N_GSYM ? Symbol::S_Global :
+                stabstype == N_RSYM || stabstype == N_PSYM ? Symbol::S_Param :
+                Symbol::S_Typedef,
+                    name, type, address
+                );
+                break;
         default:
-            cout << "error " << c << "\n";
+            cout << "error in interpretSymbol : " << c << "\n";
             break;
     }
     return result;
 }
 vector<string> ConformantArray::values(uint32_t base, int generation, int maxGeneration) {
     vector<string> result;
+    return result;
     Type *type = object->findType(no);
     if(type) return type->values(base, generation, maxGeneration);
     return result;
 }
 
+Type *ConformantArray::resolve(int *pointer)
+{
+    Type *rType = object->findType(no);
+    return rType->resolve(pointer);
+}
+
 Function *SourceObject::interpretFun(astream &str, uint64_t address) {
     Function *result = 0;
     string name = str.get(':');
-    char c = str.get();
+    char c = str.peek();
     switch(c) {
         case 'F':
         case 'f': {
-            Type::TypeNo no(str);
-            Type *type = findType(no);
-            if(!type) {
-                type = new FunctionType(no);
-                if(type) addType(type);
-            }
+            str.skip();
+            Type *type = interpretType(str);
+            // Type::TypeNo no(str);
+            // Type *type = findType(no);
+            // if(!type) {
+                // Type *type = new FunctionType(this, str);
+                // if(type) addType(type);
+            // }
             result = new Function(name, type, address);
             break;
         }
@@ -181,6 +221,38 @@ Function *SourceObject::interpretFun(astream &str, uint64_t address) {
             break;
     }
     return result;
+}
+void SourceObject::doEXCL(SymtabEntry *_sym, SymtabEntry *stab, const char *stabstr, uint64_t stabsize)
+{
+    SymtabEntry *sym = _sym;
+    bool found = false;
+    string filename = string(stabstr + _sym->n_strx);
+    while(!found) {
+        sym--;
+        string newname = string(stabstr + sym->n_strx);
+        if(sym->n_type == N_BINCL && !newname.compare(filename)) found = true;
+        if(sym == stab) break;
+    }
+    if(!found) return;
+
+    int nested = 0;
+	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
+        astream str(string(stabstr + sym->n_strx));
+		switch (sym->n_type) {
+			case N_LSYM: {
+                    Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
+                    if(symbol) locals.push_back(symbol);
+                }
+                break;
+            case N_BINCL: nested++; break;
+            case N_EINCL: if(!--nested) return;
+            case N_EXCL: doEXCL(sym, stab, stabstr, stabsize); break;
+            default:
+                cout << "Unknown n_type in doEXCL : " << (void *)(unsigned int)sym->n_type << " .\n";
+                break;
+        }
+        sym++;
+    }
 }
 SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
     astream temp("r(0,0);0;-1;");
@@ -197,7 +269,9 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
     bool closeScope = false;
     vector<Symbol *> symbols;
 	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
-        astream str(string(stabstr + sym->n_strx));
+        string s(stabstr + sym->n_strx);
+        // cout << "str : " << s << "\n";
+        astream str(s);
 		switch (sym->n_type) {
             case N_SO:
                 end = sym->n_value;
@@ -209,17 +283,17 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
                 break;
 			case N_LSYM: {
                 if(function) {
-                    Symbol *symbol = interpretSymbol(str, sym->n_value);
-                    symbols.push_back(symbol);
+                    Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
+                    if(symbol) symbols.push_back(symbol);
                 }
                 else {
-                    Symbol *symbol = interpretSymbol(str, sym->n_value);
-                    locals.push_back(symbol);
+                    Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
+                    if(symbol) locals.push_back(symbol);
                 }
                 break;
             }
 			case N_GSYM: {
-                Symbol *symbol = interpretSymbol(str, sym->n_value);
+                Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
                 if(symbol)
                     globals.push_back(symbol);
                 break;
@@ -238,8 +312,9 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
                 }
                 break;
             }
-			case N_PSYM: {
-                Symbol *symbol = interpretSymbol(str, sym->n_value);
+			case N_PSYM:
+            case N_RSYM: {
+                Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
                 function->params.push_back(symbol);
                 break;
             }
@@ -261,6 +336,9 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
                 if(scope && scope->parent == 0) {
                     scope->end = scope->children.size() ? scope->children[0]->end : function->lines.size() ? function->lines[function->lines.size()-1]->address : function->address;
                 }
+                break;
+            case N_EXCL:
+                doEXCL(sym, stab, stabstr, stabsize);
                 break;
             default:
                 break;
@@ -449,8 +527,10 @@ vector<string> Binary::getGlobals(ElfSymbols &symbols) {
         for(int j = 0; j < object->globals.size(); j++) {
             Symbol *symbol = object->globals[j];
             if(symbol->symType == Symbol::S_Global) {
-                vector<string> values = symbol->values(symbols.valueOf(symbol->name));
-                result.insert(result.begin(), values.begin(), values.end());
+                if(symbols.valueOf(symbol->name)) {
+                    vector<string> values = symbol->values(symbols.valueOf(symbol->name));
+                    result.insert(result.begin(), values.begin(), values.end());
+                }
             }
         }
     }

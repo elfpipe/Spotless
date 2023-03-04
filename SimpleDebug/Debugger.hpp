@@ -92,7 +92,7 @@ public:
 	void detach() {
 		process.detach();
 	}
-	// ElfHandle *getElfHandle() { return handle; }
+	ElfHandle *getElfHandle() { return handle; }
 	bool handleMessages() {
 		return process.handleMessages();
 	}

@@ -63,9 +63,12 @@ public:
     void skip() {
         get();
     }
-    void peekSkip(char c) {
-        if(peek() == c)
+    bool peekSkip(char c) {
+        if(peek() == c) {
             skip();
+            return true;
+        }
+        return false;
     }
     void skipNums() {
         while(!ss.eof()) {

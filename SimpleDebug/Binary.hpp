@@ -22,13 +22,15 @@ public:
         bool equals(TypeNo &other) {
             return (t1 == other.t1 && t2 == other.t2);
         }
-        TypeNo(int t1 = 0, int t2 = 0) {
+        TypeNo(int t1, int t2) {
             this->t1 = t1;
             this->t2 = t2;
         }
+        TypeNo() { this->t1 = -1; this->t2 = -1; }
         TypeNo(astream &str)
         : TypeNo()
         {
+            if(str.peek() != '(') str.skip();
             if(str.peek() == '(') {
                 str.skip();
                 t1 = str.getInt();
@@ -63,20 +65,26 @@ public:
         this->typeClass = typeClass;
         this->no = no;
     }
+    Type(TypeClass typeClass) {
+        this->typeClass = typeClass;
+        this->no = TypeNo();
+    }
     virtual ~Type();
     virtual string toString() = 0;
     virtual uint32_t byteSize() = 0;
     virtual vector<string> values(uint32_t base, int generation, int maxGeneration) = 0;
+    virtual Type *resolve(int *pointer) = 0;
 };
 class Ref : public Type {
 public:
     Type *ref;
 public:
-    Ref(TypeNo no, Type *ref)
+    Ref(Type::TypeNo no, Type *ref)
     : Type(T_Ref, no)
     {
         this->ref = ref;
     }
+    // Ref(SourceObject *o, TypeNo no, astream &str);
     string toString() {
         return ref ? ref->toString() : string();
     }
@@ -86,6 +94,7 @@ public:
     vector<string> values(uint32_t base, int generation, int maxGeneration) {
         return ref ? ref->values(base, generation, maxGeneration) : vector<string>();
     };
+    Type *resolve(int *pointer) { return ref; }
 };
 class Void : public Type {
 public:
@@ -104,6 +113,7 @@ public:
         result.push_back("<void>");
         return result;
     };
+    Type *resolve(int *pointer) { return this; }
 };
 class Range : public Type {
 public:
@@ -120,13 +130,19 @@ public:
     } RangeType;
     RangeType rangeType;
     int64_t lower, upper;
-    Range(Type::TypeNo no, astream &str)
+    Type *ref;
+    Range(Type::TypeNo no, Type *ref)
     : Type(T_Range, no)
+    { this->ref = ref; }
+    Range(Type::TypeNo no, astream &str)
+    : Type(T_Range, no), ref(0)
     {
         str.peekSkip('=');
-        char c = str.get();
-        if(c == 'r') {
-            TypeNo newNo(str);
+        char c = str.peek();
+        if(c == 'r' || c == '(' || c == ';') {
+            if(c == 'r') str.skip();
+            if(str.peek() == '(')
+                TypeNo newNo(str);
             str.peekSkip(';');
             lower = str.getInt();
             str.peekSkip(';');
@@ -152,6 +168,7 @@ public:
                 rangeType = R_Defined;
             }
         } else if(c == 'R') {
+            str.skip();
             uint32_t kind = str.getInt();
             str.peekSkip(';');
             uint32_t bytes = str.getInt();
@@ -182,6 +199,8 @@ public:
                 rangeType = R_Complex16;
             if(bytes == 32 && rangeType == R_Complex8)
                 rangeType = R_Complex32;
+        } else {
+
         }
     }
     uint32_t byteSize() {
@@ -247,11 +266,14 @@ public:
         return result; // + patch::toString((unsigned int)byteSize());
     }
     vector<string> values(uint32_t base, int generation, int maxGeneration) {
+        if(ref) return ref->values(base, generation, maxGeneration);
+
         vector<string> result;
         if(!base || !is_readable_address(base)) {
             result.push_back("<no access>");
             return result;
         }
+
         switch(rangeType) {
             case R_Int64: {
 		        result.push_back(printStringFormat("%lld", *(uint64_t *)base));
@@ -329,6 +351,7 @@ public:
         }
         return result;
     }
+    Type *resolve(int *pointer) { return this; }
 };
 class Array : public Type {
 public:
@@ -336,7 +359,7 @@ public:
     uint64_t lower, upper;
     Type *type;
 public:
-    Array(SourceObject *object, TypeNo no, astream &str);
+    Array(SourceObject *object, astream &str);
     string toString() {
         return "a" + no.toString() + " [over: " + (range ? range->toString() : "<n>") + ";" + patch::toString((int)lower) + "," + patch::toString((int)upper)+ "] of " + (type ? type->toString() : "<n>");
     }
@@ -363,6 +386,7 @@ public:
         }
         return result;
     }
+    Type *resolve(int *pointer) { return this; }
 };
 class Struct : public Type { //applies to union
 public:
@@ -382,11 +406,12 @@ public:
     };
     vector<Entry *> entries;
     void addEntry(string name, Type *type, uint64_t bitOffset, uint64_t bitSize) {
+        // cout << "struct add entry : " << name << " " << (type != nullptr ? type->no.toString() : string("<void>")) << (type != nullptr ? type->toString() : string("void")) << " " << bitOffset << " " << bitSize << "\n";
         entries.push_back(new Entry(name, type, bitOffset, bitSize));
     }
     uint64_t size;
 public:
-    Struct(SourceObject *object, Type::TypeNo no, astream &str);
+    Struct(SourceObject *object, astream &str);
     string toString() {
         string result("s" + patch::toString((int)size) + " {\n");
         for(vector<Entry *>::iterator it = entries.begin(); it != entries.end(); it++)
@@ -414,6 +439,7 @@ public:
         }
         return result;
     }
+    Type *resolve(int *pointer) { return this; }
 };
 class Enum : public Type {
 public:
@@ -433,7 +459,7 @@ public:
         entries.push_back(new Entry(name, value));
     }
 public:
-    Enum(TypeNo no, astream &str)
+    Enum(astream &str)
     : Type(T_Enum, no)
     {
         str.peekSkip('e');
@@ -474,12 +500,17 @@ public:
         }
         return result;
     }
+    Type *resolve(int *pointer) { return this; }
 };
 class Pointer : public Type {
 public:
     Type *pointsTo;
 public:
-    Pointer(SourceObject *object, Type::TypeNo no, astream &str);
+    Pointer(Type::TypeNo no, Type *type)
+    : Type(T_Pointer, no),
+    pointsTo(type)
+    { }
+    // Pointer(SourceObject *object, Type::TypeNo no, astream &str);
     string toString() {
         return "(*) " + (pointsTo ? pointsTo->toString() : "");
     }
@@ -488,11 +519,13 @@ public:
     }
     vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
-        // result.push_back(toString());
-        // return result;
 
         uint32_t address = 0x0;
         if(base && is_readable_address(base)) address = *(uint32_t *)base;
+        if(!is_readable_address(address)) {
+            result.push_back("<no access>");
+            return result;
+        }
         // result.push_back(printStringFormat("(*) (0x%x) %s", address, pointsTo->toString()));
         vector<string> v;
         if (generation <= maxGeneration) {
@@ -504,14 +537,15 @@ public:
         }
         return result;
     }
+    Type *resolve(int *pointer) { pointer++; return pointsTo->resolve(pointer); }
 };
 class ConformantArray : public Type {
 private:
     SourceObject *object;
     string name;
 public:
-    ConformantArray(SourceObject *o, Type::TypeNo no, astream &str)
-    : Type(T_ConformantArray, no), object(o)
+    ConformantArray(SourceObject *o, astream &str)
+    : Type(T_ConformantArray), object(o)
     {
         str.skip('x');
         char c = str.get();
@@ -533,19 +567,30 @@ public:
         return 0;
     }
     vector<string> values(uint32_t base, int generation, int maxGeneration); // defined in Binary.cpp
+    Type *resolve(int *pointer);
 };
 class FunctionType : public Type {
+private:
+    Type *pointsTo;
 public:
     FunctionType(Type::TypeNo no)
-    : Type(T_Function, no)
+    : Type(T_Function, no), pointsTo(0)
     { }
-    string toString() { return "f" + no.toString(); }
+    FunctionType(Type::TypeNo no, Type *retValue)
+    : Type(T_Function, no)
+    {
+        pointsTo = retValue;
+    }
+    // FunctionType(SourceObject *o, astream &str);
+    string toString() { return "f" + no.toString() + (pointsTo ? " pointsTo " + pointsTo->toString() : ""); }
     uint32_t byteSize() { return sizeof(void *); }
     vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
+        // if(pointsTo) result = pointsTo->values(base, generation, maxGeneration);
         result.push_back("<function>");
         return result;
     }
+    Type *resolve(int *pointer) { return this; /* todo: What about return code? */ }
 };
 class Symbol {
 public:
@@ -589,10 +634,11 @@ public:
         vector<string> result;
         if(symType == S_Typedef) return result; 
         vector<string> v;
+        int pointers = 0;
         if(type) v = type->values(base + address, 1, 10);
         if(v.size() == 1)
             result.push_back(name + " " + typeString() + " : " + v[0]);
-        else {
+        else if(v.size()) {
             result.push_back(name + " " + typeString() + " : {");
             result.insert(result.end(), v.begin(), v.end());
             result.push_back("}");
@@ -686,9 +732,12 @@ public:
     }
 public:
     SourceObject(SymtabEntry **sym, SymtabEntry *stab, const char *stabstr, uint64_t stabsize);
-    Type *interpretType(Type::TypeNo no, astream &str);
-    Symbol *interpretSymbol(astream &str, uint64_t address);
+    // Type *interpretType(Type::TypeNo no, astream &str);
+    Type *interpretType(astream &str);
+    Type *resolveType(Type::TypeNo no, int *pointers);
+    Symbol *interpretSymbol(astream &str, uint64_t address, unsigned char type);
     Function *interpretFun(astream &str, uint64_t address);
+    void doEXCL(SymtabEntry *_sym, SymtabEntry *stab, const char *stabstr, uint64_t stabsize);
     string toString();
 };
 class Binary {
