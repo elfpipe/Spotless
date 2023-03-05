@@ -373,7 +373,11 @@ public:
         uint32_t place = lower;
 
         if(!type) {
-            result.push_back("no type for array");
+            result.push_back("<typeless array>");
+            return result;
+        }
+        if(!is_readable_address(adderss)) {
+            result.push_back("<no access>");
             return result;
         }
         while(place <= upper) {

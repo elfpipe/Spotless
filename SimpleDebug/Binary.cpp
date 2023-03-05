@@ -172,9 +172,9 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address, unsigned 
             break;
         case 'r':
             result = new Symbol(
-                stabstype == N_LSYM ? Symbol::S_Local :
+                stabstype == N_LSYM || stabstype == N_RSYM ? Symbol::S_Local :
                 stabstype == N_GSYM ? Symbol::S_Global :
-                stabstype == N_RSYM || stabstype == N_PSYM ? Symbol::S_Param :
+                stabstype == N_PSYM ? Symbol::S_Param :
                 Symbol::S_Typedef,
                     name, type, address
                 );
