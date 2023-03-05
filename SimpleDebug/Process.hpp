@@ -124,7 +124,7 @@ public:
 	uint32_t branchAddress();
 
 	uint32_t ip () { if(!exists) return 0; readContext(); return contextCopy.ip; }
-	uint32_t sp () { if(!exists) return 0; readContext(); return contextCopy.gpr[1]; } //return (uint32_t)process->pr_Task.tc_SPReg; }
+	uint32_t sp () { if(!exists) return 0; readContext(); return contextCopy.gpr[1]; } // return (uint32_t)process->pr_Task.tc_SPReg; }
 	uint32_t lr () { if(!exists) return 0; readContext(); return contextCopy.lr; }
 
 	struct ExceptionContext *getContext() {

@@ -30,6 +30,9 @@ https://github.com/alfkil/Spotless
 
 == History:
 
+2.3.0 :
+        -- Reworked the stabs interpreter to handle new style of gcc 11.
+        
 2.2.1 :
         -- Correct highlighing of sourceline on trace/stepwise execution.
         -- Iconify now shows the Spotless icon on the workbench.

@@ -269,7 +269,7 @@ public:
         if(ref) return ref->values(base, generation, maxGeneration);
 
         vector<string> result;
-        if(!base || !is_readable_address(base)) {
+        if(!base || !is_readable_address_st(base)) {
             result.push_back("<no access>");
             return result;
         }
@@ -305,6 +305,8 @@ public:
                 result.push_back("imag : " + patch::toString(*(long double *)(base + 16)));
                 break;
             case R_Defined:
+                cout << "lower :" << lower << "\n";
+                cout << "byteSize : " << byteSize() << "\n";
                 if(lower >= 0) {
                     switch(byteSize()) {
                         case 1:
@@ -333,10 +335,10 @@ public:
                             result.push_back(patch::toString(*(short *)base));
                             break;
                         case 4:
-                            result.push_back(patch::toString(*(int *)base));
+                            result.push_back(printStringFormat("%ld", *(int *)base));
                             break;
                         case 8: {
-            		        result.push_back(printStringFormat("%lld", *(uint64_t *)base));
+            		        result.push_back(printStringFormat("%lld", *(int64_t *)base));
                             break;
                         }
                         default:
@@ -351,7 +353,7 @@ public:
         }
         return result;
     }
-    Type *resolve(int *pointer) { return this; }
+    Type *resolve(int *pointer) { return ref ? ref->resolve(pointer) : this; }
 };
 class Array : public Type {
 public:
@@ -376,8 +378,8 @@ public:
             result.push_back("<typeless array>");
             return result;
         }
-        if(!is_readable_address(adderss)) {
-            result.push_back("<no access>");
+        if(!is_readable_address_st(address)) {
+            result.push_back("<no access to array>");
             return result;
         }
         while(place <= upper) {
@@ -407,6 +409,27 @@ public:
         string toString() {
             return name + " : [" + patch::toString((int)bitOffset) + "," + patch::toString((int)bitSize) + "] of " + (type ? type->toString() : "<no type>");
         }
+        vector<string> defaultValues(uint32_t address, int generation, int maxGeneration) {
+            vector<string> result;
+            switch(bitSize) {
+                case 8:
+                    result.push_back(patch::toString(*(unsigned char *)address));
+                        break;
+                case 16:
+                    result.push_back(patch::toString(*(unsigned short *)address));
+                        break;
+                case 32:
+                    result.push_back(patch::toString(*(unsigned int *)address));
+                    break;
+                case 64:
+                    result.push_back(printStringFormat("%llu", *(uint64_t *)address));
+                    break;
+                default:
+                    result.push_back("<unreadable>");
+                    break;
+            }
+            return result;
+        }
     };
     vector<Entry *> entries;
     void addEntry(string name, Type *type, uint64_t bitOffset, uint64_t bitSize) {
@@ -432,6 +455,7 @@ public:
                 uint32_t offset = entries[i]->bitOffset / 8;
                 vector<string> v;
                 if(entries[i]->type) v = entries[i]->type->values(base + offset, generation + 1, maxGeneration);
+                else v = entries[i]->defaultValues(base + offset, generation + 1, maxGeneration);
                 if(v.size() == 1)
                     result.push_back(entries[i]->name + " : " + v[0]);
                 else {
@@ -492,7 +516,7 @@ public:
     }
     vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
-        if(is_readable_address(base)) {
+        if(is_readable_address_st(base)) {
             int value = *(int *)base;
             for(int i = 0; i < entries.size(); i++)
                 if(entries[i]->value == value) {
@@ -525,17 +549,24 @@ public:
         vector<string> result;
 
         uint32_t address = 0x0;
-        if(base && is_readable_address(base)) address = *(uint32_t *)base;
-        if(!is_readable_address(address)) {
+        if(base && is_readable_address_st(base)) { address = *(uint32_t *)base; }
+        if(!is_readable_address_st(address)) {
             result.push_back("<no access>");
             return result;
         }
-        // result.push_back(printStringFormat("(*) (0x%x) %s", address, pointsTo->toString()));
+        int pointers = 0;
+        if(pointsTo && pointsTo->resolve(&pointers) && pointers == 0) {
+            if(pointsTo->resolve(&pointers)->typeClass == T_Range && pointsTo->byteSize() == 1) {
+                 // we have a string, perhaps?
+                result.push_back(printStringFormat("(char *) (0x%x) \"%s\"", address, address));
+                return result;
+            }
+        }
         vector<string> v;
         if (generation <= maxGeneration) {
             if(pointsTo && address) v = pointsTo->values(address, generation + 1, maxGeneration);
             if(v.size() == 1)
-                result.push_back(printStringFormat("(*) (0x%x) %s", address, v[0]));
+                result.push_back(printStringFormat("(*) (0x%x) %s", address, v[0].c_str()));
             else
                 result.insert(result.end(), v.begin(), v.end());
         }
@@ -636,7 +667,7 @@ public:
     }
     vector<string> values(uint32_t base) {
         vector<string> result;
-        if(symType == S_Typedef) return result; 
+        if(symType == S_Typedef) return result;
         vector<string> v;
         int pointers = 0;
         if(type) v = type->values(base + address, 1, 10);

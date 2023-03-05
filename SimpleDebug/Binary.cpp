@@ -102,7 +102,7 @@ Type *SourceObject::interpretType(astream &str) {
                 nType = new Pointer(no, pType);
             if(str.peek() == '=') {
                 nType = new Pointer(no, interpretType(str));
-            } else {
+            } else if(!pType) {
                 nType = new Pointer(no, nullptr);
             }
             addType (nType);
@@ -537,9 +537,8 @@ vector<string> Binary::getGlobals(ElfSymbols &symbols) {
     return result;
 }
 string Binary::toString() {
-    // string result = "<Binary> : [ STAB: 0x" + patch::toString((void*)stab) + " STABSTR: 0x" + patch::toString((void *)stabstr) + " STABSIZE: " + patch::toString((int)stabsize) + "] -- {\n";
-    // for(vector<SourceObject *>::iterator it = objects.begin(); it != objects.end(); it++)
-    //     result += (*it)->toString();
-    // return result + "}\n";
-    return string();
+    string result = "<Binary> : {\n"; // [ STAB: 0x" + patch::toString((void*)stab) + " STABSTR: 0x" + patch::toString((void *)stabstr) + " STABSIZE: " + patch::toString((int)stabsize) + "] -- {\n";
+    for(vector<SourceObject *>::iterator it = objects.begin(); it != objects.end(); it++)
+        result += (*it)->toString();
+    return result + "}\n";
 }
