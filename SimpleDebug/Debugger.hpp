@@ -291,7 +291,7 @@ public:
 		// }
 	}
 	vector<string> context() {
-		return binary ? binary->getContext(process.ip(), process.sp()) : vector<string>();
+		return binary ? binary->getContext(process.getContext(), process.ip(), process.sp()) : vector<string>();
 	}
 	vector<string> globals() {
 		return binary ? binary->getGlobals(symbols) : vector<string>();

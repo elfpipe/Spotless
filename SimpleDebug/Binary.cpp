@@ -168,11 +168,12 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address, unsigned 
             break;
         case 'p':
         case 'P':
-            result = new Symbol(Symbol::S_Param, name, type, address);
+            result = new Symbol(stabstype == N_RSYM ? Symbol::S_Register : Symbol::S_Param, name, type, address);
             break;
         case 'r':
             result = new Symbol(
-                stabstype == N_LSYM || stabstype == N_RSYM ? Symbol::S_Local :
+                stabstype == N_LSYM ? Symbol::S_Local :
+                stabstype == N_RSYM ? Symbol::S_Register :
                 stabstype == N_GSYM ? Symbol::S_Global :
                 stabstype == N_PSYM ? Symbol::S_Param :
                 Symbol::S_Typedef,
@@ -292,6 +293,9 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
                 }
                 break;
             }
+            case N_LCSYM:
+            case N_STSYM:
+            case N_ROSYM:
 			case N_GSYM: {
                 Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
                 if(symbol)
@@ -312,8 +316,8 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
                 }
                 break;
             }
-			case N_PSYM:
-            case N_RSYM: {
+            case N_RSYM: // register sym
+			case N_PSYM: {
                 Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
                 function->params.push_back(symbol);
                 break;
@@ -493,7 +497,7 @@ uint32_t Binary::getFunctionAddress(string name) {
     }
     return 0x0;
 }
-vector<string> Binary::getContext(uint32_t ip, uint32_t sp) {
+vector<string> Binary::getContext(struct ExceptionContext *eContext, uint32_t ip, uint32_t sp) {
     vector<string> result;
     Function *function = getFunction(ip);
     if(!function) return result;
@@ -501,8 +505,16 @@ vector<string> Binary::getContext(uint32_t ip, uint32_t sp) {
     /* parameters */
     for(int i = 0; i < function->params.size(); i++) {
         if (function->params[i]) {
-            vector<string> values = function->params[i]->values(sp);
-            result.insert(result.end(), values.begin(), values.end());
+            if(function->params[i]->symType == Symbol::S_Register) {
+                // cout << "S_Register : address == " << function->params[i]->address << " gpr == " << (void *)eContext->gpr[function->params[i]->address] << "\n";
+                // printf("string : %s\n", (const char *)eContext->gpr[function->params[i]->address]);
+                // cout << "address of register : " << (void *)&eContext->gpr[function->params[i]->address] << "\n";
+                vector<string> values = function->params[i]->values((uint32_t)&eContext->gpr[function->params[i]->address]);
+                result.insert(result.end(), values.begin(), values.end());
+            } else {
+                vector<string> values = function->params[i]->values(sp);
+                result.insert(result.end(), values.begin(), values.end());
+            }
         } else {
             result.push_back("<no symbol info>");
         }
@@ -527,6 +539,10 @@ vector<string> Binary::getGlobals(ElfSymbols &symbols) {
         for(int j = 0; j < object->globals.size(); j++) {
             Symbol *symbol = object->globals[j];
             if(symbol->symType == Symbol::S_Global) {
+                if(symbol->address) {
+                    vector<string> values = symbol->values(0);
+                    result.insert(result.begin(), values.begin(), values.end());
+                } else
                 if(symbols.valueOf(symbol->name)) {
                     vector<string> values = symbol->values(symbols.valueOf(symbol->name));
                     result.insert(result.begin(), values.begin(), values.end());

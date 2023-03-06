@@ -633,6 +633,7 @@ public:
         S_Typedef = 1,
         S_Local,
         S_Param,
+        S_Register,
         S_Global,
         S_Function,
         S_Bracket
@@ -655,6 +656,8 @@ public:
                 return "<Local>";
             case S_Param:
                 return "<Param>";
+            case S_Register:
+                return "<Register>";
             case S_Global:
                 return "<Global>";
             case S_Function:
@@ -670,7 +673,11 @@ public:
         if(symType == S_Typedef) return result;
         vector<string> v;
         int pointers = 0;
-        if(type) v = type->values(base + address, 1, 10);
+        // if(symType == S_Register) {cout << "<register> type == " << type->toString() << type->resolve(&pointers)->toString() << pointers << "\n";
+        // cout << "base : " << (void *)base << "\n";
+        // if(!is_readable_address_st(base)) cout << "Unreadable.\n"; 
+        // if(type) v = type->values(base, 1, 10); } else
+        if(type) v = type->values(base + (symType == S_Register ? 0 : address), 1, 10);
         if(v.size() == 1)
             result.push_back(name + " " + typeString() + " : " + v[0]);
         else if(v.size()) {
@@ -756,8 +763,11 @@ public:
     vector<Function *> functions;
 public:
     Type *findType(Type::TypeNo &no) {
-        for(int i = 0; i < types.size(); i++)
-            if(types[i]->no.equals(no) && types[i]->typeClass != Type::T_ConformantArray) {
+        for(int i = types.size()-1; i >= 0; i--)
+            if(types[i]->no.equals(no)
+            && types[i]->typeClass != Type::T_ConformantArray
+            && types[i]->typeClass != Type::T_Function
+            ) {
                 return types[i];
             }
         return 0;
@@ -796,7 +806,7 @@ public:
     int getSourceLine(uint32_t address);
     // bool isLastLine(uint32_t address);
     uint32_t getFunctionAddress(string name);
-    vector<string> getContext(uint32_t ip, uint32_t sp);
+    vector<string> getContext(struct ExceptionContext *eContext, uint32_t ip, uint32_t sp);
     vector<string> getGlobals(ElfSymbols &symbols);
     string toString();
 };
