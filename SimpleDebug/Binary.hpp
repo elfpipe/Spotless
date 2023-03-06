@@ -368,6 +368,37 @@ public:
     uint32_t byteSize() {
         return type->byteSize() * (upper - lower);
     }
+    vector<string> formatChar(uint32_t base) {
+        vector<string> result;
+        uint32_t place = lower;
+        int left = upper - lower;
+        while(left) {
+            if(left < 8) {
+                string r = printStringFormat("[0x%x] : ", place);
+                while(left) {
+                    char c[3] = { *(char *)(base + place), 0, 0 };
+                    if(c[0] == '\0') { c[0] = '\\'; c[1] = '0'; }
+                    string p = printStringFormat(" \'%s\' ", c);
+                    r.append(p);
+                    left--;
+                    place++;
+                }
+                result.push_back(r);
+            } else {
+                char *s = (char *)(base + place);
+                char c[24] = {*s, 0, 0, *(s+1), 0, 0, *(s+2), 0, 0, *(s+3), 0, 0, *(s+4), 0, 0, *(s+5), 0, 0, *(s+6), 0, 0, *(s+7), 0, 0 };
+                for(int i = 0; i < 8; i++) {
+                    if(c[i*3] == '\0') { c[i*3] = '\\'; c[i*3+1] = '0'; }
+                }
+                string r = printStringFormat("[0x%x] : \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%s\'",
+                            place, c, c+3, c+6, c+9, c+12, c+15, c+18, c+21);
+                result.push_back(r);
+                left -= 8;
+                place += 8;
+            }
+        }
+        return result;
+    }
     vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
 
@@ -382,10 +413,15 @@ public:
             result.push_back("<no access to array>");
             return result;
         }
-        while(place <= upper) {
-            if(generation <= maxGeneration) {
+        if(generation <= maxGeneration) {
+            if(type->byteSize() == 1) return formatChar(base);
+            while(place <= upper) {
                 vector<string> v = type->values(address, generation+1, maxGeneration);
-                result.insert(result.end(), v.begin(), v.end());
+                if(v.size() == 1) result.push_back(printStringFormat("[0x%x] : %s", place, v[0].c_str()));
+                else {
+                    result.push_back(printStringFormat("[0x%x] :", place));
+                    result.insert(result.end(), v.begin(), v.end());
+                }
                 address += type->byteSize();
                 place++;
             }
