@@ -26,12 +26,6 @@ Array::Array(SourceObject *object, astream &str)
         str.peekSkip(';');
         if(str.peek() == '(') {
             type = object->interpretType(str);
-            // TypeNo tNo(str);
-            // type = object->findType(tNo);
-            // if(!type) {
-            //     type = object->interpretType(tNo, str);
-            //     if(type) object->addType(type);
-            // }
         } else type = 0;
     }
 }
@@ -80,6 +74,7 @@ Type *SourceObject::interpretType(astream &str) {
                 addType(nType);
             } else if (str.peek() == ';') {
                 nType = new Range(no, str);
+                addType(nType);
             } else {
                 nType = iType;
             }
@@ -99,13 +94,13 @@ Type *SourceObject::interpretType(astream &str) {
             Type::TypeNo no(str);
             Type *pType = findType(no);
             if(pType)
-                nType = new Pointer(no, pType);
-            if(str.peek() == '=') {
-                nType = new Pointer(no, interpretType(str));
+                nType = new Pointer(this, no, pType);
+            if(str.peekSkip('=')) {
+                nType = new Pointer(this, no, interpretType(str));
             } else if(!pType) {
-                nType = new Pointer(no, nullptr);
+                nType = new Pointer(this, no, nullptr);
             }
-            addType (nType);
+            addHidden(nType); //pointers should not come up in search
             break;
         }
         case 'x': //conformant array
@@ -130,12 +125,14 @@ Type *SourceObject::interpretType(astream &str) {
         case 'G':
         case 't':
         case 'T':
+        case 'S':
+        case 'V':
         case '(': {
             Type::TypeNo no(str);
             nType = findType(no);
-            Type::TypeNo iNo(0,21);
+            Type::TypeNo iNo(0,7);
             if(str.peek() == '=') {
-                nType = new Ref(no, interpretType(str));
+                nType = new Ref(this, no, interpretType(str));
                 addType(nType);
             }
             break;
@@ -161,7 +158,11 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address, unsigned 
             result = new Symbol(Symbol::S_Typedef, name, type, address);
             break;
         case '(':
-            result = new Symbol(Symbol::S_Local, name, type, address);
+            result = new Symbol(Symbol::S_Stack, name, type, address);
+            break;
+        case 'S':
+        case 'V':
+            result = new Symbol(Symbol::S_Absolute, name, type, address);
             break;
         case 'G':
             result = new Symbol(Symbol::S_Global, name, type, address);
@@ -172,7 +173,7 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address, unsigned 
             break;
         case 'r':
             result = new Symbol(
-                stabstype == N_LSYM ? Symbol::S_Local :
+                stabstype == N_LSYM ? Symbol::S_Stack :
                 stabstype == N_RSYM ? Symbol::S_Register :
                 stabstype == N_GSYM ? Symbol::S_Global :
                 stabstype == N_PSYM ? Symbol::S_Param :
@@ -181,23 +182,71 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address, unsigned 
                 );
                 break;
         default:
-            cout << "error in interpretSymbol : " << c << "\n";
+            cout << "noise in interpretSymbol : " << c << "\n";
             break;
     }
     return result;
 }
+vector<string> Ref::values(uint32_t base, int generation, int maxGeneration) {
+    if(ref && ref->typeClass == T_ConformantArray) {
+        Type *cType = so->findType(no, this);
+        if(cType)
+            return cType->values(base, generation, maxGeneration);
+    }
+    return ref ? ref->values(base, generation, maxGeneration) : vector<string>();
+}
 vector<string> ConformantArray::values(uint32_t base, int generation, int maxGeneration) {
     vector<string> result;
+    Symbol *sym = object->findSymbolByName(name);
+    if(sym && sym->type) return sym->type->values(base, generation, maxGeneration);
+    else result.push_back("<unresolved conformant>");
     return result;
-    Type *type = object->findType(no);
-    if(type) return type->values(base, generation, maxGeneration);
+}
+vector<string> Pointer::values(uint32_t base, int generation, int maxGeneration) {
+    vector<string> result;
+
+    uint32_t address = 0x0;
+    if(base && is_readable_address_st(base)) { address = *(uint32_t *)base; }
+    if(!is_readable_address_st(address)) {
+        result.push_back("<no access>");
+        return result;
+    }
+    if(pointsTo && pointsTo->typeClass == T_ConformantArray) {
+        Type *cType = object->findType(no);
+        if(cType) {
+            return cType->values(address, generation, maxGeneration);
+        }
+        result.push_back("<unresolved conformant>");
+        return result;
+    }
+    int pointers = 0;
+    if(pointsTo && pointsTo->resolve(&pointers)) {
+        if(pointers == 0 && pointsTo->resolve(&pointers)->typeClass == T_Range && pointsTo->byteSize() == 1) {
+            cout << "string perhaps?\n";
+                // we have a string, perhaps?
+            // if(is_readable_string(address))
+            //     result.push_back(printStringFormat("(char *) (0x%x) \"%s\"", address, address));
+            // else result.push_back("<void>");
+            cout << "string done.\n";
+            return result;
+        }
+    }
+    vector<string> v;
+    if (generation <= maxGeneration) {
+        if(pointsTo && address) v = pointsTo->values(address, generation + 1, maxGeneration);
+        if(v.size() == 1)
+            result.push_back(printStringFormat("(*) (0x%x) %s", address, v[0].c_str()));
+        else
+            result.insert(result.end(), v.begin(), v.end());
+    }
     return result;
 }
 
 Type *ConformantArray::resolve(int *pointer)
 {
-    Type *rType = object->findType(no);
-    return rType->resolve(pointer);
+    Symbol *sym = object->findSymbolByName(name);
+    if(sym && sym->type) return sym->type->resolve(pointer);
+    return this;
 }
 
 Function *SourceObject::interpretFun(astream &str, uint64_t address) {
@@ -209,12 +258,6 @@ Function *SourceObject::interpretFun(astream &str, uint64_t address) {
         case 'f': {
             str.skip();
             Type *type = interpretType(str);
-            // Type::TypeNo no(str);
-            // Type *type = findType(no);
-            // if(!type) {
-                // Type *type = new FunctionType(this, str);
-                // if(type) addType(type);
-            // }
             result = new Function(name, type, address);
             break;
         }
@@ -295,7 +338,33 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
             }
             case N_LCSYM:
             case N_STSYM:
-            case N_ROSYM:
+            case N_ROSYM: {
+                astream test(s);
+                test.get(':');
+                char c = test.peek();
+                switch (c) {
+                    case 'S': {
+                        Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
+                        if(symbol)
+                            globals.push_back(symbol);
+                    }
+                    break;
+
+                    case 'V': {
+                        if(function) {
+                            Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
+                            if(symbol) symbols.push_back(symbol);
+                        }
+                        else {
+                            Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
+                            if(symbol) globals.push_back(symbol); // stray 'V' symbols go into the globals
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+
 			case N_GSYM: {
                 Symbol *symbol = interpretSymbol(str, sym->n_value, sym->n_type);
                 if(symbol)
@@ -363,6 +432,15 @@ string SourceObject::toString() {
         result += (*it)->toString() + "\n";
     return result + "}\n";
 }
+Symbol *SourceObject::findSymbolByName(string name) {
+    for(vector<Symbol *>::iterator it = locals.begin(); it != locals.end(); it++) {
+        if(!name.compare((*it)->name)) return (*it);
+    }
+    for(vector<Symbol *>::iterator it = globals.begin(); it != globals.end(); it++) {
+        if(!name.compare((*it)->name)) return (*it);
+    }
+    return nullptr;
+}
 Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
     ProgressWindow progress;
     progress.open("Loading stabs...", (unsigned int)stabsize, 0);
@@ -384,7 +462,6 @@ Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t sta
         sym++;
     }
     progress.close();
-    // string result = toString();
 }
 vector<string> Binary::getSourceNames() {
     vector<string> result;
@@ -525,7 +602,10 @@ vector<string> Binary::getContext(struct ExceptionContext *eContext, uint32_t ip
     if(scope) scope = scope->getScope(ip);
     while(scope) {
         for(int j = 0; j < scope->symbols.size(); j++) {
-            vector<string> values = scope->symbols[j]->values(sp);
+            vector<string> values;
+            if(scope->symbols[j]->symType == Symbol::S_Absolute)
+                values = scope->symbols[j]->values(0); // base == 0, so just the absolute address
+            else values = scope->symbols[j]->values(sp);
             result.insert(result.end(), values.begin(), values.end());
         }
         scope = scope->parent;
@@ -533,12 +613,15 @@ vector<string> Binary::getContext(struct ExceptionContext *eContext, uint32_t ip
     return result;
 }
 vector<string> Binary::getGlobals(ElfSymbols &symbols) {
+    ProgressWindow progress;
+    progress.open("Globals...", (unsigned int)objects.size(), 0);
     vector<string> result;
     for(int i = 0; i < objects.size(); i++) {
+        progress.updateLevel(i);
         SourceObject *object = objects[i];
         for(int j = 0; j < object->globals.size(); j++) {
             Symbol *symbol = object->globals[j];
-            if(symbol->symType == Symbol::S_Global) {
+            // if(symbol->symType == Symbol::S_Global) {
                 if(symbol->address) {
                     vector<string> values = symbol->values(0);
                     result.insert(result.begin(), values.begin(), values.end());
@@ -547,9 +630,10 @@ vector<string> Binary::getGlobals(ElfSymbols &symbols) {
                     vector<string> values = symbol->values(symbols.valueOf(symbol->name));
                     result.insert(result.begin(), values.begin(), values.end());
                 }
-            }
+            // }
         }
     }
+    progress.close();
     return result;
 }
 string Binary::toString() {

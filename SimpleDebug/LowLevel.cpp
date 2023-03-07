@@ -67,6 +67,16 @@ bool is_readable_address_st (uint32_t addr)
     return result;
 }
 
+#define MAX_STRING 1024
+bool is_readable_string(uint32_t addr) {
+	int i = 0;
+	char *s = (char *)addr;
+	bool readable;
+	while(i++ < MAX_STRING && (readable = is_readable_address((uint32_t)s)) && *s++)
+		;
+	return readable;
+}
+
 bool is_readable_address (uint32_t addr)
 {
 	// return Memory_Readable((APTR)addr);

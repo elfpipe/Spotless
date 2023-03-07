@@ -77,11 +77,13 @@ public:
 };
 class Ref : public Type {
 public:
+    SourceObject *so;
     Type *ref;
 public:
-    Ref(Type::TypeNo no, Type *ref)
+    Ref(SourceObject *so, Type::TypeNo no, Type *ref)
     : Type(T_Ref, no)
     {
+        this->so = so;
         this->ref = ref;
     }
     // Ref(SourceObject *o, TypeNo no, astream &str);
@@ -91,9 +93,7 @@ public:
     uint32_t byteSize() {
         return ref->byteSize();
     }
-    vector<string> values(uint32_t base, int generation, int maxGeneration) {
-        return ref ? ref->values(base, generation, maxGeneration) : vector<string>();
-    };
+    vector<string> values(uint32_t base, int generation, int maxGeneration);
     Type *resolve(int *pointer) { return ref; }
 };
 class Void : public Type {
@@ -263,6 +263,7 @@ public:
                 result += "Def(" + patch::toString((int)lower) + "," + patch::toString((int)upper) + ")";
                 break;
         }
+        if(ref) { result += ref->toString(); }
         return result; // + patch::toString((unsigned int)byteSize());
     }
     vector<string> values(uint32_t base, int generation, int maxGeneration) {
@@ -305,8 +306,6 @@ public:
                 result.push_back("imag : " + patch::toString(*(long double *)(base + 16)));
                 break;
             case R_Defined:
-                cout << "lower :" << lower << "\n";
-                cout << "byteSize : " << byteSize() << "\n";
                 if(lower >= 0) {
                     switch(byteSize()) {
                         case 1:
@@ -447,6 +446,7 @@ public:
         }
         vector<string> defaultValues(uint32_t address, int generation, int maxGeneration) {
             vector<string> result;
+            if(!is_readable_address_st(address)) return result;
             switch(bitSize) {
                 case 8:
                     result.push_back(patch::toString(*(unsigned char *)address));
@@ -490,14 +490,16 @@ public:
             for(int i = 0; i < entries.size(); i++) {
                 uint32_t offset = entries[i]->bitOffset / 8;
                 vector<string> v;
-                if(entries[i]->type) v = entries[i]->type->values(base + offset, generation + 1, maxGeneration);
+                if(entries[i]->type) { v = entries[i]->type->values(base + offset, generation + 1, maxGeneration); }
                 else v = entries[i]->defaultValues(base + offset, generation + 1, maxGeneration);
                 if(v.size() == 1)
                     result.push_back(entries[i]->name + " : " + v[0]);
-                else {
+                else if(v.size()) {
                     result.push_back(entries[i]->name + " : {");
                     result.insert(result.end(), v.begin(), v.end());
                     result.push_back("}");
+                } else {
+                    result.push_back(entries[i]->name + " : <void>");
                 }
             }
         }
@@ -568,10 +570,12 @@ public:
 };
 class Pointer : public Type {
 public:
+    SourceObject *object;
     Type *pointsTo;
 public:
-    Pointer(Type::TypeNo no, Type *type)
+    Pointer(SourceObject *o, Type::TypeNo no, Type *type)
     : Type(T_Pointer, no),
+    object(o),
     pointsTo(type)
     { }
     // Pointer(SourceObject *object, Type::TypeNo no, astream &str);
@@ -581,34 +585,8 @@ public:
     uint32_t byteSize() {
         return sizeof(void*);
     }
-    vector<string> values(uint32_t base, int generation, int maxGeneration) {
-        vector<string> result;
-
-        uint32_t address = 0x0;
-        if(base && is_readable_address_st(base)) { address = *(uint32_t *)base; }
-        if(!is_readable_address_st(address)) {
-            result.push_back("<no access>");
-            return result;
-        }
-        int pointers = 0;
-        if(pointsTo && pointsTo->resolve(&pointers) && pointers == 0) {
-            if(pointsTo->resolve(&pointers)->typeClass == T_Range && pointsTo->byteSize() == 1) {
-                 // we have a string, perhaps?
-                result.push_back(printStringFormat("(char *) (0x%x) \"%s\"", address, address));
-                return result;
-            }
-        }
-        vector<string> v;
-        if (generation <= maxGeneration) {
-            if(pointsTo && address) v = pointsTo->values(address, generation + 1, maxGeneration);
-            if(v.size() == 1)
-                result.push_back(printStringFormat("(*) (0x%x) %s", address, v[0].c_str()));
-            else
-                result.insert(result.end(), v.begin(), v.end());
-        }
-        return result;
-    }
-    Type *resolve(int *pointer) { pointer++; return pointsTo->resolve(pointer); }
+    vector<string> values(uint32_t base, int generation, int maxGeneration);
+    Type *resolve(int *pointer) { pointer++; return pointsTo ? pointsTo->resolve(pointer) : this; }
 };
 class ConformantArray : public Type {
 private:
@@ -657,7 +635,6 @@ public:
     uint32_t byteSize() { return sizeof(void *); }
     vector<string> values(uint32_t base, int generation, int maxGeneration) {
         vector<string> result;
-        // if(pointsTo) result = pointsTo->values(base, generation, maxGeneration);
         result.push_back("<function>");
         return result;
     }
@@ -667,7 +644,8 @@ class Symbol {
 public:
     typedef enum {
         S_Typedef = 1,
-        S_Local,
+        S_Stack,
+        S_Absolute,
         S_Param,
         S_Register,
         S_Global,
@@ -688,8 +666,10 @@ public:
         switch(symType) {
             case S_Typedef:
                 return "<Typedef>";
-            case S_Local:
-                return "<Local>";
+            case S_Stack:
+                return "<Stack>";
+            case S_Absolute:
+                return "<Absolute>";
             case S_Param:
                 return "<Param>";
             case S_Register:
@@ -708,11 +688,7 @@ public:
         vector<string> result;
         if(symType == S_Typedef) return result;
         vector<string> v;
-        int pointers = 0;
-        // if(symType == S_Register) {cout << "<register> type == " << type->toString() << type->resolve(&pointers)->toString() << pointers << "\n";
-        // cout << "base : " << (void *)base << "\n";
-        // if(!is_readable_address_st(base)) cout << "Unreadable.\n"; 
-        // if(type) v = type->values(base, 1, 10); } else
+        // int pointers = 0;
         if(type) v = type->values(base + (symType == S_Register ? 0 : address), 1, 10);
         if(v.size() == 1)
             result.push_back(name + " " + typeString() + " : " + v[0]);
@@ -794,15 +770,18 @@ public:
     string name;
     uint64_t start, end;
     vector<Type *> types;
+    vector<Type *> hidden;
     vector<Symbol *> locals;
     vector<Symbol *> globals;
     vector<Function *> functions;
 public:
-    Type *findType(Type::TypeNo &no) {
+    Type *findType(Type::TypeNo &no, Type *self = 0) {
         for(int i = types.size()-1; i >= 0; i--)
             if(types[i]->no.equals(no)
             && types[i]->typeClass != Type::T_ConformantArray
             && types[i]->typeClass != Type::T_Function
+            && types[i] != self
+            // && !(types[i]->typeClass == Type::T_Ref && ((Ref)types[i])->ref && ((Ref)types[i])->ref->typeClass == Type::T_ConformantArray)
             ) {
                 return types[i];
             }
@@ -811,8 +790,12 @@ public:
     void addType(Type *type) {
         types.push_back(type);
     }
+    void addHidden(Type *type) {
+        hidden.push_back(type);
+    }
 public:
     SourceObject(SymtabEntry **sym, SymtabEntry *stab, const char *stabstr, uint64_t stabsize);
+    Symbol *findSymbolByName(string name);
     // Type *interpretType(Type::TypeNo no, astream &str);
     Type *interpretType(astream &str);
     Type *resolveType(Type::TypeNo no, int *pointers);
