@@ -222,12 +222,12 @@ vector<string> Pointer::values(uint32_t base, int generation, int maxGeneration)
     int pointers = 0;
     if(pointsTo && pointsTo->resolve(&pointers)) {
         if(pointers == 0 && pointsTo->resolve(&pointers)->typeClass == T_Range && pointsTo->byteSize() == 1) {
-            cout << "string perhaps?\n";
+            // cout << "string perhaps?\n";
                 // we have a string, perhaps?
-            // if(is_readable_string(address))
-            //     result.push_back(printStringFormat("(char *) (0x%x) \"%s\"", address, address));
-            // else result.push_back("<void>");
-            cout << "string done.\n";
+            if(is_readable_string(address))
+                result.push_back(printStringFormat("(char *) (0x%x) \"%s\"", address, address));
+            result.push_back("<void>");
+            // cout << "string done.\n";
             return result;
         }
     }
@@ -406,9 +406,11 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
                     scope->end = function->address + sym->n_value;
                     scope = scope->parent;
                 }
-                if(scope && scope->parent == 0) {
-                    scope->end = scope->children.size() ? scope->children[0]->end : function->lines.size() ? function->lines[function->lines.size()-1]->address : function->address;
-                }
+                if(scope)
+                    scope->end = function->address + sym->n_value;
+                // if(scope && scope->parent == 0) {
+                //     scope->end = scope->children.size() ? scope->children[scope->children.size()-1]->end : function->lines.size() ? function->lines[function->lines.size()-1]->address : function->address;
+                // }
                 break;
             case N_EXCL:
                 doEXCL(sym, stab, stabstr, stabsize);
@@ -536,8 +538,8 @@ bool Binary::isBinary(uint32_t address) {
 bool Binary::isFunction(uint32_t address) {
     Function *function = getFunction(address);
     if(function) {
-        Function::SLine *sline = function->lines[0];
-        if(function->address + sline->address == address)
+        // Function::SLine *sline = function->lines[0];
+        // if(function->address + sline->address == address)
             return true;
     }
     return false;

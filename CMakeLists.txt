@@ -46,4 +46,4 @@ add_executable(ConfigTest ReAction/Tests/config_test.cpp ReAction/Config.cpp)
 target_link_libraries(ConfigTest -lauto)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mcrt=newlib -athread=native -gstabs")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcrt=newlib -gstabs -mstrict-align")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcrt=newlib -gstabs -mstrict-align -O0")

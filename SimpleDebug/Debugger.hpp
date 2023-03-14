@@ -248,7 +248,9 @@ public:
 	void stepInto() {
 		if(!binary || !process.lives() || process.isRunning()) return;
 
-		if(!binary->getFunction(process.ip())) {
+		Function *f = binary->getFunction(process.ip());
+
+		if(!f) {
 			start();
 			return;
 		}
@@ -261,7 +263,7 @@ public:
 				start();
 				return;
 			}
-			if(binary->getSourceFile(process.branchAddress()).size() > 0) {
+			if(process.branchAddress() && binary->getFunction(process.branchAddress())) {
 				if(!process.step()) break; 
 			}
 			else {
@@ -273,10 +275,32 @@ public:
 	void stepOut() {
 		if (!binary || !process.lives() || process.isRunning()) return;
 
-		if(binary->isFunction(process.lr()) && outbreak.insert(process.lr()))
+		uint32_t nip = process.ip();
+		Function *f = binary->getFunction(process.ip());
+
+		while (f == binary->getFunction(nip)) {
+			while(!process.isReturn(nip)) nip += 4;
+			if(process.isReturn(nip)) outbreak.insert(nip);
+			nip += 4;
+		}
+
+		if(1)
+		{
 			outbreak.activate();
-		start();
-		// process.go();
+			// tracing = true;
+			process.setTrace();
+			process.resetTrapSignal();
+			process.go();
+			waitTrace();
+			outbreak.deactivate();
+			outbreak.clear();
+		}
+
+		if(binary->isFunction(process.lr()) && outbreak.insert(process.lr())) {
+			outbreak.activate();
+		}
+		// start();
+		process.go();
 
 		// breaks.activate();
 		// outBreak.activate();

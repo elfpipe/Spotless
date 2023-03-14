@@ -365,7 +365,7 @@ public:
         return "a" + no.toString() + " [over: " + (range ? range->toString() : "<n>") + ";" + patch::toString((int)lower) + "," + patch::toString((int)upper)+ "] of " + (type ? type->toString() : "<n>");
     }
     uint32_t byteSize() {
-        return type->byteSize() * (upper - lower);
+        return type ? type->byteSize() * (upper - lower) : 0;
     }
     vector<string> formatChar(uint32_t base) {
         vector<string> result;

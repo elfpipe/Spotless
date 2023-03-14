@@ -1,5 +1,7 @@
 #include <proto/exec.h>
 #include "LowLevel.hpp"
+#include <iostream>
+using namespace std;
 
 extern struct MMUIFace *IMMU;
 
@@ -39,11 +41,12 @@ static bool Memory_Readable(APTR suspect)
 
 bool is_readable_address_st (uint32_t addr)
 {
+	// return IExec->TypeOfMem((CONST_APTR)addr);
 	// return Memory_Readable((APTR)addr);
 
     uint32 attr, masked;
     APTR stack;
-    bool result = true;
+    bool result = false;
 
       /* Go supervisor */
     stack = IExec->SuperState();
@@ -54,27 +57,36 @@ bool is_readable_address_st (uint32_t addr)
     if (stack)
         IExec->UserState(stack);
 
-	masked = attr & (MEMATTRF_NOT_MAPPED | MEMATTRF_RW_MASK);
-	if(masked != MEMATTRF_SUPER_RW_USER_RW
-	&& masked != MEMATTRF_SUPER_RW_USER_RO
-	&& masked != MEMATTRF_SUPER_RO_USER_RO
+	masked = attr & MEMATTRF_RW_MASK;
+	if(masked == MEMATTRF_SUPER_RW_USER_RW
+	// || masked == MEMATTRF_SUPER_RW_USER_RO
+	// || masked == MEMATTRF_SUPER_RO_USER_RO
 	)
-		result = false;
-	// masked = attr & MEMATTRF_NOT_MAPPED;
-    // if(masked)
-    //     result = false;
+		result = true;
+
+	masked = attr & MEMATTRF_NOT_MAPPED;
+    if(masked)
+        result = false;
 
     return result;
 }
 
-#define MAX_STRING 1024
+#define MAX_STRING 127
 bool is_readable_string(uint32_t addr) {
 	int i = 0;
 	char *s = (char *)addr;
 	bool readable;
-	while(i++ < MAX_STRING && (readable = is_readable_address((uint32_t)s)) && *s++)
-		;
-	return readable;
+	while(i++ < MAX_STRING) {
+		// cout << "is_readable_string() [" << i << "]\n";
+		// cout << "*s" << *s << "\n";
+		readable = is_readable_address_st((uint32_t)s);
+		// cout << "readable : " << readable << "\n";
+		if(!readable) break;
+		// cout << "*s" << *s << "\n";
+		if(!(*s++)) break;
+		// cout << "loop...\n";
+	}
+	return readable && i < MAX_STRING;
 }
 
 bool is_readable_address (uint32_t addr)

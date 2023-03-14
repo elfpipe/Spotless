@@ -136,7 +136,7 @@ public:
     void go();
 	void wakeUp();
 	void waitTrace();
-	// void setTrace();
+	void setTrace() { tracing = true; }
 
 	bool isTracing() { return tracing; }
 
