@@ -146,7 +146,7 @@ void Spotless::portHandler() {
             spotless->clearAll();
             // spotless->childLives = false;
         }
-        // if(spotless->debugger.lives())
+        if(spotless->debugger.lives())
             spotless->updateAll();
     }
 }

@@ -234,6 +234,10 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 				// 	running = false;
 				// 	attached = false;
 				// 	// clear();
+				} else {
+					for(vector<TaskData *>::iterator it = data->process->tasks.begin(); it != data->process->tasks.end(); it++) {
+						if((*it)->task == data->caller) (*it)->exists = false;
+					}
 				}
 
 			// sendSignal = true;  //if process has ended, we must signal caller
@@ -322,7 +326,7 @@ ULONG AmigaProcess::amigaos_debug_callback (struct Hook *hook, struct Task *curr
 
 void AmigaProcess::hookOn(struct Task *task)
 {
-	struct HookData *data = new HookData(IExec->FindTask(0), signal);
+	struct HookData *data = new HookData(IExec->FindTask(0), signal, this);
 
     hook.h_Entry = (HOOKFUNC)amigaos_debug_callback;
     hook.h_Data =  (APTR)data;

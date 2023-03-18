@@ -47,7 +47,7 @@ public:
 		TaskData(struct Task *task /*, struct ExceptionContext *context*/) {
 			this->task = task;
 			this->exists = true;
-			readContext();
+			// readContext();
 			// this->context = context;
 		}
 		void readContext ();
@@ -65,9 +65,11 @@ public:
 	struct HookData {
 		struct Task *caller;
 		int8_t signal;
-		HookData(struct Task *caller, int8_t signal) {
+		AmigaProcess *process;
+		HookData(struct Task *caller, int8_t signal, AmigaProcess *process) {
 			this->caller = caller;
 			this->signal = signal;
+			this->process = process;
 		}
 	};
 
@@ -109,8 +111,8 @@ public:
 	APTR attach(string name);
 	void detach();
 
-	static void hookOn(struct Task *task);
-	static void hookOff(struct Task *task);
+	/*static*/ void hookOn(struct Task *task);
+	/*static*/ void hookOff(struct Task *task);
 
 	void readContext ();
 	void writeContext ();
