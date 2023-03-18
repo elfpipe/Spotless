@@ -137,6 +137,8 @@ Type *SourceObject::interpretType(astream &str) {
             }
             break;
         }
+        case 'c':
+            break; // do nothing
         default:
             cout << "noise in interpretType() : character == \'" << c << "\'\n";
             break;
@@ -181,6 +183,23 @@ Symbol *SourceObject::interpretSymbol( astream &str, uint64_t address, unsigned 
                     name, type, address
                 );
                 break;
+        case 'c': {
+            str.skip();
+            str.peekSkip('=');
+            char k = str.get();
+            switch(k) {
+                case 'i':
+                    result = new ConstSymbol(name, str.getInt());
+                    break;
+                // case 'f':
+                //     result = new ConstSymbol(name, str.getFloat());
+                //     break;
+                default:
+                    cout << "noise in ConstSymbol : \'" << k << "\'\n";
+                    break;
+            }
+        }
+            break;
         default:
             cout << "noise in interpretSymbol : " << c << "\n";
             break;
@@ -226,7 +245,7 @@ vector<string> Pointer::values(uint32_t base, int generation, int maxGeneration)
                 // we have a string, perhaps?
             if(is_readable_string(address))
                 result.push_back(printStringFormat("(char *) (0x%x) \"%s\"", address, address));
-            result.push_back("<void>");
+            else result.push_back("<void>");
             // cout << "string done.\n";
             return result;
         }
@@ -406,11 +425,11 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
                     scope->end = function->address + sym->n_value;
                     scope = scope->parent;
                 }
-                if(scope)
-                    scope->end = function->address + sym->n_value;
-                // if(scope && scope->parent == 0) {
-                //     scope->end = scope->children.size() ? scope->children[scope->children.size()-1]->end : function->lines.size() ? function->lines[function->lines.size()-1]->address : function->address;
-                // }
+                // if(scope)
+                //     scope->end = function->address + sym->n_value;
+                if(scope && scope->parent == 0) {
+                    scope->end = scope->children.size() ? scope->children[0]->end : function->lines.size() ? function->lines[function->lines.size()-1]->address : function->address;
+                }
                 break;
             case N_EXCL:
                 doEXCL(sym, stab, stabstr, stabsize);
@@ -496,6 +515,23 @@ uint32_t Binary::getLineAddress(string file, int line) {
         }
     }
     return 0x0;
+}
+vector<uint32_t> Binary::getLineAddresses(string file, int line) {
+    vector<uint32_t> result;
+    for(int i = 0; i < objects.size(); i++) {
+        SourceObject *object = objects[i];
+        for(int j = 0; j < object->functions.size(); j++) {
+            Function *function = object->functions[j];
+            for(int k = 0; k < function->lines.size(); k++) {
+                Function::SLine *sline = function->lines[k];
+                if(!sline->source.compare(file) && sline->line == line) {
+                    // return function->address + sline->address;
+                    result.push_back(function->address + sline->address);
+                }
+            }
+        }
+    }
+    return result;
 }
 Function *Binary::getFunction(uint32_t address) {
     for(int i = 0; i < objects.size(); i++) {

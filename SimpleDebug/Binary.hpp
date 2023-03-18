@@ -91,7 +91,7 @@ public:
         return ref ? ref->toString() : string();
     }
     uint32_t byteSize() {
-        return ref->byteSize();
+        return ref ? ref->byteSize() : 0;
     }
     vector<string> values(uint32_t base, int generation, int maxGeneration);
     Type *resolve(int *pointer) { return ref; }
@@ -650,12 +650,17 @@ public:
         S_Register,
         S_Global,
         S_Function,
-        S_Bracket
+        S_Bracket,
+        S_Constant
     } SymType;
     SymType symType;
     string name;
     uint32_t address; //location, depends on symType
     Type *type;
+    Symbol(SymType symType, string name) {
+        this->symType = symType;
+        this->name = name;
+    }
     Symbol(SymType symType, string name, Type *type, uint32_t address = 0) {
         this->symType = symType;
         this->name = name;
@@ -678,10 +683,12 @@ public:
                 return "<Global>";
             case S_Function:
                 return "<Function>";
+            case S_Constant:
+                return "<Constant>";
         }
         return "";
     }
-    virtual string toString() {
+    string toString() {
         return name + " " + typeString() + " [addr: " + patch::toString((void *)address) + "] " + (type ? type->toString() : "");
     }
     vector<string> values(uint32_t base) {
@@ -697,6 +704,23 @@ public:
             result.insert(result.end(), v.begin(), v.end());
             result.push_back("}");
         }
+        return result;
+    }
+};
+class ConstSymbol : public Symbol {
+public:
+    int value;
+    ConstSymbol(string name, int value) 
+    : Symbol(S_Constant, name)
+    {
+        this->value = value;
+    }
+    string toString() {
+        return name + " " + typeString() + "";
+    }
+    vector<string> values(uint32_t base) {
+        vector<string> result;
+        result.push_back(printStringFormat("%s <%s> : %d", name, typeString(), value));
         return result;
     }
 };
@@ -763,6 +787,7 @@ public:
         return result + "}\n";
     }
 };
+class Binary;
 class Symbol;
 class Function;
 class SourceObject {
@@ -815,6 +840,7 @@ public:
     Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize);
     vector<string> getSourceNames();
     uint32_t getLineAddress(string file, int line);
+    vector<uint32_t> getLineAddresses(string file, int line);
     Function *getFunction(uint32_t address);
     Function::SLine *getLocation(uint32_t address);
     bool isLocation(uint32_t address);

@@ -59,8 +59,8 @@ bool is_readable_address_st (uint32_t addr)
 
 	masked = attr & MEMATTRF_RW_MASK;
 	if(masked == MEMATTRF_SUPER_RW_USER_RW
-	// || masked == MEMATTRF_SUPER_RW_USER_RO
-	// || masked == MEMATTRF_SUPER_RO_USER_RO
+	|| masked == MEMATTRF_SUPER_RW_USER_RO
+	|| masked == MEMATTRF_SUPER_RO_USER_RO
 	)
 		result = true;
 
@@ -91,11 +91,9 @@ bool is_readable_string(uint32_t addr) {
 
 bool is_readable_address (uint32_t addr)
 {
-	// return Memory_Readable((APTR)addr);
-
     uint32 attr, masked;
     APTR stack;
-    bool result = true;
+    bool result = false;
 
       /* Go supervisor */
     stack = IExec->SuperState();
@@ -106,11 +104,16 @@ bool is_readable_address (uint32_t addr)
     if (stack)
         IExec->UserState(stack);
 
-	if((attr & (MEMATTRF_NOT_MAPPED | MEMATTRF_RW_MASK)) != MEMATTRF_SUPER_RW_USER_RW)
-		result = false;
-    // // masked = attr & MEMATTRF_RW_MASK;
-    // // if(masked)
-    // //     ret = TRUE;
+	masked = attr & MEMATTRF_RW_MASK;
+	if(masked == MEMATTRF_SUPER_RW_USER_RW
+	|| masked == MEMATTRF_SUPER_RW_USER_RO
+	|| masked == MEMATTRF_SUPER_RO_USER_RO
+	)
+		result = true;
+
+	masked = attr & MEMATTRF_NOT_MAPPED;
+    if(masked)
+        result = false;
 
     return result;
 }

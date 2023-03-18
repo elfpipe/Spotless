@@ -107,9 +107,13 @@ public:
 	}
 	bool breakpoint(string file, int line, bool set) {
 		if(!binary) return false;
-		uint32_t address = binary->getLineAddress(file, line);
-		if(address)	set ? (void) breaks.insert(address) : breaks.remove(address);
-		return address != 0;
+		// uint32_t address = binary->getLineAddress(file, line);
+		// if(address)	set ? (void) breaks.insert(address) : breaks.remove(address);
+		// return address != 0;
+		vector<uint32_t> addresses = binary->getLineAddresses(file, line);
+		for(vector<uint32_t>::iterator it = addresses.begin(); it != addresses.end(); it++)
+			set ? (void) breaks.insert(*it) : breaks.remove(*it);
+		return addresses.size() ? true : false;
 	}
 	bool breakpoint(string function, bool set) {
 		if(!binary) return false;
@@ -263,6 +267,10 @@ public:
 				start();
 				return;
 			}
+			// cout << "binary->getFunction() : " << binary->getFunction(process.branchAddress()) << "\n";
+
+			// if(!process.step()) break;
+			
 			if(process.branchAddress() && binary->getFunction(process.branchAddress())) {
 				if(!process.step()) break; 
 			}
@@ -277,14 +285,16 @@ public:
 
 		uint32_t nip = process.ip();
 		Function *f = binary->getFunction(process.ip());
+		uint32_t size = symbols.sizeOf(f->name); // stabs might not give an accurate end point for functions
+		bool out = false;
 
-		while (f == binary->getFunction(nip)) {
+		while (f && size && nip < f->address + size) {
 			while(!process.isReturn(nip)) nip += 4;
-			if(process.isReturn(nip)) outbreak.insert(nip);
+			if(process.isReturn(nip)) { out = true; outbreak.insert(nip); }
 			nip += 4;
 		}
 
-		if(1)
+		if(out)
 		{
 			outbreak.activate();
 			// tracing = true;
@@ -295,7 +305,7 @@ public:
 			outbreak.deactivate();
 			outbreak.clear();
 		}
-
+		
 		if(binary->isFunction(process.lr()) && outbreak.insert(process.lr())) {
 			outbreak.activate();
 		}
@@ -467,9 +477,16 @@ public:
 		if(!function) return result;
 		int entry = 1;
 		result.push_back(function->name + " :");
-		Scope *scope = function->locals[0];
 
-			for(uint32_t address = scope->begin; address <= scope->end; address += 4) {
+		// Scope *scope = function->locals[0];
+
+		uint32_t size = symbols.sizeOf(function->name);
+		if(size)
+		for(uint32_t address = function->address; address < function->address + size; address += 4) {
+
+		// 	for(uint32_t address = scope->begin; address <= scope->end; address += 4) {
+
+
 				char opcode[256], operands[256];
 				IDebug->DisassembleNative((APTR)address, opcode, operands);
 
