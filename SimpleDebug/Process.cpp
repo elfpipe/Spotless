@@ -470,13 +470,13 @@ void AmigaProcess::writeContext ()
 void AmigaProcess::TaskData::readContext ()
 {
 	// if(!exists || running) return;
-	if(task) IDebug->ReadTaskContext  (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
+	if(task && exists) IDebug->ReadTaskContext  (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
 }
 
 void AmigaProcess::TaskData::writeContext ()
 {
 	// if(!exists || running) return;
-	if(task) IDebug->WriteTaskContext (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
+	if(task && exists) IDebug->WriteTaskContext (task, &contextCopy, RTCF_SPECIAL|RTCF_STATE|RTCF_GENERAL|RTCF_VECTOR|RTCF_FPU);
 }
 
 // void AmigaProcess::handleDeath()
