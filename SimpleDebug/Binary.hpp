@@ -4,6 +4,7 @@
 #include "Strings.hpp"
 #include "LowLevel.hpp"
 #include "Symbols.hpp"
+#include "Breaks.hpp"
 #include "symtabs.h"
 
 #include <string>
@@ -793,9 +794,15 @@ class Function;
 class SourceObject {
 public:
     string name;
+    bool secondDone;
+    SymtabEntry *stab;
+    const char *stabstr;
+    uint64_t stabsize;
+    SymtabEntry *_sym;
+    int noSym;
     uint64_t start, end;
     vector<Type *> types;
-    vector<Type *> hidden;
+    // vector<Type *> hidden;
     vector<Symbol *> locals;
     vector<Symbol *> globals;
     vector<Function *> functions;
@@ -805,6 +812,7 @@ public:
             if(types[i]->no.equals(no)
             && types[i]->typeClass != Type::T_ConformantArray
             && types[i]->typeClass != Type::T_Function
+            && types[i]->typeClass != Type::T_Pointer
             && types[i] != self
             // && !(types[i]->typeClass == Type::T_Ref && ((Ref)types[i])->ref && ((Ref)types[i])->ref->typeClass == Type::T_ConformantArray)
             ) {
@@ -813,13 +821,14 @@ public:
         return 0;
     }
     void addType(Type *type) {
-        types.push_back(type);
+        if(type) types.push_back(type);
     }
-    void addHidden(Type *type) {
-        hidden.push_back(type);
-    }
+    // void addHidden(Type *type) {
+    //     hidden.push_back(type);
+    // }
 public:
     SourceObject(SymtabEntry **sym, SymtabEntry *stab, const char *stabstr, uint64_t stabsize);
+    void secondPass();
     Symbol *findSymbolByName(string name);
     // Type *interpretType(Type::TypeNo no, astream &str);
     Type *interpretType(astream &str);
@@ -838,9 +847,11 @@ public:
     vector<SourceObject *> objects;
 public:
     Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize);
+    SourceObject *findSourceObject(uint32_t address);
     vector<string> getSourceNames();
-    uint32_t getLineAddress(string file, int line);
+    // uint32_t getLineAddress(string file, int line);
     vector<uint32_t> getLineAddresses(string file, int line);
+    void getLinesAndBreaks(string file, Breaks &b, vector<int> &lines, vector<int> &breaks);
     Function *getFunction(uint32_t address);
     Function::SLine *getLocation(uint32_t address);
     bool isLocation(uint32_t address);

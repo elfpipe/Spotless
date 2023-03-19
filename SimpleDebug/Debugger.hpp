@@ -60,7 +60,7 @@ public:
 		else cout << "Relocations failed.\n";
 		firstRun = true;
 
-		handle->close();
+		// handle->close();
 	}
 	bool load(string path, string file, string args) {
 		APTR handle = process.load(path, file, args);
@@ -115,12 +115,12 @@ public:
 			set ? (void) breaks.insert(*it) : breaks.remove(*it);
 		return addresses.size() ? true : false;
 	}
-	bool breakpoint(string function, bool set) {
-		if(!binary) return false;
-		uint32_t address = binary->getFunctionAddress(function);
-		if(address)	set ? (void) breaks.insert(address) : breaks.remove(address);
-		return address != 0;
-	}
+	// bool breakpoint(string function, bool set) {
+	// 	if(!binary) return false;
+	// 	uint32_t address = binary->getFunctionAddress(function);
+	// 	if(address)	set ? (void) breaks.insert(address) : breaks.remove(address);
+	// 	return address != 0;
+	// }
 	bool breakpointSymbol(string symbolName, bool set) {
 		uint32_t address = symbols.valueOf(symbolName);
 		if(address)	set ? (void) breaks.insert(address) : breaks.remove(address);
@@ -358,10 +358,23 @@ public:
 		return binary ? binary->getSourceLine(address) : 0;
 	}
 	bool isSourceLine(string file, int line) {
-		return binary ? binary->getLineAddress(file, line) : false;
+		if(binary) {
+			vector<uint32_t> addresses = binary->getLineAddresses(file, line);
+			if(addresses.size()) return true;
+		}
+		return false;
 	}
 	bool isBreakpoint(string file, int line) {
-		return binary ? breaks.isBreak(binary->getLineAddress(file, line)) : false;
+		if(binary) {
+			vector<uint32_t> addresses = binary->getLineAddresses(file, line);
+			for(vector<uint32_t>::iterator it = addresses.begin(); it != addresses.end(); it++)
+				if(breaks.isBreak(*it)) return true;
+		}
+		return false;
+		// return binary ? breaks.isBreak(binary->getLineAddress(file, line)) : false;
+	}
+	void getLinesAndBreaks(string file, vector<int> &lines, vector<int> &breaks) {
+		if(binary) binary->getLinesAndBreaks(file, this->breaks, lines, breaks);
 	}
 	uint32_t getSymbolValue(string symbolName) {
 		return symbols. valueOf(symbolName);
@@ -650,7 +663,7 @@ public:
 		// cout << "debugger.clear()\n";
 		linebreaks.clear();
 		breaks.clear();
-		if(handle) delete handle;
+		if(handle) { handle->close(); handle; }
 		if(binary) delete binary;
 		handle = 0;
 		binary = 0;

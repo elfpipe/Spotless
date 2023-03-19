@@ -7,6 +7,8 @@
 #include "../SimpleDebug/TextFile.hpp"
 #include "../SimpleDebug/Strings.hpp"
 
+#include <algorithm>
+
 class Code : public Widget {
 private:
     Spotless *spotless;
@@ -38,6 +40,9 @@ public:
             return;
         }
         TextFile text(foundPath);
+        vector<int> lines;
+        vector<int> breaks;
+        spotless->debugger.getLinesAndBreaks(file, lines, breaks);
         listbrowser->clear();
         int line = 1;
         listbrowser->detach();
@@ -49,8 +54,10 @@ public:
             data.push_back(formatRawString(textLine));
             listbrowser->addCheckboxNode(
                 data,
-                spotless->debugger.isSourceLine(file, line),
-                spotless->debugger.isBreakpoint(file, line)
+                std::find(lines.begin(), lines.end(), line) != lines.end(),
+                // spotless->debugger.isSourceLine(file, line),
+                std::find(breaks.begin(), breaks.end(), line) != breaks.end()
+                // spotless->debugger.isBreakpoint(file, line)
             );
             line++;
         }

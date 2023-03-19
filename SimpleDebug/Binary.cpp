@@ -1,4 +1,5 @@
 #include "Binary.hpp"
+#include "Breaks.hpp"
 #include "../ReAction/Progress.hpp"
 #include "symtabs.h"
 #include <vector>
@@ -100,7 +101,7 @@ Type *SourceObject::interpretType(astream &str) {
             } else if(!pType) {
                 nType = new Pointer(this, no, nullptr);
             }
-            addHidden(nType); //pointers should not come up in search
+            addType(nType); //pointers should not come up in search (this is fixed in findType)
             break;
         }
         case 'x': //conformant array
@@ -318,14 +319,46 @@ void SourceObject::doEXCL(SymtabEntry *_sym, SymtabEntry *stab, const char *stab
     }
 }
 SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
-    astream temp("r(0,0);0;-1;");
-    addType(new Range(Type::TypeNo(0, 0), temp));
-
-    SymtabEntry *sym = *_sym;
+    secondDone = false;
+    this->stab = stab;
+    this->stabstr = stabstr;
+    this->stabsize = stabsize;
+    this->_sym = *_sym;
+    this->noSym = 0;
+    SymtabEntry *sym = this->_sym;
     name = string(stabstr + sym->n_strx);
     start = sym->n_value;
     sym++;
 
+	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
+		switch (sym->n_type) {
+            case N_SO:
+                end = sym->n_value;
+                *_sym = ++sym;
+                noSym = sym - this->_sym;
+
+                // cout << "SourceObject name : " << name << " start : " << (void*)start << " end : " << (void*)end << "\n";
+
+                return;
+        }
+        sym++;
+    }
+    *_sym = sym;
+}
+void SourceObject::secondPass() { //SymtabEntry **_sym, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
+    if(secondDone) return;
+    ProgressWindow progress;
+    progress.open("Loading stabs (second pass)...", (unsigned int)noSym, 0);
+
+    astream temp("r(0,0);0;-1;");
+    addType(new Range(Type::TypeNo(0, 0), temp));
+
+    SymtabEntry *sym = _sym;
+    name = string(stabstr + sym->n_strx);
+    start = sym->n_value;
+    sym++;
+
+    int is = 0;
     string source = name;
     Function *function = 0;
     Scope *scope = 0;
@@ -333,13 +366,16 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
     vector<Symbol *> symbols;
 	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
         string s(stabstr + sym->n_strx);
+        progress.updateLevel(is++);
         // cout << "str : " << s << "\n";
         astream str(s);
 		switch (sym->n_type) {
             case N_SO:
                 end = sym->n_value;
-                *_sym = ++sym;
+                // *_sym = ++sym;
                 if(closeScope) scope->end = end-4; //  function->address + function->lines[function->lines.size()-1]->address;
+                secondDone = true;
+                progress.close();
                 return;
             case N_SOL:
                 source = string(stabstr + sym->n_strx);
@@ -439,7 +475,9 @@ SourceObject::SourceObject(SymtabEntry **_sym, SymtabEntry *stab, const char *st
         }
         sym++;
     }
-    *_sym = sym;
+    // *_sym = sym;
+    secondDone = true;
+    progress.close();
 }
 string SourceObject::toString() {
     string result = name + "<SO> : [ " + patch::toString((void *)start) + "," + patch::toString((void *)end) + " ] --- {\n";
@@ -484,65 +522,157 @@ Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t sta
     }
     progress.close();
 }
+SourceObject *Binary::findSourceObject(uint32_t address) {
+    // cout << "findSourceObject() address : " << (void*)address << "\n";
+    for(vector<SourceObject *>::iterator it = objects.begin(); it != objects.end(); it++)
+        if((*it)->start <= address && (*it)->end >= address) {
+            // cout << "match\n";
+            if(!(*it)->secondDone) (*it)->secondPass();
+            return (*it);
+        }
+    return 0;
+}
 vector<string> Binary::getSourceNames() {
     vector<string> result;
     ProgressWindow progress;
-    progress.open("Fetching sources...", (unsigned int)objects.size(), 0);
-    uint32_t p = 0;
-    for(vector<SourceObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
-        progress.updateLevel(p++);
-
-        result.push_back((*it)->name);
-        for(vector<Function *>::iterator itf = (*it)->functions.begin(); itf != (*it)->functions.end(); itf++) {
-            for(vector<Function::SLine *>::iterator its = (*itf)->lines.begin(); its != (*itf)->lines.end(); its++)
-                if(!patch::contains(result, (*its)->source))
-                    result.push_back((*its)->source);
+    progress.open("Fetching sources...", (unsigned int)stabsize, 0);
+	SymtabEntry *sym = stab;
+	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
+        // cout << "SO: " << string(stabstr + sym->n_strx) << "\n";
+        progress.updateLevel((uint32_t)sym - (uint32_t)stab);
+		switch (sym->n_type) {
+            case N_SO: {
+                string str(stabstr + sym->n_strx);
+                if(str.size()) result.push_back(str);
+                break;
+            }
+            case N_SOL: {
+                bool save = true;
+                string sol(stabstr + sym->n_strx);
+                for(vector<string>::iterator it = result.begin(); it != result.end(); it++)
+                    if((*it).compare(sol)) { save = false; break; }
+                if(save) result.push_back(sol);
+            }
+                break;
+            default:
+                break;
         }
+        sym++;
     }
+
+    // uint32_t p = 0;
+    // for(vector<SourceObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
+    //     progress.updateLevel(p++);
+
+    //     result.push_back((*it)->name);
+    //     for(vector<Function *>::iterator itf = (*it)->functions.begin(); itf != (*it)->functions.end(); itf++) {
+    //         for(vector<Function::SLine *>::iterator its = (*itf)->lines.begin(); its != (*itf)->lines.end(); its++)
+    //             if(!patch::contains(result, (*its)->source))
+    //                 result.push_back((*its)->source);
+    //     }
+    // }
     progress.close();
     return result;
 }
-uint32_t Binary::getLineAddress(string file, int line) {
-    for(int i = 0; i < objects.size(); i++) {
-        SourceObject *object = objects[i];
-        for(int j = 0; j < object->functions.size(); j++) {
-            Function *function = object->functions[j];
-            for(int k = 0; k < function->lines.size(); k++) {
-                Function::SLine *sline = function->lines[k];
-                if(!sline->source.compare(file) && sline->line == line) {
-                    return function->address + sline->address; }
-            }
-        }
-    }
-    return 0x0;
-}
+// uint32_t Binary::getLineAddress(string file, int line) {
+//     for(int i = 0; i < objects.size(); i++) {
+//         SourceObject *object = objects[i];
+//         for(int j = 0; j < object->functions.size(); j++) {
+//             Function *function = object->functions[j];
+//             for(int k = 0; k < function->lines.size(); k++) {
+//                 Function::SLine *sline = function->lines[k];
+//                 if(!sline->source.compare(file) && sline->line == line) {
+//                     return function->address + sline->address; }
+//             }
+//         }
+//     }
+//     return 0x0;
+// }
 vector<uint32_t> Binary::getLineAddresses(string file, int line) {
     vector<uint32_t> result;
-    for(int i = 0; i < objects.size(); i++) {
-        SourceObject *object = objects[i];
-        for(int j = 0; j < object->functions.size(); j++) {
-            Function *function = object->functions[j];
-            for(int k = 0; k < function->lines.size(); k++) {
-                Function::SLine *sline = function->lines[k];
-                if(!sline->source.compare(file) && sline->line == line) {
-                    // return function->address + sline->address;
-                    result.push_back(function->address + sline->address);
-                }
-            }
+	SymtabEntry *sym = stab;
+    bool on = false;
+    uint32_t faddress = 0x0;
+	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
+        string str(stabstr + sym->n_strx);
+		switch (sym->n_type) {
+            case N_SOL:
+            case N_SO:
+                if(!str.compare(file)) on = true;
+                else on = false;
+                break;
+            case N_FUN:
+                faddress = sym->n_value;
+                break;
+            case N_SLINE:
+                if(on && line == sym->n_desc) result.push_back(faddress + sym->n_value);
+                break;
+            default:
+                break;
         }
+        sym++;
     }
+    // for(int i = 0; i < objects.size(); i++) {
+    //     SourceObject *object = objects[i];
+    //     for(int j = 0; j < object->functions.size(); j++) {
+    //         Function *function = object->functions[j];
+    //         for(int k = 0; k < function->lines.size(); k++) {
+    //             Function::SLine *sline = function->lines[k];
+    //             if(!sline->source.compare(file) && sline->line == line) {
+    //                 // return function->address + sline->address;
+    //                 result.push_back(function->address + sline->address);
+    //             }
+    //         }
+    //     }
+    // }
     return result;
 }
+void Binary::getLinesAndBreaks(string file, Breaks &b, vector<int> &lines, vector<int> &breaks) {
+    vector<uint32_t> result;
+	SymtabEntry *sym = stab;
+    bool on = false;
+    uint32_t faddress = 0x0;
+	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
+        string str(stabstr + sym->n_strx);
+		switch (sym->n_type) {
+            case N_SOL:
+            case N_SO:
+                if(!str.compare(file)) on = true;
+                else on = false;
+                break;
+            case N_FUN:
+                faddress = sym->n_value;
+                break;
+            case N_SLINE:
+                if(on) {
+                    uint32_t addr = faddress + sym->n_value;
+                    lines.push_back(sym->n_desc);
+                    if(b.isBreak(addr)) breaks.push_back(sym->n_desc);
+                }
+                break;
+            default:
+                break;
+        }
+        sym++;
+    }
+}
 Function *Binary::getFunction(uint32_t address) {
-    for(int i = 0; i < objects.size(); i++) {
-        SourceObject *object = objects[i];
+
+    SourceObject *object = findSourceObject(address);
+    // for(int i = 0; i < objects.size(); i++) {
+    //     SourceObject *object = objects[i];
+    // cout << "getFunction object : " << (void*)object << "\n";
+    if(object)
         for(int j = 0; j < object->functions.size(); j++) {
+            // cout << "function j : " << j << "\n";
             Function *function = object->functions[j];
             Scope *scope = function->locals[0];
-            if(scope && scope->begin <= address && scope->end >= address)
+            if(scope && scope->begin <= address && scope->end >= address) {
+                // cout << "match\n";
                 return function;
+            }
         }
-    }
+    // }
     return 0;
 }
 Function::SLine *Binary::getLocation(uint32_t address) {
@@ -566,9 +696,11 @@ bool Binary::isLocation(uint32_t address) {
     return false;
 }
 bool Binary::isBinary(uint32_t address) {
-    for(vector<SourceObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
-        if(address >= (*it)->start && address <= (*it)->end) return true;
-    }
+    // for(vector<SourceObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
+    //     if(address >= (*it)->start && address <= (*it)->end) return true;
+    // }
+    SourceObject *object = findSourceObject(address);
+    if(object) return true;
     return false;
 }
 bool Binary::isFunction(uint32_t address) {
@@ -601,17 +733,17 @@ int Binary::getSourceLine(uint32_t address) {
 //     if(function->lines.back() == line) return true;
 //     return false;
 // }
-uint32_t Binary::getFunctionAddress(string name) {
-    for(int i = 0; i < objects.size(); i++) {
-        SourceObject *object = objects[i];
-        for(int j = 0; j < object->functions.size(); j++) {
-            Function *function = object->functions[j];
-            if(!function->name.compare(name))
-                return function->address;
-        }
-    }
-    return 0x0;
-}
+// uint32_t Binary::getFunctionAddress(string name) {
+//     // for(int i = 0; i < objects.size(); i++) {
+//     //     SourceObject *object = objects[i];
+//         for(int j = 0; j < object->functions.size(); j++) {
+//             Function *function = object->functions[j];
+//             if(!function->name.compare(name))
+//                 return function->address;
+//         }
+//     // }
+//     return 0x0;
+// }
 vector<string> Binary::getContext(struct ExceptionContext *eContext, uint32_t ip, uint32_t sp) {
     vector<string> result;
     Function *function = getFunction(ip);
