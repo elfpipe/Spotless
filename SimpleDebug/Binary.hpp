@@ -840,13 +840,27 @@ public:
 };
 class Binary {
 public:
-    string name;
-    SymtabEntry *stab;
-    const char *stabstr;
-    uint64_t stabsize;
+    // string name;
+    // SymtabEntry *stab;
+    // const char *stabstr;
+    // uint64_t stabsize;
     vector<SourceObject *> objects;
+    struct Module {
+        Module(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
+            this->name = name;
+            this->stab = stab;
+            this->stabstr = stabstr;
+            this->stabsize = stabsize;
+        }
+        string name;
+        SymtabEntry *stab;
+        const char *stabstr;
+        uint64_t stabsize;
+    };
+    vector<Module *> modules;
 public:
     Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize);
+    void addModule(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize);
     SourceObject *findSourceObject(uint32_t address);
     vector<string> getSourceNames();
     // uint32_t getLineAddress(string file, int line);

@@ -35,6 +35,8 @@ private:
 	ElfHandle *handle;
 	Binary *binary;
 
+	vector<ElfHandle *> soHandles;
+
 	Roots roots;
 
 	int line, hexLine;
@@ -52,12 +54,21 @@ public:
 	void open(APTR _handle, string name) {
 		handle = new ElfHandle(_handle, name);
 		handle->open();
-
+			
 		symbols.readAll(handle);
 
 		if(handle->performRelocation())
 			binary = new Binary(handle->getName(), (SymtabEntry *)handle->getStabSection(), handle->getStabstrSection(), handle->getStabsSize());
 		else cout << "Relocations failed.\n";
+
+		soHandles = handle->getSOLibHandles();
+		for(vector<ElfHandle*>::iterator it = soHandles.begin(); it != soHandles.end(); it++) {
+			(*it)->open();
+			if((*it)->performRelocation())
+				binary->addModule((*it)->getName(), (SymtabEntry *)(*it)->getStabSection(), (*it)->getStabstrSection(), (*it)->getStabsSize());
+			cout << "SO : " << (*it)->getName() << "\n";
+		}
+
 		firstRun = true;
 
 		// handle->close();
@@ -664,6 +675,11 @@ public:
 		linebreaks.clear();
 		breaks.clear();
 		if(handle) { handle->close(); handle; }
+		for(vector<ElfHandle*>::iterator it = soHandles.begin(); it != soHandles.end(); it++) {
+			(*it)->close();
+			delete *it;
+		}
+		soHandles.clear();
 		if(binary) delete binary;
 		handle = 0;
 		binary = 0;

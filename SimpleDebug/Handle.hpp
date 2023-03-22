@@ -13,6 +13,7 @@
 //                                          on a living process. Used together wil
 //                                          OET_ElfHandle */
 
+#include <vector>
 #include <string>
 
 using namespace std;
@@ -29,6 +30,8 @@ public:
 	ElfHandle (APTR handle, string name, bool isOpen = false);
 	~ElfHandle();
 	
+	vector<ElfHandle *> getSOLibHandles();
+
 	APTR getHandle () { return handleCopy; }
     string getName() { return name; }
 

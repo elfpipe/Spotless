@@ -226,6 +226,7 @@ vector<string> Pointer::values(uint32_t base, int generation, int maxGeneration)
     vector<string> result;
 
     uint32_t address = 0x0;
+    cout << "address : " << (void*)base << "\n";
     if(base && is_readable_address_st(base)) { address = *(uint32_t *)base; }
     if(!is_readable_address_st(address)) {
         result.push_back("<no access>");
@@ -501,16 +502,34 @@ Symbol *SourceObject::findSymbolByName(string name) {
     return nullptr;
 }
 Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
-    ProgressWindow progress;
-    progress.open("Loading stabs...", (unsigned int)stabsize, 0);
-    this->name = name;
-    this->stab = stab;
-    this->stabstr = stabstr;
-    this->stabsize = stabsize;
+    addModule(name, stab, stabstr, stabsize);
+    // ProgressWindow progress;
+    // progress.open("Loading stabs...", (unsigned int)stabsize, 0);
+    // this->name = name;
+    // this->stab = stab;
+    // this->stabstr = stabstr;
+    // this->stabsize = stabsize;
+	// SymtabEntry *sym = stab;
+	// while ((uint32_t)sym < (uint32_t)stab + stabsize) {
+    //     // cout << "SO: " << string(stabstr + sym->n_strx) << "\n";
+    //     progress.updateLevel((uint32_t)sym - (uint32_t)stab);
+	// 	switch (sym->n_type) {
+    //         case N_SO:
+    //             objects.push_back(new SourceObject(&sym, stab, stabstr, stabsize));
+    //             continue;
+    //         default:
+    //             break;
+    //     }
+    //     sym++;
+    // }
+    // progress.close();
+}
+void Binary::addModule(string name, SymtabEntry *stab, const char *stabstr, uint64_t stabsize) {
+    Module *module = new Module(name, stab, stabstr, stabsize);
 	SymtabEntry *sym = stab;
 	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
         // cout << "SO: " << string(stabstr + sym->n_strx) << "\n";
-        progress.updateLevel((uint32_t)sym - (uint32_t)stab);
+        // progress.updateLevel((uint32_t)sym - (uint32_t)stab);
 		switch (sym->n_type) {
             case N_SO:
                 objects.push_back(new SourceObject(&sym, stab, stabstr, stabsize));
@@ -520,7 +539,8 @@ Binary::Binary(string name, SymtabEntry *stab, const char *stabstr, uint64_t sta
         }
         sym++;
     }
-    progress.close();
+    modules.push_back(module);
+    // progress.close();
 }
 SourceObject *Binary::findSourceObject(uint32_t address) {
     // cout << "findSourceObject() address : " << (void*)address << "\n";
@@ -535,29 +555,34 @@ SourceObject *Binary::findSourceObject(uint32_t address) {
 vector<string> Binary::getSourceNames() {
     vector<string> result;
     ProgressWindow progress;
-    progress.open("Fetching sources...", (unsigned int)stabsize, 0);
-	SymtabEntry *sym = stab;
-	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
-        // cout << "SO: " << string(stabstr + sym->n_strx) << "\n";
-        progress.updateLevel((uint32_t)sym - (uint32_t)stab);
-		switch (sym->n_type) {
-            case N_SO: {
-                string str(stabstr + sym->n_strx);
-                if(str.size()) result.push_back(str);
-                break;
+    int fullSize = 0;
+    for(vector<Module *>::iterator it = modules.begin(); it != modules.end(); it++)
+        fullSize += (*it)->stabsize;
+    progress.open("Fetching sources...", fullSize, 0);
+    int p = 0;
+    for(vector<Module *>::iterator it = modules.begin(); it != modules.end(); it++) {
+        SymtabEntry *sym = (*it)->stab;
+        while ((uint32_t)sym < (uint32_t)(*it)->stab + (uint32_t)(*it)->stabsize) {
+            progress.updateLevel(p);
+            string str((*it)->stabstr + sym->n_strx);
+            switch (sym->n_type) {
+                case N_SO: {
+                    if(str.size()) result.push_back(str);
+                    break;
+                }
+                case N_SOL: {
+                    bool save = true;
+                    for(vector<string>::iterator it = result.begin(); it != result.end(); it++)
+                        if((*it).compare(str)) { save = false; break; }
+                    if(save) result.push_back(str);
+                }
+                    break;
+                default:
+                    break;
             }
-            case N_SOL: {
-                bool save = true;
-                string sol(stabstr + sym->n_strx);
-                for(vector<string>::iterator it = result.begin(); it != result.end(); it++)
-                    if((*it).compare(sol)) { save = false; break; }
-                if(save) result.push_back(sol);
-            }
-                break;
-            default:
-                break;
+            sym++;
+            p += sizeof(SymtabEntry);
         }
-        sym++;
     }
 
     // uint32_t p = 0;
@@ -590,27 +615,29 @@ vector<string> Binary::getSourceNames() {
 // }
 vector<uint32_t> Binary::getLineAddresses(string file, int line) {
     vector<uint32_t> result;
-	SymtabEntry *sym = stab;
-    bool on = false;
-    uint32_t faddress = 0x0;
-	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
-        string str(stabstr + sym->n_strx);
-		switch (sym->n_type) {
-            case N_SOL:
-            case N_SO:
-                if(!str.compare(file)) on = true;
-                else on = false;
-                break;
-            case N_FUN:
-                faddress = sym->n_value;
-                break;
-            case N_SLINE:
-                if(on && line == sym->n_desc) result.push_back(faddress + sym->n_value);
-                break;
-            default:
-                break;
+    for(vector<Module *>::iterator it = modules.begin(); it != modules.end(); it++) {
+        SymtabEntry *sym = (*it)->stab;
+        bool on = false;
+        uint32_t faddress = 0x0;
+        while ((uint32_t)sym < (uint32_t)(*it)->stab + (*it)->stabsize) {
+            string str((*it)->stabstr + sym->n_strx);
+            switch (sym->n_type) {
+                case N_SOL:
+                case N_SO:
+                    if(!str.compare(file)) on = true;
+                    else on = false;
+                    break;
+                case N_FUN:
+                    faddress = sym->n_value;
+                    break;
+                case N_SLINE:
+                    if(on && line == sym->n_desc) result.push_back(faddress + sym->n_value);
+                    break;
+                default:
+                    break;
+            }
+            sym++;
         }
-        sym++;
     }
     // for(int i = 0; i < objects.size(); i++) {
     //     SourceObject *object = objects[i];
@@ -628,32 +655,33 @@ vector<uint32_t> Binary::getLineAddresses(string file, int line) {
     return result;
 }
 void Binary::getLinesAndBreaks(string file, Breaks &b, vector<int> &lines, vector<int> &breaks) {
-    vector<uint32_t> result;
-	SymtabEntry *sym = stab;
-    bool on = false;
-    uint32_t faddress = 0x0;
-	while ((uint32_t)sym < (uint32_t)stab + stabsize) {
-        string str(stabstr + sym->n_strx);
-		switch (sym->n_type) {
-            case N_SOL:
-            case N_SO:
-                if(!str.compare(file)) on = true;
-                else on = false;
-                break;
-            case N_FUN:
-                faddress = sym->n_value;
-                break;
-            case N_SLINE:
-                if(on) {
-                    uint32_t addr = faddress + sym->n_value;
-                    lines.push_back(sym->n_desc);
-                    if(b.isBreak(addr)) breaks.push_back(sym->n_desc);
-                }
-                break;
-            default:
-                break;
+    for(vector<Module *>::iterator it = modules.begin(); it != modules.end(); it++) {
+        SymtabEntry *sym = (*it)->stab;
+        bool on = false;
+        uint32_t faddress = 0x0;
+        while ((uint32_t)sym < (uint32_t)(*it)->stab + (*it)->stabsize) {
+            string str((*it)->stabstr + sym->n_strx);
+            switch (sym->n_type) {
+                case N_SOL:
+                case N_SO:
+                    if(!str.compare(file)) on = true;
+                    else on = false;
+                    break;
+                case N_FUN:
+                    faddress = sym->n_value;
+                    break;
+                case N_SLINE:
+                    if(on) {
+                        uint32_t addr = faddress + sym->n_value;
+                        lines.push_back(sym->n_desc);
+                        if(b.isBreak(addr)) breaks.push_back(sym->n_desc);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            sym++;
         }
-        sym++;
     }
 }
 Function *Binary::getFunction(uint32_t address) {

@@ -1,4 +1,5 @@
 #include "Handle.hpp"
+#include <vector>
 
 ElfHandle::ElfHandle (APTR handle, string name, bool isOpen) {
     this->name = name;
@@ -13,6 +14,43 @@ ElfHandle::ElfHandle (APTR handle, string name, bool isOpen) {
 
 ElfHandle::~ElfHandle() {
 	// if(isOpen) close();
+}
+
+typedef struct {
+	string name;
+	Elf32_Handle handle;
+} SOLib;
+
+int32 solib_callback(struct Hook *hook, APTR handle, struct GetSOLibMsg *msg) {
+	vector<SOLib> *v = (vector<SOLib>*)hook->h_Data;
+	SOLib sl;
+	sl.name = string(msg->SOLibName);
+	sl.handle = msg->SOLibHandle;
+	v->push_back(sl);
+	return 0;
+}
+
+vector<ElfHandle *> ElfHandle::getSOLibHandles() {
+	vector<SOLib> v;
+	Hook *hook = (Hook *)IExec->AllocSysObjectTags(
+		ASOT_HOOK,
+		ASOHOOK_Entry, solib_callback,
+		TAG_END);
+	hook->h_Data = (APTR)&v;
+
+	// open();
+
+	if (hook) {
+		IElf->GetSOHandles((Elf32_Handle)handle, hook);
+		IExec->FreeSysObject(ASOT_HOOK, hook);
+	}
+
+	vector<ElfHandle *> result;
+	for(vector<SOLib>::iterator it = v.begin(); it != v.end(); it++) {
+		ElfHandle *h = new ElfHandle((*it).handle, (*it).name, false);
+		result.push_back(h);
+	}
+	return result;
 }
 
 void ElfHandle::lock()
