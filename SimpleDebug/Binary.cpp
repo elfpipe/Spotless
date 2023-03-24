@@ -74,7 +74,8 @@ Type *SourceObject::interpretType(astream &str) {
                     nType = new Range(no, str);
                 addType(nType);
             } else if (str.peek() == ';') {
-                nType = new Range(no, str);
+                if(iType) nType = new Range(Type::TypeNo(0,0), str); //otherwise, the new type will shadow the original
+                else nType = new Range(no, str);
                 addType(nType);
             } else {
                 nType = iType;
