@@ -101,5 +101,5 @@ PayPal : alfkil()gmail.com
 
 == Thanks to:
 
-kas1e, Thomas Frieden, Colin Wenzel, nbache, NinjaDNA and Jamie Krueger.
+kas1e, Thomas Frieden, Colin Wenzel, nbache, NinjaDNA, Steven Solie and Jamie Krueger.
 And the entire Amiga community.
